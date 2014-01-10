@@ -5,7 +5,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE
 
 // Standard internal libraries:
-#include "ocuConfig.h"
+#include "common.h"
 
 #if _WIN32
 #define _CRT_NONSTDC_NO_DEPRECATE
@@ -48,9 +48,6 @@
 #include <boost/filesystem.hpp>
 
 // Slow internal libraries:
-#include "ocuMacro.h"
-#include "ocuType.h"
-#include "DataTypes.h"
 #include "MathUtil.h"
 
 #endif // _WIN32

@@ -11,7 +11,7 @@
 #if !defined(__OutputPeripheralImplementation_h__)
 #define __OutputPeripheralImplementation_h__
 
-#include "ocuType.h"
+#include "common.h"
 
 #if LEAP_API_INTERNAL
 #include "LeapInternal.h"
@@ -35,7 +35,6 @@
 #include "LPGesture.h"
 #include "LPImage.h"
 #include "LPIcon.h"
-#include "DataTypes.h"
 #include "OutputPeripheralBasic.h"
 #include "OutputPeripheralFingerMouse.h"
 #include "OutputPeripheralGestureOnly.h"

@@ -22,7 +22,7 @@ using std::max;
 #include "LPGeometry.h"
 #endif
 
-#include "DataTypes.h"
+#include "common.h"
 #include <set>
 
 class LPIcon;

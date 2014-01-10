@@ -12,7 +12,7 @@
 #define __BoundedQueue_h__
 
 #include <cstdlib>
-#include "DataTypes.h"
+#include "common.h"
 
 /// <summary>
 /// Templated queue class with a maximum capacity

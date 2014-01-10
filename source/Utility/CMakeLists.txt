@@ -3,11 +3,8 @@ ${LEAP_INCLUDE_DIR}
 )
 
 SET(Utility_SRCS
-  CurrentApplication.h
-  CurrentApplication.cpp
   FileSystemUtil.h
   FileSystemUtil.cpp
-  FrontmostChecker.h
   Heartbeat.h
   Heartbeat.cpp
   StateMachine.h

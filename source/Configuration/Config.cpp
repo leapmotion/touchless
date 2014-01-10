@@ -1,9 +1,7 @@
 // Copyright (c) 2010 - 2013 Leap Motion. All rights reserved. Proprietary and confidential.
 #include "stdafx.h"
-#include "ocuMacro.h"
+#include "common.h"
 #include "Config.h"
-#include "ocuType.h"
-#include "ocuMacro.h"
 #include "API/LeapPluginPlus.h"
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -260,36 +258,36 @@ bool Config::SetAttribute(const std::string& attributeName, const Value& value, 
   return true;
 }
 
-bool Config::RegisterDynamicAttribute(const std::string& attributeName,
-                                      const std::shared_ptr<DynamicAttribute>& dynamicAttribute)
-{
-  static ConfigState& s = state();
-  boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
-  s.DynamicAttributeMap.find(attributeName);
-  if (dynamicAttribute &&
-      s.DynamicAttributeMap.find(attributeName) == s.DynamicAttributeMap.end() &&
-      s.AttributeMap.find(attributeName) == s.AttributeMap.end()) {
-    s.DynamicAttributeMap[attributeName] = dynamicAttribute;
-
-    NotifyClients(attributeName, dynamicAttribute->Getter());
-
-    return true;
-  }
-  return false;
-}
-
-bool Config::UnregisterDynamicAttribute(const std::string& attributeName)
-{
-  static ConfigState& s = state();
-  boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
-  std::map<std::string, std::shared_ptr<DynamicAttribute> >::iterator found = s.DynamicAttributeMap.find(attributeName);
-  if (found != s.DynamicAttributeMap.end()) {
-    s.DynamicAttributeMap.erase(found);
-    NotifyClients(attributeName, Value());
-    return true;
-  }
-  return false;
-}
+// bool Config::RegisterDynamicAttribute(const std::string& attributeName,
+//                                       const std::shared_ptr<DynamicAttribute>& dynamicAttribute)
+// {
+//   static ConfigState& s = state();
+//   boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
+//   s.DynamicAttributeMap.find(attributeName);
+//   if (dynamicAttribute &&
+//       s.DynamicAttributeMap.find(attributeName) == s.DynamicAttributeMap.end() &&
+//       s.AttributeMap.find(attributeName) == s.AttributeMap.end()) {
+//     s.DynamicAttributeMap[attributeName] = dynamicAttribute;
+//
+//     NotifyClients(attributeName, dynamicAttribute->Getter());
+//
+//     return true;
+//   }
+//   return false;
+// }
+//
+// bool Config::UnregisterDynamicAttribute(const std::string& attributeName)
+// {
+//   static ConfigState& s = state();
+//   boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
+//   std::map<std::string, std::shared_ptr<DynamicAttribute> >::iterator found = s.DynamicAttributeMap.find(attributeName);
+//   if (found != s.DynamicAttributeMap.end()) {
+//     s.DynamicAttributeMap.erase(found);
+//     NotifyClients(attributeName, Value());
+//     return true;
+//   }
+//   return false;
+// }
 
 void Config::LoadFromFile(const std::string& fileName, const std::string& section) {
   Value object;
@@ -393,22 +391,22 @@ bool Config::Save(const std::string& section, bool toDefault)
   return status;
 }
 
-void Config::RegisterOnChange(const std::string& name,
-                              const boost::function<void(const std::string&, const Value&)>& function)
-{
-  static ConfigState& s = state();
-
-  boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
-  s.OnChangeFunctions[name] = function;
-}
-
-void Config::UnregisterOnChange(const std::string& name)
-{
-  static ConfigState& s = state();
-
-  boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
-  s.OnChangeFunctions.erase(name);
-}
+// void Config::RegisterOnChange(const std::string& name,
+//                               const boost::function<void(const std::string&, const Value&)>& function)
+// {
+//   static ConfigState& s = state();
+//
+//   boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
+//   s.OnChangeFunctions[name] = function;
+// }
+//
+// void Config::UnregisterOnChange(const std::string& name)
+// {
+//   static ConfigState& s = state();
+//
+//   boost::unique_lock<boost::recursive_mutex> lock(s.MapMutex);
+//   s.OnChangeFunctions.erase(name);
+// }
 
 void Config::NotifyClients( const std::string& attributeName, const Value& value ) {
   static ConfigState& s = state();
@@ -471,89 +469,89 @@ bool Config::LoadImageConfig()
     Config::GetAttribute<int>("image_source_height", s.SourceHeight);
 }
 
-void Config::GetImageConfig(int& width, int& height, int& downsampleRate)
-{
-  static ConfigState& s = state();
-  width = s.Width;
-  height = s.Height;
-  downsampleRate = s.DownSampleRate;
-}
-
-void Config::SetImageConfig(int  width, int  height, int  downsampleRate)
-{
-  static ConfigState& s = state();
-  s.Width = width;
-  s.Height = height;
-  s.DownSampleRate = downsampleRate;
-}
-
-void Config::GetCalibImageConfig(int& calibWidth, int& calibHeight)
-{
-  static ConfigState& s = state();
-  calibWidth = s.CalibWidth;
-  calibHeight = s.CalibHeight;
-}
-
-void Config::SetCalibImageConfig(int  calibWidth, int  calibHeight)
-{
-  static ConfigState& s = state();
-  s.CalibWidth = calibWidth;
-  s.CalibHeight = calibHeight;
-}
-
-void Config::GetSourceImageConfig(int& srcWidth, int& srcHeight)
-{
-  static ConfigState& s = state();
-  srcWidth = s.SourceWidth;
-  srcHeight = s.SourceHeight;
-}
-
-void Config::SetSourceImageConfig(int  srcWidth, int  srcHeight)
-{
-  static ConfigState& s = state();
-  s.SourceWidth = srcWidth;
-  s.SourceHeight = srcHeight;
-}
-
-void Config::SetCameraMode(CameraMode mode, bool userSpecified)
-{
-  switch(mode) {
-    case VGA:
-      Config::SetAttribute("camera_mode", "VGA", userSpecified);
-      break;
-    case HVGA:
-      Config::SetAttribute("camera_mode", "HVGA", userSpecified);
-      break;
-    case QVGA:
-      Config::SetAttribute("camera_mode", "QVGA", userSpecified);
-      break;
-    case HHVGA:
-      Config::SetAttribute("camera_mode", "HHVGA", userSpecified);
-      break;
-    case QHVGA:
-      Config::SetAttribute("camera_mode", "QHVGA", userSpecified);
-      break;
-    default:
-      Config::SetAttribute("camera_mode", "HVGA", userSpecified);
-      break;
-  }
-  if (userSpecified) {
-    Config::Save();
-  }
-  LoadImageConfig();
-}
-
-Config::CameraMode Config::GetCameraMode()
-{
-  std::string mode;
-  Config::GetAttribute<std::string>("camera_mode", mode);
-  if (!mode.compare("VGA"))    {return Config::VGA;}
-  if (!mode.compare("HVGA"))   {return Config::HVGA;}
-  if (!mode.compare("QVGA"))   {return Config::QVGA;}
-  if (!mode.compare("HHVGA"))  {return Config::HHVGA;}
-  if (!mode.compare("QHVGA"))  {return Config::QHVGA;}
-  return Config::HVGA;
-}
+// void Config::GetImageConfig(int& width, int& height, int& downsampleRate)
+// {
+//   static ConfigState& s = state();
+//   width = s.Width;
+//   height = s.Height;
+//   downsampleRate = s.DownSampleRate;
+// }
+//
+// void Config::SetImageConfig(int  width, int  height, int  downsampleRate)
+// {
+//   static ConfigState& s = state();
+//   s.Width = width;
+//   s.Height = height;
+//   s.DownSampleRate = downsampleRate;
+// }
+//
+// void Config::GetCalibImageConfig(int& calibWidth, int& calibHeight)
+// {
+//   static ConfigState& s = state();
+//   calibWidth = s.CalibWidth;
+//   calibHeight = s.CalibHeight;
+// }
+//
+// void Config::SetCalibImageConfig(int  calibWidth, int  calibHeight)
+// {
+//   static ConfigState& s = state();
+//   s.CalibWidth = calibWidth;
+//   s.CalibHeight = calibHeight;
+// }
+//
+// void Config::GetSourceImageConfig(int& srcWidth, int& srcHeight)
+// {
+//   static ConfigState& s = state();
+//   srcWidth = s.SourceWidth;
+//   srcHeight = s.SourceHeight;
+// }
+//
+// void Config::SetSourceImageConfig(int  srcWidth, int  srcHeight)
+// {
+//   static ConfigState& s = state();
+//   s.SourceWidth = srcWidth;
+//   s.SourceHeight = srcHeight;
+// }
+//
+// void Config::SetCameraMode(CameraMode mode, bool userSpecified)
+// {
+//   switch(mode) {
+//     case VGA:
+//       Config::SetAttribute("camera_mode", "VGA", userSpecified);
+//       break;
+//     case HVGA:
+//       Config::SetAttribute("camera_mode", "HVGA", userSpecified);
+//       break;
+//     case QVGA:
+//       Config::SetAttribute("camera_mode", "QVGA", userSpecified);
+//       break;
+//     case HHVGA:
+//       Config::SetAttribute("camera_mode", "HHVGA", userSpecified);
+//       break;
+//     case QHVGA:
+//       Config::SetAttribute("camera_mode", "QHVGA", userSpecified);
+//       break;
+//     default:
+//       Config::SetAttribute("camera_mode", "HVGA", userSpecified);
+//       break;
+//   }
+//   if (userSpecified) {
+//     Config::Save();
+//   }
+//   LoadImageConfig();
+// }
+//
+// Config::CameraMode Config::GetCameraMode()
+// {
+//   std::string mode;
+//   Config::GetAttribute<std::string>("camera_mode", mode);
+//   if (!mode.compare("VGA"))    {return Config::VGA;}
+//   if (!mode.compare("HVGA"))   {return Config::HVGA;}
+//   if (!mode.compare("QVGA"))   {return Config::QVGA;}
+//   if (!mode.compare("HHVGA"))  {return Config::HHVGA;}
+//   if (!mode.compare("QHVGA"))  {return Config::QHVGA;}
+//   return Config::HVGA;
+// }
 
 std::vector<double>& Config::GetDefaultScreenCalib() {
   static std::vector<double> calib;

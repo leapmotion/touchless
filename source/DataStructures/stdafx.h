@@ -2,7 +2,7 @@
 #ifndef _STDAFX_H
 #define _STDAFX_H
 
-#include "ocuConfig.h"
+#include "common.h"
 
 #ifndef _MSC_VER
 #ifdef __APPLE__

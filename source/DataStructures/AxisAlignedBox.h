@@ -22,7 +22,7 @@
 #ifndef __AxisAlignedBox_h__
 #define __AxisAlignedBox_h__
 
-#include "DataTypes.h"
+#include "common.h"
 
 template <int DIM>
 class AxisAlignedBox {

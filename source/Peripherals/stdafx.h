@@ -2,18 +2,16 @@
 #ifndef _STDAFX_H
 #define _STDAFX_H
 
-#include "ocuConfig.h"
+#include "common.h"
 
 #if _WIN32
 
 #include "AlgorithmUtil.h"
 #include "BoundedQueue.h"
-#include "DataTypes.h"
 #include "Heartbeat.h"
 #include "MathUtil.h"
 #include "TouchManager.h"
 #include "DataStructures/Value.h"
-#include "ocuType.h"
 
 #include <math.h>
 

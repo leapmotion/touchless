@@ -25,28 +25,9 @@ public:
   static bool FileExists(const std::string& path);
   static bool MakeDirectory(const std::string& path);
   static std::string GetWorkingDirectory();
-  static std::string GetBinaryDirectory();
   static bool ChangeWorkingDirectory(const std::string& path);
-  static std::string FindUniquePath(const std::string& path);
-  static std::string FindSharedDataPath(const std::string& path);
-  static void OpenFile(const std::string& path, const std::string& args = "");
-  static bool RunInstaller(const std::string& path, bool silent = true);
-  static std::string CheckOutput(const std::string& path, const std::string& args = "");
-  static std::string FullPath(const std::string& directory, const std::string& filename);
   static void ApplySeparatorStyle(std::string& path, int separatorStyle);
-  static std::string CreateNameWithTime(const std::string& prefix, const std::string& extension);
-  static int GetFilesInDirectory(const std::string& path, std::vector<std::string>& filenames, const std::string& extension = "", int ageInDays = 0);
-  static void DeleteFiles(const std::vector<std::string>& filenames);
-  static void DeleteOneFile(const std::string& filename);
   static std::string GetUserPath(const std::string& filename = "");
-  static std::string GetDumpPath(const std::string& filename = "");
-  static std::string GetOperatingSystemString();
-  static bool OperatingSystemSupportsTouch();
-  static std::string GetInstallType();
-  static bool IsEmbeddedInstall();
-#if _WIN32
-  static void SetFilePermission(const char* FileName);
-#endif
 
   static const char PATH_SEPARATOR;
 

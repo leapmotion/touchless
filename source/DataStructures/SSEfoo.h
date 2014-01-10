@@ -10,7 +10,7 @@
 #ifndef __SSEFoo_h__
 #define __SSEFoo_h__
 
-#include "ocuMacro.h"
+#include "common.h"
 
 #if defined(__SSE2__) || defined(_M_IX86) || defined(_M_AMD64)
 
@@ -130,19 +130,19 @@ struct SSEc {
     return (SSEc)_mm_or_si128(a, _mm_slli_si128(b, 15));
   }
   template<int I> inline SSEc div() const {
-    LEAP_STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
+    STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
     const int i = StaticLog2<I>();
     const int mask = ((0xFF >> i) << 8) | (0xFF >> i);
     return (SSEc)_mm_and_si128(_mm_srli_epi16(m, i), _mm_set1_epi16(mask));
   }
   template<int I> inline SSEc sdiv() const {
-    LEAP_STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
+    STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
     const int i = StaticLog2<I>();
     const int mask = ((0xFF >> i) << 8) | (0xFF >> i);
     return (SSEc)_mm_and_si128(_mm_srai_epi16(m, i), _mm_set1_epi16(mask));
   }
   template<int I> inline SSEc mul() const {
-    LEAP_STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotMultiplyByNonPowersOf2);
+    STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotMultiplyByNonPowersOf2);
     return (SSEc)_mm_and_si128(_mm_slli_epi16(m, FIRST_BIT_POS8(I)), _mm_set1_epi16((unsigned short)(FIRST_BIT_MASK8(I)*257)));
   }
 };
@@ -191,15 +191,15 @@ struct SSEs {
     return (SSEs)_mm_or_si128(a, _mm_slli_si128(b, 14));
   }
   template<int I> inline SSEs div() const {
-    LEAP_STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
+    STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
     return (SSEs)_mm_srli_epi16(m, StaticLog2<I>());
   }
   template<int I> inline SSEs sdiv() const {
-    LEAP_STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
+    STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
     return (SSEs)_mm_srai_epi16(m, StaticLog2<I>());
   }
   template<int I> inline SSEs mul() const {
-    LEAP_STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotMultiplyByNonPowersOf2);
+    STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotMultiplyByNonPowersOf2);
     return (SSEs)_mm_slli_epi16(m, StaticLog2<I>());
   }
 };
@@ -228,7 +228,7 @@ struct SSEi {
   inline bool isAllTrue() const { return _mm_movemask_epi8(m) == 0xFFFF; }
   inline bool isAllFalse() const { return _mm_movemask_epi8(m) == 0x0000; }
   template<int I> inline SSEi div() const {
-    LEAP_STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
+    STATIC_ASSERT(!(I&(I-1)), SSE_ERROR_CannotDivideByNonPowersOf2);
     return (SSEi)_mm_srai_epi32(m, StaticLog2<I>());
   }
   inline SSEi operator [](const unsigned char* const ptr) const;
@@ -944,301 +944,301 @@ AUTO_EXTEND_FULL(^,SSEi,int)
 AUTO_EXTEND_FULL(^,SSEf,float)
 AUTO_EXTEND_FULL(^,SSEd,double)
 
-//####################################################################
-//#  Ternary Operation
-//####################################################################
-inline SSEc SSETernary(const SSEc& condition, const SSEc& doTrue, const SSEc& doFalse) {
-  return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, doFalse);
-}
-inline SSEc SSETernary(const SSEc& condition, const unsigned char doTrue, const SSEc& doFalse) {
-  return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, doFalse);
-}
-inline SSEc SSETernary(const SSEc& condition, const SSEc& doTrue, const unsigned char doFalse) {
-  return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, (SSEc)doFalse);
-}
-inline SSEc SSETernary(const SSEc& condition, const unsigned char doTrue, const unsigned char doFalse) {
-  return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, (SSEc)doFalse);
-}
-inline SSEs SSETernary(const SSEs& condition, const SSEs& doTrue, const SSEs& doFalse) {
-  return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, doFalse);
-}
-inline SSEs SSETernary(const SSEs& condition, const unsigned short doTrue, const SSEs& doFalse) {
-  return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, doFalse);
-}
-inline SSEs SSETernary(const SSEs& condition, const SSEs& doTrue, const unsigned short doFalse) {
-  return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, (SSEs)doFalse);
-}
-inline SSEs SSETernary(const SSEs& condition, const unsigned short doTrue, const unsigned short doFalse) {
-  return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, (SSEs)doFalse);
-}
-inline SSEi SSETernary(const SSEi& condition, const SSEi& doTrue, const SSEi& doFalse) {
-  return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, doFalse);
-}
-inline SSEi SSETernary(const SSEi& condition, const int doTrue, const SSEi& doFalse) {
-  return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, doFalse);
-}
-inline SSEi SSETernary(const SSEi& condition, const SSEi& doTrue, const int doFalse) {
-  return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, (SSEi)doFalse);
-}
-inline SSEi SSETernary(const SSEi& condition, const int doTrue, const int doFalse) {
-  return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, (SSEi)doFalse);
-}
-inline SSEf SSETernary(const SSEf& condition, const SSEf& doTrue, const SSEf& doFalse) {
-  return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, doFalse);
-}
-inline SSEf SSETernary(const SSEf& condition, const float doTrue, const SSEf& doFalse) {
-  return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, doFalse);
-}
-inline SSEf SSETernary(const SSEf& condition, const SSEf& doTrue, const float doFalse) {
-  return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, (SSEf)doFalse);
-}
-inline SSEf SSETernary(const SSEf& condition, const float doTrue, const float doFalse) {
-  return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, (SSEf)doFalse);
-}
-
-//####################################################################
-//#  Square Root
-//####################################################################
-inline SSEf SSESqrt(const SSEf& a) {
-  return (SSEf)_mm_sqrt_ps(a);
-}
-inline SSEd SSESqrt(const SSEd& a) {
-  return (SSEd)_mm_sqrt_pd(a);
-}
-inline SSEf SSEInvSqrt(const SSEf& a) {
-  return (SSEf)_mm_rsqrt_ps(a);
-}
-
-//####################################################################
-//#  Minimum
-//####################################################################
-inline SSEc SSEMin(const SSEc& a, const SSEc& b) {
-  return (SSEc)_mm_min_epu8(a,b);
-}
-#if HAS_SSE >= _X_SSE4_1
-inline SSEs SSEMin(const SSEs& a, const SSEs& b) {
-  return (SSEs)_mm_min_epu16(a,b);
-}
-inline SSEi SSEMin(const SSEi& a, const SSEi& b) {
-  return (SSEi)_mm_min_epi32(a,b);
-}
-#else
-inline SSEs SSEMin(const SSEs& a, const SSEs& b) {
-  return SSETernary(a<b, a, b);
-}
-inline SSEi SSEMin(const SSEi& a, const SSEi& b) {
-  return SSETernary(a<b, a, b);
-}
-#endif
-inline SSEf SSEMin(const SSEf& a, const SSEf& b) {
-  return (SSEf)_mm_min_ps(a,b);
-}
-inline SSEd SSEMin(const SSEd& a, const SSEd& b) {
-  return (SSEd)_mm_min_pd(a,b);
-}
-inline SSEc SSEMin(const SSEc& a, const unsigned char& b) {
-  return SSEMin(a, SSEc(b));
-}
-inline SSEs SSEMin(const SSEs& a, const unsigned short& b) {
-  return SSEMin(a, SSEs(b));
-}
-inline SSEi SSEMin(const SSEi& a, const int& b) {
-  return SSEMin(a, SSEi(b));
-}
-inline SSEf SSEMin(const SSEf& a, const float& b) {
-  return SSEMin(a, SSEf(b));
-}
-inline SSEd SSEMin(const SSEd& a, const double& b) {
-  return SSEMin(a, SSEd(b));
-}
-inline SSEc SSEMin(const unsigned char& a, const SSEc& b) {
-  return SSEMin(SSEc(a), b);
-}
-inline SSEs SSEMin(const unsigned short& a, const SSEs& b) {
-  return SSEMin(SSEs(a), b);
-}
-inline SSEi SSEMin(const int& a, const SSEi& b) {
-  return SSEMin(SSEi(a), b);
-}
-inline SSEf SSEMin(const float& a, const SSEf& b) {
-  return SSEMin(SSEf(a), b);
-}
-inline SSEd SSEMin(const double& a, const SSEd& b) {
-  return SSEMin(SSEd(a), b);
-}
-inline unsigned char SSEMin(const SSEc& a) {
-  SSEc x = SSEMin(a, (SSEc)_mm_srli_si128(a,8));
-  x = SSEMin(x, (SSEc)_mm_srli_si128(x,4));
-  x = SSEMin(x, (SSEc)_mm_srli_si128(x,2));
-  x = SSEMin(x, (SSEc)_mm_srli_si128(x,1));
-  return SSEExtract(x);
-}
-inline unsigned short SSEMin(const SSEs& a) {
-  SSEs x = SSEMin(a, (SSEs)_mm_srli_si128(a,8));
-  x = SSEMin(x, (SSEs)_mm_srli_si128(x,4));
-  x = SSEMin(x, (SSEs)_mm_srli_si128(x,2));
-  return SSEExtract(x);
-}
-inline int SSEMin(const SSEi& a) {
-  SSEi x = SSEMin(a, (SSEi)_mm_srli_si128(a,8));
-  x = SSEMin(x, (SSEi)_mm_srli_si128(x,4));
-  return SSEExtract(x);
-}
-inline float SSEMin(const SSEf& a) {
-  SSEf x = SSEMin(a, (SSEf)_mm_srli_si128(a.castInt(),8));
-  x = SSEMin(x, (SSEf)_mm_srli_si128(x.castInt(),4));
-  return SSEExtract(x);
-}
-
-//####################################################################
-//#  Maximum
-//####################################################################
-inline SSEc SSEMax(const SSEc& a, const SSEc& b) {
-  return (SSEc)_mm_max_epu8(a,b);
-}
-#if HAS_SSE >= _X_SSE4_1
-inline SSEs SSEMax(const SSEs& a, const SSEs& b) {
-  return (SSEs)_mm_max_epu16(a,b);
-}
-inline SSEi SSEMax(const SSEi& a, const SSEi& b) {
-  return (SSEi)_mm_max_epi32(a,b);
-}
-#else
-inline SSEs SSEMax(const SSEs& a, const SSEs& b) {
-  return SSETernary(a>b, a, b);
-}
-inline SSEi SSEMax(const SSEi& a, const SSEi& b) {
-  return SSETernary(a>b, a, b);
-}
-#endif
-inline SSEf SSEMax(const SSEf& a, const SSEf& b) {
-  return (SSEf)_mm_max_ps(a,b);
-}
-inline SSEd SSEMax(const SSEd& a, const SSEd& b) {
-  return (SSEd)_mm_max_pd(a,b);
-}
-inline SSEc SSEMax(const SSEc& a, const unsigned char& b) {
-  return SSEMax(a, SSEc(b));
-}
-inline SSEs SSEMax(const SSEs& a, const unsigned short& b) {
-  return SSEMax(a, SSEs(b));
-}
-inline SSEi SSEMax(const SSEi& a, const int& b) {
-  return SSEMax(a, SSEi(b));
-}
-inline SSEf SSEMax(const SSEf& a, const float& b) {
-  return SSEMax(a, SSEf(b));
-}
-inline SSEd SSEMax(const SSEd& a, const double& b) {
-  return SSEMax(a, SSEd(b));
-}
-inline SSEc SSEMax(const unsigned char& a, const SSEc& b) {
-  return SSEMax(SSEc(a), b);
-}
-inline SSEs SSEMax(const unsigned short& a, const SSEs& b) {
-  return SSEMax(SSEs(a), b);
-}
-inline SSEi SSEMax(const int& a, const SSEi& b) {
-  return SSEMax(SSEi(a), b);
-}
-inline SSEf SSEMax(const float& a, const SSEf& b) {
-  return SSEMax(SSEf(a), b);
-}
-inline SSEd SSEMax(const double& a, const SSEd& b) {
-  return SSEMax(SSEd(a), b);
-}
-inline unsigned char SSEMax(const SSEc& a) {
-  SSEc x = SSEMax(a, (SSEc)_mm_srli_si128(a,8));
-  x = SSEMax(x, (SSEc)_mm_srli_si128(x,4));
-  x = SSEMax(x, (SSEc)_mm_srli_si128(x,2));
-  x = SSEMax(x, (SSEc)_mm_srli_si128(x,1));
-  return SSEExtract(x);
-}
-inline unsigned short SSEMax(const SSEs& a) {
-  SSEs x = SSEMax(a, (SSEs)_mm_srli_si128(a,8));
-  x = SSEMax(x, (SSEs)_mm_srli_si128(x,4));
-  x = SSEMax(x, (SSEs)_mm_srli_si128(x,2));
-  return SSEExtract(x);
-}
-inline int SSEMax(const SSEi& a) {
-  SSEi x = SSEMax(a, (SSEi)_mm_srli_si128(a,8));
-  x = SSEMax(x, (SSEi)_mm_srli_si128(x,4));
-  return SSEExtract(x);
-}
-inline float SSEMax(const SSEf& a) {
-  SSEf x = SSEMax(a, (SSEf)_mm_srli_si128(a.castInt(),8));
-  x = SSEMax(x, (SSEf)_mm_srli_si128(x.castInt(),4));
-  return SSEExtract(x);
-}
-
-//####################################################################
-//#  Absolute Value
-//####################################################################
-#if HAS_SSE >= _X_SSSE3
-inline SSEc SSEAbs(const SSEc& a) {
-  return (SSEc)_mm_abs_epi8(a);
-}
-inline SSEs SSEAbs(const SSEs& a) {
-  return (SSEs)_mm_abs_epi16(a);
-}
-inline SSEi SSEAbs(const SSEi& a) {
-  return (SSEi)_mm_abs_epi32(a);
-}
-#else
-inline SSEc SSEAbs(const SSEc& a) {
-  return SSEMin(-a, a);
-}
-inline SSEs SSEAbs(const SSEs& a) {
-  return SSEMin(-a, a);
-}
-inline SSEi SSEAbs(const SSEi& a) {
-  return SSEMax(-a, a);
-}
-#endif
-inline SSEf SSEAbs(const SSEf& a) {
-  return SSEMax(-a, a);
-}
-inline SSEd SSEAbs(const SSEd& a) {
-  return SSEMax(-a, a);
-}
-
-//####################################################################
-//#  Weighted Multiplication
-//####################################################################
-//Equivalent to (a*b)/256
-inline SSEc SSEWMul(const SSEc& a, const SSEc& b) {
-  SSEc e = SSEZero();
-  SSEc c = (SSEc)_mm_mullo_epi16(_mm_unpacklo_epi8(a, e), _mm_unpacklo_epi8(b, e));
-  SSEc d = (SSEc)_mm_mullo_epi16(_mm_unpackhi_epi8(a, e), _mm_unpackhi_epi8(b, e));
-  e = (SSEc)_mm_unpacklo_epi8(c, d);
-  c = (SSEc)_mm_unpackhi_epi8(c, d);
-  d = (SSEc)_mm_unpacklo_epi8(e, c);
-  e = (SSEc)_mm_unpackhi_epi8(e, c);
-  c = (SSEc)_mm_unpacklo_epi8(d, e);
-  d = (SSEc)_mm_unpackhi_epi8(d, e);
-  return (SSEc)_mm_unpackhi_epi8(c, d);
-}
-inline SSEs SSEWMul(const SSEs& a, const SSEs& b) {
-  return (SSEs)_mm_mulhi_epu16(a, b);
-}
-inline SSEf SSEWMul(const SSEf& a, const SSEf& b) {
-  return (a*b)/255.0f;
-}
-inline SSEd SSEWMul(const SSEd& a, const SSEd& b) {
-  return (a*b)/255.0;
-}
-inline SSEc SSEWMul(const SSEc& a, unsigned char b) {
-  return SSEWMul(a, SSEc(b));
-}
-inline SSEs SSEWMul(const SSEs& a, unsigned short b) {
-  return SSEWMul(a, SSEs(b));
-}
-inline SSEf SSEWMul(const SSEf& a, float b) {
-  return SSEWMul(a, SSEf(b));
-}
-inline SSEd SSEWMul(const SSEd& a, double b) {
-  return SSEWMul(a, SSEd(b));
-}
+// //####################################################################
+// //#  Ternary Operation
+// //####################################################################
+// inline SSEc SSETernary(const SSEc& condition, const SSEc& doTrue, const SSEc& doFalse) {
+//   return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, doFalse);
+// }
+// inline SSEc SSETernary(const SSEc& condition, const unsigned char doTrue, const SSEc& doFalse) {
+//   return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, doFalse);
+// }
+// inline SSEc SSETernary(const SSEc& condition, const SSEc& doTrue, const unsigned char doFalse) {
+//   return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, (SSEc)doFalse);
+// }
+// inline SSEc SSETernary(const SSEc& condition, const unsigned char doTrue, const unsigned char doFalse) {
+//   return (condition & doTrue) | (SSEc)_mm_andnot_si128(condition, (SSEc)doFalse);
+// }
+// inline SSEs SSETernary(const SSEs& condition, const SSEs& doTrue, const SSEs& doFalse) {
+//   return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, doFalse);
+// }
+// inline SSEs SSETernary(const SSEs& condition, const unsigned short doTrue, const SSEs& doFalse) {
+//   return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, doFalse);
+// }
+// inline SSEs SSETernary(const SSEs& condition, const SSEs& doTrue, const unsigned short doFalse) {
+//   return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, (SSEs)doFalse);
+// }
+// inline SSEs SSETernary(const SSEs& condition, const unsigned short doTrue, const unsigned short doFalse) {
+//   return (condition & doTrue) | (SSEs)_mm_andnot_si128(condition, (SSEs)doFalse);
+// }
+// inline SSEi SSETernary(const SSEi& condition, const SSEi& doTrue, const SSEi& doFalse) {
+//   return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, doFalse);
+// }
+// inline SSEi SSETernary(const SSEi& condition, const int doTrue, const SSEi& doFalse) {
+//   return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, doFalse);
+// }
+// inline SSEi SSETernary(const SSEi& condition, const SSEi& doTrue, const int doFalse) {
+//   return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, (SSEi)doFalse);
+// }
+// inline SSEi SSETernary(const SSEi& condition, const int doTrue, const int doFalse) {
+//   return (condition & doTrue) | (SSEi)_mm_andnot_si128(condition, (SSEi)doFalse);
+// }
+// inline SSEf SSETernary(const SSEf& condition, const SSEf& doTrue, const SSEf& doFalse) {
+//   return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, doFalse);
+// }
+// inline SSEf SSETernary(const SSEf& condition, const float doTrue, const SSEf& doFalse) {
+//   return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, doFalse);
+// }
+// inline SSEf SSETernary(const SSEf& condition, const SSEf& doTrue, const float doFalse) {
+//   return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, (SSEf)doFalse);
+// }
+// inline SSEf SSETernary(const SSEf& condition, const float doTrue, const float doFalse) {
+//   return (condition & doTrue) | (SSEf)_mm_andnot_ps(condition, (SSEf)doFalse);
+// }
+//
+// //####################################################################
+// //#  Square Root
+// //####################################################################
+// inline SSEf SSESqrt(const SSEf& a) {
+//   return (SSEf)_mm_sqrt_ps(a);
+// }
+// inline SSEd SSESqrt(const SSEd& a) {
+//   return (SSEd)_mm_sqrt_pd(a);
+// }
+// inline SSEf SSEInvSqrt(const SSEf& a) {
+//   return (SSEf)_mm_rsqrt_ps(a);
+// }
+//
+// //####################################################################
+// //#  Minimum
+// //####################################################################
+// inline SSEc SSEMin(const SSEc& a, const SSEc& b) {
+//   return (SSEc)_mm_min_epu8(a,b);
+// }
+// #if HAS_SSE >= _X_SSE4_1
+// inline SSEs SSEMin(const SSEs& a, const SSEs& b) {
+//   return (SSEs)_mm_min_epu16(a,b);
+// }
+// inline SSEi SSEMin(const SSEi& a, const SSEi& b) {
+//   return (SSEi)_mm_min_epi32(a,b);
+// }
+// #else
+// inline SSEs SSEMin(const SSEs& a, const SSEs& b) {
+//   return SSETernary(a<b, a, b);
+// }
+// inline SSEi SSEMin(const SSEi& a, const SSEi& b) {
+//   return SSETernary(a<b, a, b);
+// }
+// #endif
+// inline SSEf SSEMin(const SSEf& a, const SSEf& b) {
+//   return (SSEf)_mm_min_ps(a,b);
+// }
+// inline SSEd SSEMin(const SSEd& a, const SSEd& b) {
+//   return (SSEd)_mm_min_pd(a,b);
+// }
+// inline SSEc SSEMin(const SSEc& a, const unsigned char& b) {
+//   return SSEMin(a, SSEc(b));
+// }
+// inline SSEs SSEMin(const SSEs& a, const unsigned short& b) {
+//   return SSEMin(a, SSEs(b));
+// }
+// inline SSEi SSEMin(const SSEi& a, const int& b) {
+//   return SSEMin(a, SSEi(b));
+// }
+// inline SSEf SSEMin(const SSEf& a, const float& b) {
+//   return SSEMin(a, SSEf(b));
+// }
+// inline SSEd SSEMin(const SSEd& a, const double& b) {
+//   return SSEMin(a, SSEd(b));
+// }
+// inline SSEc SSEMin(const unsigned char& a, const SSEc& b) {
+//   return SSEMin(SSEc(a), b);
+// }
+// inline SSEs SSEMin(const unsigned short& a, const SSEs& b) {
+//   return SSEMin(SSEs(a), b);
+// }
+// inline SSEi SSEMin(const int& a, const SSEi& b) {
+//   return SSEMin(SSEi(a), b);
+// }
+// inline SSEf SSEMin(const float& a, const SSEf& b) {
+//   return SSEMin(SSEf(a), b);
+// }
+// inline SSEd SSEMin(const double& a, const SSEd& b) {
+//   return SSEMin(SSEd(a), b);
+// }
+// inline unsigned char SSEMin(const SSEc& a) {
+//   SSEc x = SSEMin(a, (SSEc)_mm_srli_si128(a,8));
+//   x = SSEMin(x, (SSEc)_mm_srli_si128(x,4));
+//   x = SSEMin(x, (SSEc)_mm_srli_si128(x,2));
+//   x = SSEMin(x, (SSEc)_mm_srli_si128(x,1));
+//   return SSEExtract(x);
+// }
+// inline unsigned short SSEMin(const SSEs& a) {
+//   SSEs x = SSEMin(a, (SSEs)_mm_srli_si128(a,8));
+//   x = SSEMin(x, (SSEs)_mm_srli_si128(x,4));
+//   x = SSEMin(x, (SSEs)_mm_srli_si128(x,2));
+//   return SSEExtract(x);
+// }
+// inline int SSEMin(const SSEi& a) {
+//   SSEi x = SSEMin(a, (SSEi)_mm_srli_si128(a,8));
+//   x = SSEMin(x, (SSEi)_mm_srli_si128(x,4));
+//   return SSEExtract(x);
+// }
+// inline float SSEMin(const SSEf& a) {
+//   SSEf x = SSEMin(a, (SSEf)_mm_srli_si128(a.castInt(),8));
+//   x = SSEMin(x, (SSEf)_mm_srli_si128(x.castInt(),4));
+//   return SSEExtract(x);
+// }
+//
+// //####################################################################
+// //#  Maximum
+// //####################################################################
+// inline SSEc SSEMax(const SSEc& a, const SSEc& b) {
+//   return (SSEc)_mm_max_epu8(a,b);
+// }
+// #if HAS_SSE >= _X_SSE4_1
+// inline SSEs SSEMax(const SSEs& a, const SSEs& b) {
+//   return (SSEs)_mm_max_epu16(a,b);
+// }
+// inline SSEi SSEMax(const SSEi& a, const SSEi& b) {
+//   return (SSEi)_mm_max_epi32(a,b);
+// }
+// #else
+// inline SSEs SSEMax(const SSEs& a, const SSEs& b) {
+//   return SSETernary(a>b, a, b);
+// }
+// inline SSEi SSEMax(const SSEi& a, const SSEi& b) {
+//   return SSETernary(a>b, a, b);
+// }
+// #endif
+// inline SSEf SSEMax(const SSEf& a, const SSEf& b) {
+//   return (SSEf)_mm_max_ps(a,b);
+// }
+// inline SSEd SSEMax(const SSEd& a, const SSEd& b) {
+//   return (SSEd)_mm_max_pd(a,b);
+// }
+// inline SSEc SSEMax(const SSEc& a, const unsigned char& b) {
+//   return SSEMax(a, SSEc(b));
+// }
+// inline SSEs SSEMax(const SSEs& a, const unsigned short& b) {
+//   return SSEMax(a, SSEs(b));
+// }
+// inline SSEi SSEMax(const SSEi& a, const int& b) {
+//   return SSEMax(a, SSEi(b));
+// }
+// inline SSEf SSEMax(const SSEf& a, const float& b) {
+//   return SSEMax(a, SSEf(b));
+// }
+// inline SSEd SSEMax(const SSEd& a, const double& b) {
+//   return SSEMax(a, SSEd(b));
+// }
+// inline SSEc SSEMax(const unsigned char& a, const SSEc& b) {
+//   return SSEMax(SSEc(a), b);
+// }
+// inline SSEs SSEMax(const unsigned short& a, const SSEs& b) {
+//   return SSEMax(SSEs(a), b);
+// }
+// inline SSEi SSEMax(const int& a, const SSEi& b) {
+//   return SSEMax(SSEi(a), b);
+// }
+// inline SSEf SSEMax(const float& a, const SSEf& b) {
+//   return SSEMax(SSEf(a), b);
+// }
+// inline SSEd SSEMax(const double& a, const SSEd& b) {
+//   return SSEMax(SSEd(a), b);
+// }
+// inline unsigned char SSEMax(const SSEc& a) {
+//   SSEc x = SSEMax(a, (SSEc)_mm_srli_si128(a,8));
+//   x = SSEMax(x, (SSEc)_mm_srli_si128(x,4));
+//   x = SSEMax(x, (SSEc)_mm_srli_si128(x,2));
+//   x = SSEMax(x, (SSEc)_mm_srli_si128(x,1));
+//   return SSEExtract(x);
+// }
+// inline unsigned short SSEMax(const SSEs& a) {
+//   SSEs x = SSEMax(a, (SSEs)_mm_srli_si128(a,8));
+//   x = SSEMax(x, (SSEs)_mm_srli_si128(x,4));
+//   x = SSEMax(x, (SSEs)_mm_srli_si128(x,2));
+//   return SSEExtract(x);
+// }
+// inline int SSEMax(const SSEi& a) {
+//   SSEi x = SSEMax(a, (SSEi)_mm_srli_si128(a,8));
+//   x = SSEMax(x, (SSEi)_mm_srli_si128(x,4));
+//   return SSEExtract(x);
+// }
+// inline float SSEMax(const SSEf& a) {
+//   SSEf x = SSEMax(a, (SSEf)_mm_srli_si128(a.castInt(),8));
+//   x = SSEMax(x, (SSEf)_mm_srli_si128(x.castInt(),4));
+//   return SSEExtract(x);
+// }
+//
+// //####################################################################
+// //#  Absolute Value
+// //####################################################################
+// #if HAS_SSE >= _X_SSSE3
+// inline SSEc SSEAbs(const SSEc& a) {
+//   return (SSEc)_mm_abs_epi8(a);
+// }
+// inline SSEs SSEAbs(const SSEs& a) {
+//   return (SSEs)_mm_abs_epi16(a);
+// }
+// inline SSEi SSEAbs(const SSEi& a) {
+//   return (SSEi)_mm_abs_epi32(a);
+// }
+// #else
+// inline SSEc SSEAbs(const SSEc& a) {
+//   return SSEMin(-a, a);
+// }
+// inline SSEs SSEAbs(const SSEs& a) {
+//   return SSEMin(-a, a);
+// }
+// inline SSEi SSEAbs(const SSEi& a) {
+//   return SSEMax(-a, a);
+// }
+// #endif
+// inline SSEf SSEAbs(const SSEf& a) {
+//   return SSEMax(-a, a);
+// }
+// inline SSEd SSEAbs(const SSEd& a) {
+//   return SSEMax(-a, a);
+// }
+//
+// //####################################################################
+// //#  Weighted Multiplication
+// //####################################################################
+// //Equivalent to (a*b)/256
+// inline SSEc SSEWMul(const SSEc& a, const SSEc& b) {
+//   SSEc e = SSEZero();
+//   SSEc c = (SSEc)_mm_mullo_epi16(_mm_unpacklo_epi8(a, e), _mm_unpacklo_epi8(b, e));
+//   SSEc d = (SSEc)_mm_mullo_epi16(_mm_unpackhi_epi8(a, e), _mm_unpackhi_epi8(b, e));
+//   e = (SSEc)_mm_unpacklo_epi8(c, d);
+//   c = (SSEc)_mm_unpackhi_epi8(c, d);
+//   d = (SSEc)_mm_unpacklo_epi8(e, c);
+//   e = (SSEc)_mm_unpackhi_epi8(e, c);
+//   c = (SSEc)_mm_unpacklo_epi8(d, e);
+//   d = (SSEc)_mm_unpackhi_epi8(d, e);
+//   return (SSEc)_mm_unpackhi_epi8(c, d);
+// }
+// inline SSEs SSEWMul(const SSEs& a, const SSEs& b) {
+//   return (SSEs)_mm_mulhi_epu16(a, b);
+// }
+// inline SSEf SSEWMul(const SSEf& a, const SSEf& b) {
+//   return (a*b)/255.0f;
+// }
+// inline SSEd SSEWMul(const SSEd& a, const SSEd& b) {
+//   return (a*b)/255.0;
+// }
+// inline SSEc SSEWMul(const SSEc& a, unsigned char b) {
+//   return SSEWMul(a, SSEc(b));
+// }
+// inline SSEs SSEWMul(const SSEs& a, unsigned short b) {
+//   return SSEWMul(a, SSEs(b));
+// }
+// inline SSEf SSEWMul(const SSEf& a, float b) {
+//   return SSEWMul(a, SSEf(b));
+// }
+// inline SSEd SSEWMul(const SSEd& a, double b) {
+//   return SSEWMul(a, SSEd(b));
+// }
 
 //####################################################################
 //#  Average
@@ -1259,330 +1259,330 @@ inline SSEd SSEAvg(const SSEd& a, const SSEd& b) {
   return (a+b)*0.5;
 }
 
-//####################################################################
-//#  Sign Copy
-//####################################################################
-#if HAS_SSE >= _X_SSSE3
-inline SSEc SSECopySign(const SSEc& a, const SSEc& b) {
-  return (SSEc)_mm_sign_epi8(a, b);
-}
-inline SSEs SSECopySign(const SSEs& a, const SSEs& b) {
-  return (SSEs)_mm_sign_epi16(a, b);
-}
-inline SSEi SSECopySign(const SSEi& a, const SSEi& b) {
-  return (SSEi)_mm_sign_epi32(a, b);
-}
-#endif
-
-//####################################################################
-//#  Clamped Addition and Subtraction
-//####################################################################
-inline SSEc SSEAddClamp(const SSEc& a, const SSEc& b) {
-  return (SSEc)_mm_adds_epu8(a, b);
-}
-inline SSEs SSEAddClamp(const SSEs& a, const SSEs& b) {
-  return (SSEs)_mm_adds_epu16(a, b);
-}
-inline SSEf SSEAddClamp(const SSEf& a, const SSEf& b) {
-  return a + b;
-}
-inline SSEc SSEAddClamp(const SSEc& a, const unsigned char& b) {
-  return (SSEc)_mm_adds_epu8(a, SSEc(b));
-}
-inline SSEs SSEAddClamp(const SSEs& a, const unsigned short& b) {
-  return (SSEs)_mm_adds_epu16(a, SSEs(b));
-}
-inline SSEf SSEAddClamp(const SSEf& a, const float b) {
-  return a + b;
-}
-inline SSEc SSESubClamp(const SSEc& a, const SSEc& b) {
-  return (SSEc)_mm_subs_epu8(a, b);
-}
-inline SSEs SSESubClamp(const SSEs& a, const SSEs& b) {
-  return (SSEs)_mm_subs_epu16(a, b);
-}
-inline SSEf SSESubClamp(const SSEf& a, const SSEf& b) {
-  return a - b;
-}
-inline SSEc SSESubClamp(const SSEc& a, const unsigned char& b) {
-  return (SSEc)_mm_subs_epu8(a, SSEc(b));
-}
-inline SSEs SSESubClamp(const SSEs& a, const unsigned short& b) {
-  return (SSEs)_mm_subs_epu16(a, SSEs(b));
-}
-inline SSEf SSESubClamp(const SSEf& a, const float b) {
-  return a - b;
-}
-inline SSEc SSESubLimit(const SSEc& a, const SSEc& b) {
-  SSEc d = a - b;
-  return SSETernary(a > b, SSEMin(d, 127), SSEMax(d, 128));
-}
-inline SSEs SSESubLimit(const SSEs& a, const SSEs& b) {
-  return a - b;
-}
-inline SSEf SSESubLimit(const SSEf& a, const SSEf& b) {
-  return a - b;
-}
-
-//####################################################################
-//#  Horizontal Operations
-//####################################################################
-#if HAS_SSE >= _X_SSSE3
-inline int SSESum(const SSEi& a) {
-  SSEi x = (SSEi)_mm_hadd_epi32(a,a);
-  x = (SSEi)_mm_hadd_epi32(x,x);
-  return SSEExtract(x);
-}
-inline float SSESum(const SSEf& a) {
-  SSEf x = (SSEf)_mm_hadd_ps(a,a);
-  x = (SSEf)_mm_hadd_ps(x,x);
-  return SSEExtract(x);
-}
-inline double SSESum(const SSEd& a) {
-  SSEd x = (SSEd)_mm_hadd_pd(a,a);
-  return SSEExtract(x);
-}
-#elif HAS_SSE >= _X_SSE2
-inline int SSESum(const SSEi& a) {
-  SSEi x = a + (SSEi)_mm_srli_si128(a,8);
-  x += (SSEi)_mm_srli_si128(x,4);
-  return SSEExtract(x);
-}
-inline float SSESum(const SSEf& a) {
-  SSEf x = a + (SSEf)_mm_castsi128_ps(_mm_srli_si128(_mm_castps_si128(a),8));
-  x += (SSEf)_mm_castsi128_ps(_mm_srli_si128(_mm_castps_si128(x),4));
-  return SSEExtract(x);
-}
-inline double SSESum(const SSEd& a) {
-  SSEd x = a + (SSEd)_mm_castsi128_pd(_mm_srli_si128(_mm_castpd_si128(a),8));
-  return _mm_cvtsd_f64(x);
-}
-#endif
-inline int SSESum(const SSEs& a) {
-  SSEs zero = SSEZero();
-  SSEi b = (SSEi)_mm_unpacklo_epi16(a, zero);
-  SSEi c = (SSEi)_mm_unpackhi_epi16(a, zero);
-  return SSESum(b + c);
-}
-inline unsigned char SSEAvg(const SSEc& a) {
-  SSEc x = SSEAvg(a,(SSEc)_mm_srli_si128(a,8));
-  x = SSEAvg(x,(SSEc)_mm_srli_si128(x,4));
-  x = SSEAvg(x,(SSEc)_mm_srli_si128(x,2));
-  x = SSEAvg(x,(SSEc)_mm_srli_si128(x,1));
-  return SSEExtract(x);
-}
-inline unsigned short SSEAvg(const SSEs& a) {
-  SSEs x = SSEAvg(a,(SSEs)_mm_srli_si128(a,8));
-  x = SSEAvg(x,(SSEs)_mm_srli_si128(x,4));
-  x = SSEAvg(x,(SSEs)_mm_srli_si128(x,2));
-  return SSEExtract(x);
-}
-inline int SSEAvg(const SSEi& a) {
-  SSEi x = SSEAvg(a,(SSEi)_mm_srli_si128(a,8));
-  x = SSEAvg(x,(SSEi)_mm_srli_si128(x,4));
-  return SSEExtract(x);
-}
-inline float SSEAvg(const SSEf& a) {
-  return SSESum(a)*0.25f;
-}
-inline double SSEAvg(const SSEd& a) {
-  return SSESum(a)*0.5;
-}
-
-//####################################################################
-//#  Rotate
-//####################################################################
-inline SSEi SSERotateLeft(const SSEi& a) {
-  return (SSEi)_mm_shuffle_epi32(a, 0x39);
-}
-inline SSEf SSERotateLeft(const SSEf& a) {
-  return (SSEf)_mm_shuffle_ps(a, a, 0x39);
-}
-inline SSEi SSERotateRight(const SSEi& a) {
-  return (SSEi)_mm_shuffle_epi32(a, 0x93);
-}
-inline SSEf SSERotateRight(const SSEf& a) {
-  return (SSEf)_mm_shuffle_ps(a, a, 0x93);
-}
-
-//####################################################################
-//#  Interleaving
-//####################################################################
-//Deinterleave from memory
-inline void SSEDeinterleave(const unsigned char* p, SSEc& a, SSEc& b) {
-  SSEc c;
-  a << p;
-  b << p + 16;
-  c = (SSEc)_mm_unpacklo_epi8(a, b);
-  b = (SSEc)_mm_unpackhi_epi8(a, b);
-  a = (SSEc)_mm_unpacklo_epi8(c, b);
-  b = (SSEc)_mm_unpackhi_epi8(c, b);
-  c = (SSEc)_mm_unpacklo_epi8(a, b);
-  b = (SSEc)_mm_unpackhi_epi8(a, b);
-  a = (SSEc)_mm_unpacklo_epi8(c, b);
-  b = (SSEc)_mm_unpackhi_epi8(c, b);
-}
-inline void SSEDeinterleave(const unsigned short* p, SSEs& a, SSEs& b) {
-  SSEs c;
-  c << p;
-  b << p + 8;
-  a = (SSEs)_mm_unpacklo_epi16(c, b);
-  b = (SSEs)_mm_unpackhi_epi16(c, b);
-  c = (SSEs)_mm_unpacklo_epi16(a, b);
-  b = (SSEs)_mm_unpackhi_epi16(a, b);
-  a = (SSEs)_mm_unpacklo_epi16(c, b);
-  b = (SSEs)_mm_unpackhi_epi16(c, b);
-}
-inline void SSEDeinterleave(const int* p, SSEi& a, SSEi& b) {
-  SSEi c;
-  a << p;
-  b << p + 4;
-  c = (SSEi)_mm_unpacklo_epi32(a, b);
-  b = (SSEi)_mm_unpackhi_epi32(a, b);
-  a = (SSEi)_mm_unpacklo_epi32(c, b);
-  b = (SSEi)_mm_unpackhi_epi32(c, b);
-}
-inline void SSEDeinterleave(const float* p, SSEf& a, SSEf& b) {
-  SSEf c;
-  a << p;
-  b << p + 4;
-  c = (SSEf)_mm_unpacklo_ps(a, b);
-  b = (SSEf)_mm_unpackhi_ps(a, b);
-  a = (SSEf)_mm_unpacklo_ps(c, b);
-  b = (SSEf)_mm_unpackhi_ps(c, b);
-}
-
-//Interleaves to memory
-inline void SSEInterleave(unsigned char* p, const SSEc& a, const SSEc& b) {
-  p << (SSEc)_mm_unpacklo_epi8(a, b);
-  (p + 16) << (SSEc)_mm_unpackhi_epi8(a, b);
-}
-inline void SSEInterleave(unsigned short* p, const SSEs& a, const SSEs& b) {
-  p << (SSEs)_mm_unpacklo_epi16(a, b);
-  (p + 8) << (SSEs)_mm_unpackhi_epi16(a, b);
-}
-inline void SSEInterleave(int* p, const SSEi& a, const SSEi& b) {
-  p << (SSEi)_mm_unpacklo_epi32(a, b);
-  (p + 4) << (SSEi)_mm_unpackhi_epi32(a, b);
-}
-inline void SSEInterleave(float* p, const SSEf& a, const SSEf& b) {
-  p << (SSEf)_mm_unpacklo_ps(a, b);
-  (p + 4) << (SSEf)_mm_unpackhi_ps(a, b);
-}
-
-//Interleaves to register
-inline void SSEInterleave(const SSEc& a, const SSEc& b, SSEc& c, SSEc& d) {
-  c = (SSEc)_mm_unpacklo_epi8(a, b);
-  d = (SSEc)_mm_unpackhi_epi8(a, b);
-}
-inline void SSEInterleave(const SSEs& a, const SSEs& b, SSEs& c, SSEs& d) {
-  c = (SSEs)_mm_unpacklo_epi16(a, b);
-  d = (SSEs)_mm_unpackhi_epi16(a, b);
-}
-inline void SSEInterleave(const SSEi& a, const SSEi& b, SSEi& c, SSEi& d) {
-  c = (SSEi)_mm_unpacklo_epi32(a, b);
-  d = (SSEi)_mm_unpackhi_epi32(a, b);
-}
-inline void SSEInterleave(const SSEf& a, const SSEf& b, SSEf& c, SSEf& d) {
-  c = (SSEf)_mm_unpacklo_ps(a, b);
-  d = (SSEf)_mm_unpackhi_ps(a, b);
-}
-
-//####################################################################
-//#  Reduction
-//####################################################################
-//Reduce a block of memory into a register half the size by neighbor averaging
-inline SSEc SSEReduce(const unsigned char* p) {
-  SSEc a, b;
-  SSEDeinterleave(p, a, b);
-  return (SSEc)_mm_avg_epu8(a, b);
-}
-inline SSEs SSEReduce(const unsigned short* p) {
-  SSEs a, b;
-  SSEDeinterleave(p, a, b);
-  return (SSEs)_mm_avg_epu16(a, b);
-}
-inline SSEi SSEReduce(const int* p) {
-  SSEi a, b;
-  SSEDeinterleave(p, a, b);
-  return (SSEi)_mm_srai_epi32(a + b, 1);
-}
-inline SSEf SSEReduce(const float* p) {
-  SSEf a, b;
-  SSEDeinterleave(p, a, b);
-  return (a + b)*0.5f;
-}
-
-//####################################################################
-//#  Expansion
-//####################################################################
-//Exapand a block of memory to two sse registers by duplicating neighbors
-inline void SSEExpand(const unsigned char* p, SSEc& left, SSEc& right) {
-  SSEc a(p);
-  left = (SSEc)_mm_unpacklo_epi8(a, a);
-  right = (SSEc)_mm_unpackhi_epi8(a, a);
-}
-inline void SSEExpand(const unsigned short* p, SSEs& left, SSEs& right) {
-  SSEs a(p);
-  left = (SSEs)_mm_unpacklo_epi16(a, a);
-  right = (SSEs)_mm_unpackhi_epi16(a, a);
-}
-inline void SSEExpand(const int* p, SSEi& left, SSEi& right) {
-  SSEi a(p);
-  left = (SSEi)_mm_unpacklo_epi32(a, a);
-  right = (SSEi)_mm_unpackhi_epi32(a, a);
-}
-inline void SSEExpand(const float* p, SSEf& left, SSEf& right) {
-  SSEf a(p);
-  left = (SSEf)_mm_unpacklo_ps(a, a);
-  right = (SSEf)_mm_unpackhi_ps(a, a);
-}
-
-//####################################################################
-//#  Reverse Order
-//####################################################################
-inline SSEc SSEReverse(const SSEc& a) {
-  SSEc b = (SSEc)_mm_shuffle_epi32(a, 0x1B);
-  b = (SSEc)_mm_shufflelo_epi16(b, 0xB1);
-  b = (SSEc)_mm_shufflehi_epi16(b, 0xB1);
-  return (SSEc)_mm_srli_epi16(b, 8) | (SSEc)_mm_slli_epi16(b, 8);
-}
-inline SSEs SSEReverse(const SSEs& a) {
-  SSEs b = (SSEs)_mm_shuffle_epi32(a, 0x1B);
-  b = (SSEs)_mm_shufflelo_epi16(b, 0xB1);
-  return (SSEs)_mm_shufflehi_epi16(b, 0xB1);
-}
-inline SSEi SSEReverse(const SSEi& a) {
-  return (SSEi)_mm_shuffle_epi32(a, 0x1B);
-}
-inline SSEf SSEReverse(const SSEf& a) {
-  return (SSEf)_mm_shuffle_ps(a, a, 0x1B);
-}
-
-//####################################################################
-//#  Sorting
-//####################################################################
-inline SSEf SSESort(const SSEf& a) {
-  SSEf b = (SSEf)_mm_shuffle_ps(a, a, 0xB1);
-  SSEf c = SSEMin(b, a);
-  b = SSEMax(b, a);
-  b = SSEReverse(b);
-  SSEf d = SSEMin(b, c);
-  b = SSEMax(b, c);
-  c = (SSEf)_mm_unpacklo_ps(d, b);
-  d = (SSEf)_mm_unpackhi_ps(d, b);
-  b = SSEMin(c, d);
-  c = SSEMax(c, d);
-  return (SSEf)_mm_unpacklo_ps(b, c);
-}
-
-//####################################################################
-//#  NaN Handling
-//####################################################################
-inline SSEf SSEIsNaN(const SSEf& a) {
-  SSEf mask(_mm_castsi128_ps(SSEi(0x7F800000)));
-  return (a & mask) == mask;
-}
+// //####################################################################
+// //#  Sign Copy
+// //####################################################################
+// #if HAS_SSE >= _X_SSSE3
+// inline SSEc SSECopySign(const SSEc& a, const SSEc& b) {
+//   return (SSEc)_mm_sign_epi8(a, b);
+// }
+// inline SSEs SSECopySign(const SSEs& a, const SSEs& b) {
+//   return (SSEs)_mm_sign_epi16(a, b);
+// }
+// inline SSEi SSECopySign(const SSEi& a, const SSEi& b) {
+//   return (SSEi)_mm_sign_epi32(a, b);
+// }
+// #endif
+//
+// //####################################################################
+// //#  Clamped Addition and Subtraction
+// //####################################################################
+// inline SSEc SSEAddClamp(const SSEc& a, const SSEc& b) {
+//   return (SSEc)_mm_adds_epu8(a, b);
+// }
+// inline SSEs SSEAddClamp(const SSEs& a, const SSEs& b) {
+//   return (SSEs)_mm_adds_epu16(a, b);
+// }
+// inline SSEf SSEAddClamp(const SSEf& a, const SSEf& b) {
+//   return a + b;
+// }
+// inline SSEc SSEAddClamp(const SSEc& a, const unsigned char& b) {
+//   return (SSEc)_mm_adds_epu8(a, SSEc(b));
+// }
+// inline SSEs SSEAddClamp(const SSEs& a, const unsigned short& b) {
+//   return (SSEs)_mm_adds_epu16(a, SSEs(b));
+// }
+// inline SSEf SSEAddClamp(const SSEf& a, const float b) {
+//   return a + b;
+// }
+// inline SSEc SSESubClamp(const SSEc& a, const SSEc& b) {
+//   return (SSEc)_mm_subs_epu8(a, b);
+// }
+// inline SSEs SSESubClamp(const SSEs& a, const SSEs& b) {
+//   return (SSEs)_mm_subs_epu16(a, b);
+// }
+// inline SSEf SSESubClamp(const SSEf& a, const SSEf& b) {
+//   return a - b;
+// }
+// inline SSEc SSESubClamp(const SSEc& a, const unsigned char& b) {
+//   return (SSEc)_mm_subs_epu8(a, SSEc(b));
+// }
+// inline SSEs SSESubClamp(const SSEs& a, const unsigned short& b) {
+//   return (SSEs)_mm_subs_epu16(a, SSEs(b));
+// }
+// inline SSEf SSESubClamp(const SSEf& a, const float b) {
+//   return a - b;
+// }
+// inline SSEc SSESubLimit(const SSEc& a, const SSEc& b) {
+//   SSEc d = a - b;
+//   return SSETernary(a > b, SSEMin(d, 127), SSEMax(d, 128));
+// }
+// inline SSEs SSESubLimit(const SSEs& a, const SSEs& b) {
+//   return a - b;
+// }
+// inline SSEf SSESubLimit(const SSEf& a, const SSEf& b) {
+//   return a - b;
+// }
+//
+// //####################################################################
+// //#  Horizontal Operations
+// //####################################################################
+// #if HAS_SSE >= _X_SSSE3
+// inline int SSESum(const SSEi& a) {
+//   SSEi x = (SSEi)_mm_hadd_epi32(a,a);
+//   x = (SSEi)_mm_hadd_epi32(x,x);
+//   return SSEExtract(x);
+// }
+// inline float SSESum(const SSEf& a) {
+//   SSEf x = (SSEf)_mm_hadd_ps(a,a);
+//   x = (SSEf)_mm_hadd_ps(x,x);
+//   return SSEExtract(x);
+// }
+// inline double SSESum(const SSEd& a) {
+//   SSEd x = (SSEd)_mm_hadd_pd(a,a);
+//   return SSEExtract(x);
+// }
+// #elif HAS_SSE >= _X_SSE2
+// inline int SSESum(const SSEi& a) {
+//   SSEi x = a + (SSEi)_mm_srli_si128(a,8);
+//   x += (SSEi)_mm_srli_si128(x,4);
+//   return SSEExtract(x);
+// }
+// inline float SSESum(const SSEf& a) {
+//   SSEf x = a + (SSEf)_mm_castsi128_ps(_mm_srli_si128(_mm_castps_si128(a),8));
+//   x += (SSEf)_mm_castsi128_ps(_mm_srli_si128(_mm_castps_si128(x),4));
+//   return SSEExtract(x);
+// }
+// inline double SSESum(const SSEd& a) {
+//   SSEd x = a + (SSEd)_mm_castsi128_pd(_mm_srli_si128(_mm_castpd_si128(a),8));
+//   return _mm_cvtsd_f64(x);
+// }
+// #endif
+// inline int SSESum(const SSEs& a) {
+//   SSEs zero = SSEZero();
+//   SSEi b = (SSEi)_mm_unpacklo_epi16(a, zero);
+//   SSEi c = (SSEi)_mm_unpackhi_epi16(a, zero);
+//   return SSESum(b + c);
+// }
+// inline unsigned char SSEAvg(const SSEc& a) {
+//   SSEc x = SSEAvg(a,(SSEc)_mm_srli_si128(a,8));
+//   x = SSEAvg(x,(SSEc)_mm_srli_si128(x,4));
+//   x = SSEAvg(x,(SSEc)_mm_srli_si128(x,2));
+//   x = SSEAvg(x,(SSEc)_mm_srli_si128(x,1));
+//   return SSEExtract(x);
+// }
+// inline unsigned short SSEAvg(const SSEs& a) {
+//   SSEs x = SSEAvg(a,(SSEs)_mm_srli_si128(a,8));
+//   x = SSEAvg(x,(SSEs)_mm_srli_si128(x,4));
+//   x = SSEAvg(x,(SSEs)_mm_srli_si128(x,2));
+//   return SSEExtract(x);
+// }
+// inline int SSEAvg(const SSEi& a) {
+//   SSEi x = SSEAvg(a,(SSEi)_mm_srli_si128(a,8));
+//   x = SSEAvg(x,(SSEi)_mm_srli_si128(x,4));
+//   return SSEExtract(x);
+// }
+// inline float SSEAvg(const SSEf& a) {
+//   return SSESum(a)*0.25f;
+// }
+// inline double SSEAvg(const SSEd& a) {
+//   return SSESum(a)*0.5;
+// }
+//
+// //####################################################################
+// //#  Rotate
+// //####################################################################
+// inline SSEi SSERotateLeft(const SSEi& a) {
+//   return (SSEi)_mm_shuffle_epi32(a, 0x39);
+// }
+// inline SSEf SSERotateLeft(const SSEf& a) {
+//   return (SSEf)_mm_shuffle_ps(a, a, 0x39);
+// }
+// inline SSEi SSERotateRight(const SSEi& a) {
+//   return (SSEi)_mm_shuffle_epi32(a, 0x93);
+// }
+// inline SSEf SSERotateRight(const SSEf& a) {
+//   return (SSEf)_mm_shuffle_ps(a, a, 0x93);
+// }
+//
+// //####################################################################
+// //#  Interleaving
+// //####################################################################
+// //Deinterleave from memory
+// inline void SSEDeinterleave(const unsigned char* p, SSEc& a, SSEc& b) {
+//   SSEc c;
+//   a << p;
+//   b << p + 16;
+//   c = (SSEc)_mm_unpacklo_epi8(a, b);
+//   b = (SSEc)_mm_unpackhi_epi8(a, b);
+//   a = (SSEc)_mm_unpacklo_epi8(c, b);
+//   b = (SSEc)_mm_unpackhi_epi8(c, b);
+//   c = (SSEc)_mm_unpacklo_epi8(a, b);
+//   b = (SSEc)_mm_unpackhi_epi8(a, b);
+//   a = (SSEc)_mm_unpacklo_epi8(c, b);
+//   b = (SSEc)_mm_unpackhi_epi8(c, b);
+// }
+// inline void SSEDeinterleave(const unsigned short* p, SSEs& a, SSEs& b) {
+//   SSEs c;
+//   c << p;
+//   b << p + 8;
+//   a = (SSEs)_mm_unpacklo_epi16(c, b);
+//   b = (SSEs)_mm_unpackhi_epi16(c, b);
+//   c = (SSEs)_mm_unpacklo_epi16(a, b);
+//   b = (SSEs)_mm_unpackhi_epi16(a, b);
+//   a = (SSEs)_mm_unpacklo_epi16(c, b);
+//   b = (SSEs)_mm_unpackhi_epi16(c, b);
+// }
+// inline void SSEDeinterleave(const int* p, SSEi& a, SSEi& b) {
+//   SSEi c;
+//   a << p;
+//   b << p + 4;
+//   c = (SSEi)_mm_unpacklo_epi32(a, b);
+//   b = (SSEi)_mm_unpackhi_epi32(a, b);
+//   a = (SSEi)_mm_unpacklo_epi32(c, b);
+//   b = (SSEi)_mm_unpackhi_epi32(c, b);
+// }
+// inline void SSEDeinterleave(const float* p, SSEf& a, SSEf& b) {
+//   SSEf c;
+//   a << p;
+//   b << p + 4;
+//   c = (SSEf)_mm_unpacklo_ps(a, b);
+//   b = (SSEf)_mm_unpackhi_ps(a, b);
+//   a = (SSEf)_mm_unpacklo_ps(c, b);
+//   b = (SSEf)_mm_unpackhi_ps(c, b);
+// }
+//
+// //Interleaves to memory
+// inline void SSEInterleave(unsigned char* p, const SSEc& a, const SSEc& b) {
+//   p << (SSEc)_mm_unpacklo_epi8(a, b);
+//   (p + 16) << (SSEc)_mm_unpackhi_epi8(a, b);
+// }
+// inline void SSEInterleave(unsigned short* p, const SSEs& a, const SSEs& b) {
+//   p << (SSEs)_mm_unpacklo_epi16(a, b);
+//   (p + 8) << (SSEs)_mm_unpackhi_epi16(a, b);
+// }
+// inline void SSEInterleave(int* p, const SSEi& a, const SSEi& b) {
+//   p << (SSEi)_mm_unpacklo_epi32(a, b);
+//   (p + 4) << (SSEi)_mm_unpackhi_epi32(a, b);
+// }
+// inline void SSEInterleave(float* p, const SSEf& a, const SSEf& b) {
+//   p << (SSEf)_mm_unpacklo_ps(a, b);
+//   (p + 4) << (SSEf)_mm_unpackhi_ps(a, b);
+// }
+//
+// //Interleaves to register
+// inline void SSEInterleave(const SSEc& a, const SSEc& b, SSEc& c, SSEc& d) {
+//   c = (SSEc)_mm_unpacklo_epi8(a, b);
+//   d = (SSEc)_mm_unpackhi_epi8(a, b);
+// }
+// inline void SSEInterleave(const SSEs& a, const SSEs& b, SSEs& c, SSEs& d) {
+//   c = (SSEs)_mm_unpacklo_epi16(a, b);
+//   d = (SSEs)_mm_unpackhi_epi16(a, b);
+// }
+// inline void SSEInterleave(const SSEi& a, const SSEi& b, SSEi& c, SSEi& d) {
+//   c = (SSEi)_mm_unpacklo_epi32(a, b);
+//   d = (SSEi)_mm_unpackhi_epi32(a, b);
+// }
+// inline void SSEInterleave(const SSEf& a, const SSEf& b, SSEf& c, SSEf& d) {
+//   c = (SSEf)_mm_unpacklo_ps(a, b);
+//   d = (SSEf)_mm_unpackhi_ps(a, b);
+// }
+//
+// //####################################################################
+// //#  Reduction
+// //####################################################################
+// //Reduce a block of memory into a register half the size by neighbor averaging
+// inline SSEc SSEReduce(const unsigned char* p) {
+//   SSEc a, b;
+//   SSEDeinterleave(p, a, b);
+//   return (SSEc)_mm_avg_epu8(a, b);
+// }
+// inline SSEs SSEReduce(const unsigned short* p) {
+//   SSEs a, b;
+//   SSEDeinterleave(p, a, b);
+//   return (SSEs)_mm_avg_epu16(a, b);
+// }
+// inline SSEi SSEReduce(const int* p) {
+//   SSEi a, b;
+//   SSEDeinterleave(p, a, b);
+//   return (SSEi)_mm_srai_epi32(a + b, 1);
+// }
+// inline SSEf SSEReduce(const float* p) {
+//   SSEf a, b;
+//   SSEDeinterleave(p, a, b);
+//   return (a + b)*0.5f;
+// }
+//
+// //####################################################################
+// //#  Expansion
+// //####################################################################
+// //Exapand a block of memory to two sse registers by duplicating neighbors
+// inline void SSEExpand(const unsigned char* p, SSEc& left, SSEc& right) {
+//   SSEc a(p);
+//   left = (SSEc)_mm_unpacklo_epi8(a, a);
+//   right = (SSEc)_mm_unpackhi_epi8(a, a);
+// }
+// inline void SSEExpand(const unsigned short* p, SSEs& left, SSEs& right) {
+//   SSEs a(p);
+//   left = (SSEs)_mm_unpacklo_epi16(a, a);
+//   right = (SSEs)_mm_unpackhi_epi16(a, a);
+// }
+// inline void SSEExpand(const int* p, SSEi& left, SSEi& right) {
+//   SSEi a(p);
+//   left = (SSEi)_mm_unpacklo_epi32(a, a);
+//   right = (SSEi)_mm_unpackhi_epi32(a, a);
+// }
+// inline void SSEExpand(const float* p, SSEf& left, SSEf& right) {
+//   SSEf a(p);
+//   left = (SSEf)_mm_unpacklo_ps(a, a);
+//   right = (SSEf)_mm_unpackhi_ps(a, a);
+// }
+//
+// //####################################################################
+// //#  Reverse Order
+// //####################################################################
+// inline SSEc SSEReverse(const SSEc& a) {
+//   SSEc b = (SSEc)_mm_shuffle_epi32(a, 0x1B);
+//   b = (SSEc)_mm_shufflelo_epi16(b, 0xB1);
+//   b = (SSEc)_mm_shufflehi_epi16(b, 0xB1);
+//   return (SSEc)_mm_srli_epi16(b, 8) | (SSEc)_mm_slli_epi16(b, 8);
+// }
+// inline SSEs SSEReverse(const SSEs& a) {
+//   SSEs b = (SSEs)_mm_shuffle_epi32(a, 0x1B);
+//   b = (SSEs)_mm_shufflelo_epi16(b, 0xB1);
+//   return (SSEs)_mm_shufflehi_epi16(b, 0xB1);
+// }
+// inline SSEi SSEReverse(const SSEi& a) {
+//   return (SSEi)_mm_shuffle_epi32(a, 0x1B);
+// }
+// inline SSEf SSEReverse(const SSEf& a) {
+//   return (SSEf)_mm_shuffle_ps(a, a, 0x1B);
+// }
+//
+// //####################################################################
+// //#  Sorting
+// //####################################################################
+// inline SSEf SSESort(const SSEf& a) {
+//   SSEf b = (SSEf)_mm_shuffle_ps(a, a, 0xB1);
+//   SSEf c = SSEMin(b, a);
+//   b = SSEMax(b, a);
+//   b = SSEReverse(b);
+//   SSEf d = SSEMin(b, c);
+//   b = SSEMax(b, c);
+//   c = (SSEf)_mm_unpacklo_ps(d, b);
+//   d = (SSEf)_mm_unpackhi_ps(d, b);
+//   b = SSEMin(c, d);
+//   c = SSEMax(c, d);
+//   return (SSEf)_mm_unpacklo_ps(b, c);
+// }
+//
+// //####################################################################
+// //#  NaN Handling
+// //####################################################################
+// inline SSEf SSEIsNaN(const SSEf& a) {
+//   SSEf mask(_mm_castsi128_ps(SSEi(0x7F800000)));
+//   return (a & mask) == mask;
+// }
 
 //####################################################################
 //#  Conversion of types
@@ -1626,42 +1626,42 @@ inline SSEc SSEShortsToChars(const SSEs& a, const SSEs& b) {
   return (SSEc)_mm_unpackhi_epi8(c, d);
 }
 
-//####################################################################
-//#  Special Summations
-//####################################################################
-//Converts a char sum into an array of short partial sums
-inline SSEs SSEShortSum(const SSEc& a) {
-  SSEc zero = SSEZero();
-  SSEs b = (SSEs)_mm_unpacklo_epi8(a, zero);
-  SSEs c = (SSEs)_mm_unpackhi_epi8(a, zero);
-  return b + c;
-}
-//Converts a char sum into an array of int partial sums
-inline SSEi SSEIntSum(const SSEc& a) {
-  SSEc zero = SSEZero();
-  SSEs b = (SSEs)_mm_unpacklo_epi8(a, zero);
-  SSEs c = (SSEs)_mm_unpackhi_epi8(a, zero);
-  b = b + c;
-  SSEi d = (SSEi)_mm_unpacklo_epi16(b, zero);
-  SSEi e = (SSEi)_mm_unpackhi_epi16(b, zero);
-  return d + e;
-}
-//Converts a short sum into an array of int partial sums
-inline SSEi SSEIntSum(const SSEs& a) {
-  SSEs zero = SSEZero();
-  SSEi b = (SSEi)_mm_unpacklo_epi16(a, zero);
-  SSEi c = (SSEi)_mm_unpackhi_epi16(a, zero);
-  return b + c;
-}
-inline void SSEIntSum(const SSEc& a, SSEi& s1, SSEi& s2, SSEi& s3, SSEi& s4) {
-  SSEc zero = SSEZero();
-  SSEs b = (SSEs)_mm_unpacklo_epi8(a, zero);
-  s1 += (SSEi)_mm_unpacklo_epi16(b, zero);
-  s2 += (SSEi)_mm_unpackhi_epi16(b, zero);
-  b = (SSEs)_mm_unpackhi_epi8(a, zero);
-  s3 += (SSEi)_mm_unpacklo_epi16(b, zero);
-  s4 += (SSEi)_mm_unpackhi_epi16(b, zero);
-}
+// //####################################################################
+// //#  Special Summations
+// //####################################################################
+// //Converts a char sum into an array of short partial sums
+// inline SSEs SSEShortSum(const SSEc& a) {
+//   SSEc zero = SSEZero();
+//   SSEs b = (SSEs)_mm_unpacklo_epi8(a, zero);
+//   SSEs c = (SSEs)_mm_unpackhi_epi8(a, zero);
+//   return b + c;
+// }
+// //Converts a char sum into an array of int partial sums
+// inline SSEi SSEIntSum(const SSEc& a) {
+//   SSEc zero = SSEZero();
+//   SSEs b = (SSEs)_mm_unpacklo_epi8(a, zero);
+//   SSEs c = (SSEs)_mm_unpackhi_epi8(a, zero);
+//   b = b + c;
+//   SSEi d = (SSEi)_mm_unpacklo_epi16(b, zero);
+//   SSEi e = (SSEi)_mm_unpackhi_epi16(b, zero);
+//   return d + e;
+// }
+// //Converts a short sum into an array of int partial sums
+// inline SSEi SSEIntSum(const SSEs& a) {
+//   SSEs zero = SSEZero();
+//   SSEi b = (SSEi)_mm_unpacklo_epi16(a, zero);
+//   SSEi c = (SSEi)_mm_unpackhi_epi16(a, zero);
+//   return b + c;
+// }
+// inline void SSEIntSum(const SSEc& a, SSEi& s1, SSEi& s2, SSEi& s3, SSEi& s4) {
+//   SSEc zero = SSEZero();
+//   SSEs b = (SSEs)_mm_unpacklo_epi8(a, zero);
+//   s1 += (SSEi)_mm_unpacklo_epi16(b, zero);
+//   s2 += (SSEi)_mm_unpackhi_epi16(b, zero);
+//   b = (SSEs)_mm_unpackhi_epi8(a, zero);
+//   s3 += (SSEi)_mm_unpacklo_epi16(b, zero);
+//   s4 += (SSEi)_mm_unpackhi_epi16(b, zero);
+// }
 
 #else
 #error "Need to implement architecture-specific SSE-emulation implementation"

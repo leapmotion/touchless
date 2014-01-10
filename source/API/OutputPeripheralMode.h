@@ -11,7 +11,7 @@
 #if !defined(__OutputPeripheralMode_h__)
 #define __OutputPeripheralMode_h__
 
-#include "ocuType.h"
+#include "common.h"
 
 #if LEAP_API_INTERNAL
 #include "LeapInternal.h"
@@ -19,7 +19,6 @@
 #include "Leap.h"
 #endif
 
-#include "DataTypes.h"
 #include "StateMachine.h"
 #include "FilterMethods/CategoricalFilter.h"
 #include "FilterMethods/RollingMean.h"
@@ -146,7 +145,7 @@ protected:
   Frame                                       m_sinceFrame;
   TimedFrameHistory                           m_timedFrameHistory;
   std::vector<Pointable>                      m_relevantPointables;
-  
+
   bool                                        m_flushOverlay;
 
 private:
