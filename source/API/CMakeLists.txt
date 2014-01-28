@@ -25,6 +25,8 @@ SET(LEAP_PLUGIN_PLUS_API_SRCS
   TouchPeripheral.cpp
   PluginImplementation.h
   PluginPlus.cpp
+  PositionalDeltaTracker.h
+  PositionalDeltaTracker.cpp
 )
 
 # Internal static library for now

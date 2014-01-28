@@ -1,12 +1,4 @@
-/*==================================================================================================================
-
- Copyright (c) 2010 - 2013 Leap Motion. All rights reserved.
-
- The intellectual and technical concepts contained herein are proprietary and confidential to Leap Motion, and are
- protected by trade secret or copyright law. Dissemination of this information or reproduction of this material is
- strictly forbidden unless prior written permission is obtained from Leap Motion.
-
- ===================================================================================================================*/
+#include "stdafx.h"
 #include "OutputPeripheralImplementation.h"
 #include "OutputPeripheralMode.h"
 
@@ -70,6 +62,10 @@ OutputPeripheralMode::~OutputPeripheralMode() {
 #endif
   delete m_filteredPointableCount;
   delete m_filteredRTS;
+}
+
+OutputPeripheralImplementation* OutputPeripheralImplementation::New(void) {
+  return new OutputPeripheralImplementation;
 }
 
 void OutputPeripheralMode::processFrame (const Frame& frame, const Frame& sinceFrame) {
@@ -197,10 +193,6 @@ void OutputPeripheralMode::DrawOverlays() {
 #if __APPLE__
   m_outputPeripheral.flushOverlay();
 #endif
-}
-
-const InteractionBox &OutputPeripheralMode::interactionBox() const {
-  return m_interactionBox;
 }
 
 int32_t OutputPeripheralMode::foremostPointableId () const {
@@ -789,24 +781,16 @@ void OutputPeripheralMode::drawRasterIcon(int iconIndex, float x, float y, bool 
   m_outputPeripheral.drawRasterIcon(iconIndex, x, y, visible, velocity, touchDistance, radius, clampDistance, alphaMult, numFingers);
 }
 
-// bool OutputPeripheralMode::checkTouching(const Vector& position, float noTouchBorder) const {
-//   return m_outputPeripheral.checkTouching(position, noTouchBorder);
-// }
-
-void OutputPeripheralMode::clearTouchPoints() {
-  m_outputPeripheral.clearTouchPoints();
+void OutputPeripheralMode::emitTouchEvent() {
+  m_outputPeripheral.emitTouchEvent(m_touchEvent);
 }
 
-void OutputPeripheralMode::removeTouchPoint(int touchId) {
-  m_outputPeripheral.removeTouchPoint(touchId);
+void OutputPeripheralMode::clearTouchPoints() {
+  m_touchEvent.clear();
 }
 
 void OutputPeripheralMode::addTouchPoint(int touchId, float x, float y, bool touching) {
-  m_outputPeripheral.addTouchPoint(touchId, x, y, touching);
-}
-
-void OutputPeripheralMode::emitTouchEvent() {
-  m_outputPeripheral.emitTouchEvent();
+  m_touchEvent.insert(Touch(touchId, x, y, touching));
 }
 
 bool OutputPeripheralMode::touchAvailable() const {
@@ -818,7 +802,7 @@ int OutputPeripheralMode::numTouchScreens() const {
 }
 
 int OutputPeripheralMode::touchVersion() const {
-  return m_outputPeripheral.touchVersion();
+  return -1;
 }
 
 bool OutputPeripheralMode::useProceduralOverlay() const {
@@ -844,11 +828,6 @@ void OutputPeripheralMode::setForemostPointable (const std::vector<Pointable> &r
   } else {
     foremostPointableId = -1;
   }
-}
-
-void OutputPeripheralMode::stopActiveEvents()
-{
-  return;
 }
 
 void OutputPeripheralMode::identifyForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const {

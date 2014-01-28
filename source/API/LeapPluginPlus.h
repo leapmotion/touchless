@@ -10,12 +10,31 @@
 #define __LeapPluginPlus_h__
 
 #include "LeapPlugin.h"
+#include "Peripherals/Touch.h"
+#include <set>
 
 namespace Leap {
 
 //
 // Public Interface
 //
+class TouchEvent:
+  public std::set<Touch>
+{
+public:
+  void clearTouchPoints(void) {
+    clear();
+  }
+
+  void removeTouchPoint(int touchId) {
+    Touch touch(touchId);
+    erase(touch);
+  }
+
+  void addTouchPoint(int touchId, float x, float y, bool touching) {
+    insert(Touch(touchId, x, y, touching));
+  }
+};
 
 //
 // This is the interface to the underlying OS peripherals (i.e., keyboard,
@@ -26,60 +45,59 @@ namespace Leap {
 // sub-classed Plugin constructor. References to that class will not be
 // available until the onInit method.
 //
-class OutputPeripheral : public Interface {
-  public:
+class OutputPeripheral:
+  public Interface
+{
+public:
 
-    enum OutputMode { OUTPUT_MODE_DISABLED = 0, OUTPUT_MODE_INTRO, OUTPUT_MODE_BASIC, OUTPUT_MODE_ADVANCED };
+  enum OutputMode { OUTPUT_MODE_DISABLED = 0, OUTPUT_MODE_INTRO, OUTPUT_MODE_BASIC, OUTPUT_MODE_ADVANCED };
 
-    OutputPeripheral(Implementation*);
+  OutputPeripheral(Implementation*);
 
-    void destroy();
+  void destroy();
 
-    bool initializeTouchAndOverlay();
+  bool initializeTouchAndOverlay();
 
-    void useDefaultScreen(bool use = true);
-    bool usingDefaultScreen() const;
+  void useDefaultScreen(bool use = true);
+  bool usingDefaultScreen() const;
 
-    void clickDown(int button);
-    void clickUp(int button);
-    bool isClickedDown(int button) const;
-    void keyDown(int code);
-    void keyUp(int code);
+  void clickDown(int button);
+  void clickUp(int button);
+  bool isClickedDown(int button) const;
+  void keyDown(int code);
+  void keyUp(int code);
 
-    Vector deviceToScreen(const Vector& position, float scale = 1, bool clamp = true) const;
+  Vector deviceToScreen(const Vector& position, float scale = 1, bool clamp = true) const;
 
-    bool cursorPosition(float* x, float* y) const;
-    void setCursorPosition(float x, float y, bool absolute = true);
+  bool cursorPosition(float* x, float* y) const;
+  void setCursorPosition(float x, float y, bool absolute = true);
 
-    void registerApplication(const std::string& windowTitle, const std::string& exeName, int appCode);
-    void registerApplication(const std::wstring& windowTitle, const std::wstring& exeName, int appCode);
-    int getCurrentApplication();
+  void registerApplication(const std::string& windowTitle, const std::string& exeName, int appCode);
+  void registerApplication(const std::wstring& windowTitle, const std::wstring& exeName, int appCode);
+  int getCurrentApplication();
 
-    void setIconVisibility(int index, bool visible);
-    int findImageIndex(float z, float touchThreshold, float touchRange) const;
-    void drawIcon(int iconIndex, int imageIndex, float x, float y, bool visible);
-    void clearTouchPoints();
-    void removeTouchPoint(int touchId);
-    void addTouchPoint(int touchId, float x, float y, bool touching);
-    void emitTouchEvent();
-    bool touchAvailable() const;
-    int numTouchScreens() const;
-    int touchVersion() const;
+  void setIconVisibility(int index, bool visible);
+  int findImageIndex(float z, float touchThreshold, float touchRange) const;
+  void drawIcon(int iconIndex, int imageIndex, float x, float y, bool visible);
+  void emitTouchEvent(const TouchEvent& evt);
+  bool touchAvailable() const;
+  int numTouchScreens() const;
+  int touchVersion() const;
 
-    bool emitGestureEvents(const Frame& frame, const Frame& sinceFrame);
-    void cancelGestureEvents();
+  bool emitGestureEvents(const Frame& frame, const Frame& sinceFrame);
+  void cancelGestureEvents();
 
-    void setOutputSensitivity(double sens);
-    void setOutputMode(OutputMode mode);
-    OutputMode getOutputMode() const;
+  void setOutputSensitivity(double sens);
+  void setOutputMode(OutputMode mode);
+  OutputMode getOutputMode() const;
 };
 
 class PluginPlus : public Plugin {
-  public:
-    PluginPlus(const Plugin& plugin);
-    PluginPlus();
+public:
+  PluginPlus(const Plugin& plugin);
+  PluginPlus();
 
-    OutputPeripheral& outputPeripheral() const;
+  OutputPeripheral& outputPeripheral() const;
 };
 
 }

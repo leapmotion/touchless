@@ -1,40 +1,21 @@
-/*==================================================================================================================
-
-    Copyright (c) 2010 - 2013 Leap Motion. All rights reserved.
-
-  The intellectual and technical concepts contained herein are proprietary and confidential to Leap Motion, and are
-  protected by trade secret or copyright law. Dissemination of this information or reproduction of this material is
-  strictly forbidden unless prior written permission is obtained from Leap Motion.
-
-===================================================================================================================*/
+#include "stdafx.h"
 #include "OutputPeripheralImplementation.h"
-#include "SharedObject.h"
-#include "DataStructures/Value.h"
-#include "DataStructures/AxisAlignedBox.h"
-
 #if _WIN32
-  #include "targetver.h"
-  #include <SetupAPI.h>
-  #include <Psapi.h>
-  #include <Shlwapi.h>
-  #include <GdiPlus.h>
-  extern "C" {
-    #include "hidsdi.h"
-  }
-  #include "Globals/Interface.h"
-  #include "OcuInterfaceCodes.h"
-  #include "PreprocFlags.h"
-  #include "OcuInterface.h"
-
-  #define IOCTL_HID_SET_OUTPUT_REPORT 0xb0195
+#include "FocusAppInfo.h"
 #endif
-#include EXCEPTION_PTR_HEADER
-
-#include "Utility/FileSystemUtil.h"
 #include "TouchPeripheral.h"
+#include "API/SharedObject.h"
+#include "DataStructures/AxisAlignedBox.h"
+#include "DataStructures/Value.h"
+#include "Peripherals/LPIcon.h"
+#include "Peripherals/LPImage.h"
+#include "Peripherals/LPVirtualScreen.h"
+#include "Peripherals/TouchManager.h"
+#include "Utility/FileSystemUtil.h"
+#include EXCEPTION_PTR_HEADER
 #include <fstream>
 
-namespace Leap {
+using namespace Leap;
 
 //
 // OutputPeripheralImplementation
@@ -49,10 +30,6 @@ OutputPeripheralImplementation::OutputPeripheralImplementation() :
   m_filledImageIdx(0),
   m_useCharmHelper(true)
 {
-#if _WIN32
-  m_gdiplusToken = 0;
-#endif
-
   m_outputMode = OutputPeripheral::OUTPUT_MODE_DISABLED;
   m_lastOutputMode = OutputPeripheral::OUTPUT_MODE_DISABLED;
 
@@ -70,26 +47,14 @@ OutputPeripheralImplementation::~OutputPeripheralImplementation()
   for (int i = 0; i < m_numOverlayImages; ++i) {
     setIconVisibility(i, false);
   }
-  m_overlayPoints.clear();
-  m_overlayImages.clear();
 }
 
 void OutputPeripheralImplementation::destroy() {
   delete m_outputPeripheralMode;
   m_outputPeripheralMode = nullptr;
-#if _WIN32
-  if (m_gdiplusToken) {
-    Gdiplus::GdiplusShutdown(m_gdiplusToken);
-  }
-#endif
 }
 
 bool OutputPeripheralImplementation::initializeTouchAndOverlay() {
-#if _WIN32
-  Gdiplus::GdiplusStartupInput startupInput;
-  Gdiplus::GdiplusStartup(&m_gdiplusToken, &startupInput, nullptr);
-#endif
-
   m_numOverlayPoints = 32;
   std::string folder = "circle_icons_64";
   std::string prefix = "circle_";
@@ -113,8 +78,7 @@ bool OutputPeripheralImplementation::initializeTouchAndOverlay() {
   }
 
   for (int i=0; i<m_numOverlayPoints; i++) {
-    std::shared_ptr<LPIcon> icon(new LPIcon());
-    m_overlayPoints.push_back(icon);
+    m_overlayPoints.push_back(std::shared_ptr<LPIcon>(new LPIcon()));
   }
   for (int i=0; i<m_numOverlayImages; i++) {
     m_overlayImages.push_back(std::shared_ptr<LPImage>(new LPImage()));
@@ -541,60 +505,55 @@ void OutputPeripheralImplementation::drawRasterIcon(int iconIndex,
   setIconVisibility(iconIndex, visible);
 }
 
-void OutputPeripheralImplementation::clearTouchPoints()
+void OutputPeripheralImplementation::emitTouchEvent(const TouchEvent& evt)
 {
-  m_touches.clear();
-}
+#if _WIN32
+  // Translate and convert:
+  std::set<Touch> unordered;
 
-void OutputPeripheralImplementation::removeTouchPoint(int touchId)
-{
-  Touch touch(touchId);
-  std::set<Touch>::iterator found = m_touches.find(touch);
+  for(auto q = evt.begin(); q != evt.end(); q++) {
+    const Touch& cur = *q;
 
-  if (found != m_touches.end()) {
-    m_touches.erase(found);
+    // Clip to our screen:
+    auto position = m_virtualScreen.ClipPosition(LPPoint((LPFloat)cur.x(), (LPFloat)cur.y()));
+
+    // Insert into the new map:
+    unordered.insert(Touch(
+      cur.id(),
+      position.x,
+      position.y,
+      cur.touching()
+    ));
   }
+  m_touchManager->setTouches(std::move(unordered));
+#endif
 }
 
-void OutputPeripheralImplementation::addTouchPoint(int touchId, float x, float y, bool touching)
+void OutputPeripheralImplementation::emitTouchEvent(std::set<Touch>&& touches)
 {
-  LPPoint position = LPPointMake(static_cast<LPFloat>(x), static_cast<LPFloat>(y));
-
-  position = m_virtualScreen.ClipPosition(position);
-
-  if (m_touchManager.expectsNormalizedTouchCoordinates()) {
-    position = m_virtualScreen.Normalize(position);
-  }
-  x = static_cast<float>(position.x);
-  y = static_cast<float>(position.y);
-  Touch touch(touchId, x, y, touching);
-
-  m_touches.insert(touch);
-}
-
-void OutputPeripheralImplementation::emitTouchEvent()
-{
-  m_touchManager.setTouches(m_touches);
-  clearTouchPoints();
+#if _WIN32
+  m_touchManager->setTouches(std::move(touches));
+#endif
 }
 
 bool OutputPeripheralImplementation::touchAvailable() const
 {
-  return m_touchManager.supportsTouch();
+#if _WIN32
+  return m_touchManager.IsAutowired();
+#else
+  return false;
+#endif
 }
 
 int OutputPeripheralImplementation::numTouchScreens() const {
-  if (!touchAvailable()) {
-    return 0;
-  } else if (m_touchManager.expectsNormalizedTouchCoordinates()) {
-    return 1;
-  } else {
-    return static_cast<int>(m_virtualScreen.NumScreens(false));
-  }
-}
-
-int OutputPeripheralImplementation::touchVersion() const {
-  return m_touchManager.getVersion();
+#if _WIN32
+  return
+    m_touchManager ?
+    m_touchManager->numTouchScreens() :
+    0;
+#else
+  return 0;
+#endif
 }
 
 bool OutputPeripheralImplementation::emitGestureEvents(const Frame& frame, const Frame& sinceFrame)
@@ -617,7 +576,7 @@ void OutputPeripheralImplementation::cancelGestureEvents()
 
 #if _WIN32
   boost::unique_lock<boost::mutex> lock(m_touchMutex);
-  m_touchManager.clearTouches();
+  m_touchManager->clearTouches();
 #endif
   for (int i=0; i<m_numOverlayPoints; i++) {
     setIconVisibility(i, false);
@@ -625,11 +584,6 @@ void OutputPeripheralImplementation::cancelGestureEvents()
 #if __APPLE__
   flushOverlay();
 #endif
-
-  if (m_outputPeripheralMode) {
-    m_outputPeripheralMode->stopActiveEvents();
-  }
-
   endGesture();
 }
 
@@ -822,7 +776,7 @@ void OutputPeripheralImplementation::syncPosition()
     position.y = static_cast<LPFloat>(cursor.y);
   }
 #else
-  throw_rethrowable std::logic_error("OutputPeripheralImplementatione not implemented"); // Linux -- FIXME
+  throw_rethrowable std::logic_error("OutputPeripheralImplementation not implemented"); // Linux -- FIXME
 #endif
   position = m_virtualScreen.SetPosition(position);
   m_gesture.setPosition(position.x, position.y);
@@ -851,16 +805,11 @@ int OutputPeripheral::getCurrentApplication() { return get<OutputPeripheralImple
 void OutputPeripheral::setIconVisibility(int index, bool visible) { get<OutputPeripheralImplementation>()->setIconVisibility(index, visible); }
 int OutputPeripheral::findImageIndex(float z, float touchThreshold, float touchRange) const { return get<OutputPeripheralImplementation>()->findImageIndex(z, touchThreshold, touchRange); }
 void OutputPeripheral::drawIcon(int iconIndex, int imageIndex, float x, float y, bool visible) { get<OutputPeripheralImplementation>()->drawImageIcon(iconIndex, imageIndex, x, y, visible); }
-void OutputPeripheral::clearTouchPoints() { get<OutputPeripheralImplementation>()->clearTouchPoints(); }
-void OutputPeripheral::removeTouchPoint(int touchId) { get<OutputPeripheralImplementation>()->removeTouchPoint(touchId); }
-void OutputPeripheral::addTouchPoint(int touchId, float x, float y, bool touching) { get<OutputPeripheralImplementation>()->addTouchPoint(touchId, x, y, touching); }
-void OutputPeripheral::emitTouchEvent() { get<OutputPeripheralImplementation>()->emitTouchEvent(); }
+void OutputPeripheral::emitTouchEvent(const TouchEvent& evt) { get<OutputPeripheralImplementation>()->emitTouchEvent(evt); }
 bool OutputPeripheral::touchAvailable() const { return get<OutputPeripheralImplementation>()->touchAvailable(); }
 int OutputPeripheral::numTouchScreens() const { return get<OutputPeripheralImplementation>()->numTouchScreens(); }
-int OutputPeripheral::touchVersion() const { return get<OutputPeripheralImplementation>()->touchVersion(); }
+int OutputPeripheral::touchVersion() const { return -1; }
 bool OutputPeripheral::emitGestureEvents(const Frame& frame, const Frame& sinceFrame) { return get<OutputPeripheralImplementation>()->emitGestureEvents(frame, sinceFrame); }
 void OutputPeripheral::cancelGestureEvents() { get<OutputPeripheralImplementation>()->cancelGestureEvents(); }
 void OutputPeripheral::setOutputMode(OutputPeripheral::OutputMode mode) { get<OutputPeripheralImplementation>()->setOutputMode(mode); }
 OutputPeripheral::OutputMode OutputPeripheral::getOutputMode() const { return get<OutputPeripheralImplementation>()->getOutputMode(); }
-
-}

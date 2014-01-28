@@ -1,34 +1,26 @@
-/*==================================================================================================================
-
- Copyright (c) 2010 - 2013 Leap Motion. All rights reserved.
-
- The intellectual and technical concepts contained herein are proprietary and confidential to Leap Motion, and are
- protected by trade secret or copyright law. Dissemination of this information or reproduction of this material is
- strictly forbidden unless prior written permission is obtained from Leap Motion.
-
- ===================================================================================================================*/
-
 #if !defined(__OutputPeripheralMode_h__)
 #define __OutputPeripheralMode_h__
 
 #include "common.h"
 
 #if LEAP_API_INTERNAL
-#include "LeapInternal.h"
+#include "Leap/LeapInternal.h"
 #else
 #include "Leap.h"
 #endif
 
-#include "StateMachine.h"
+#include "DataStructures/TimedHistory.h"
+#include "PositionalDeltaTracker.h"
 #include "FilterMethods/CategoricalFilter.h"
 #include "FilterMethods/RollingMean.h"
-#include "TimedHistory.h"
+#include "Utility/StateMachine.h"
+#include "LeapPluginPlus.h"
 
 #include <vector>
 
 #define MAX_POINTABLES 10
 
-namespace Leap{
+namespace Leap {
 
 class OutputPeripheralImplementation;
 
@@ -39,18 +31,21 @@ public:
   virtual ~OutputPeripheralMode();
 
   void processFrame (const Frame& frame, const Frame& sinceFrame);
-  virtual void stopActiveEvents();
 
 protected:
 
   // this must be implemented in a subclass -- it provides the mode-specific peripheral behavior.
   virtual void processFrameInternal() = 0;
+
   // a default implementation, currently taken from the finger mouse.
   virtual void identifyRelevantPointables (const PointableList &pointables, std::vector<Pointable> &relevantPointables) const;
+
   // a default implementation, currently taken from the finger mouse.
   virtual Pointable::Zone identifyCollectivePointableZone (const std::vector<Pointable> &pointables) const;
+
   // a default implementation, currently taken from the finger mouse.
   virtual void DrawOverlays();
+
   // a default implementation, sets to -1 if the number of actual fingers doesn't match the finger category
   virtual void setForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const;
 
@@ -64,7 +59,6 @@ protected:
 
   typedef CategoricalFilter<RTS,RTS__CATEGORY_COUNT>  RTSFilter;
 
-  const InteractionBox &interactionBox() const;
   int32_t foremostPointableId () const;
   int32_t foremostPointableIdOfHand(const Hand &hand) const;
   void resetFavoritePointableId();
@@ -80,8 +74,6 @@ protected:
   Pointable::Zone collectiveZone() const;
 
   bool deviceToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
-  bool normalizedToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
-  bool normalizedToAspect(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
   void setCursorPosition(float fx, float fy, bool absolute = true);
   void clickDown(int button, int number = 1);
   void clickUp(int button, int number = 1);
@@ -119,14 +111,11 @@ protected:
   static float scrollDampingFactor (const Vector &scrollVelocity);
   static double touchDistanceToRadius (float touchDistance);
   void drawRasterIcon(int iconIndex, float x, float y, bool visible, const Vector3& velocity, float touchDistance, double radius, float clampDistance, float alphaMult, int numFingers = 1);
-//   bool checkTouching(const Vector& position, float noTouchBorder) const; // NOTE: this is apparently undefined in OutputPeripheral
   void clearTouchPoints();
-  void removeTouchPoint(int touchId);
   void addTouchPoint(int touchId, float x, float y, bool touching);
-  void emitTouchEvent();
   bool touchAvailable() const;
   int numTouchScreens() const;
-  int touchVersion() const;
+  int DEPRECATED(touchVersion() const, "This method is no longer supported");
   bool useProceduralOverlay() const;
   bool useCharmHelper() const;
 #if __APPLE__
@@ -148,8 +137,7 @@ protected:
 
   bool                                        m_flushOverlay;
 
-private:
-
+protected:
   typedef RollingMean<MAX_POINTABLES>                 PointableCountFilterRollingMean;
   typedef CategoricalFilter<size_t,MAX_POINTABLES>    PointableCountFilter;
   typedef RollingMean<RTS__CATEGORY_COUNT>            RTSFilterRollingMean;
@@ -162,96 +150,25 @@ private:
   int32_t                                     m_foremostPointableId;
   int32_t                                     m_favoritePointableId;
   OutputPeripheralImplementation             &m_outputPeripheral;
+  PositionalDeltaTracker                      m_positionalDeltaTracker;
+  TouchEvent                                  m_touchEvent;
 
-protected:
+public:
+  // Accessor methods:
+  PositionalDeltaTracker& positionalDeltaTracker(void) {return m_positionalDeltaTracker;}
+  const InteractionBox& interactionBox() const {return m_interactionBox;}
 
-  // This is for removing discontinuities in cursor/overlay position resulting
-  // from switching between pointable and palm positions for setting the cursor/
-  // overlay position.  Positional deltas are accumulated so that the output
-  // position is continuous.  There should be one of these objects per tracked
-  // hand, and tracking 2+ hands will require additional logic to determine which
-  // one of these objects corresponds to which hand.
-  class PositionalDeltaTracker {
-  public:
+  /// <summary>
+  /// Converts the passed normalized coordinates to pixel coordinates on the virtual screen
+  /// </summary>
+  /// <param name="position">The normalized coordinate to be converted</param>
+  /// <param name="output">A vector that will receive the normalized coordinates</param>
+  bool normalizedToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
 
-    PositionalDeltaTracker () {
-      clear();
-    }
+  bool normalizedToAspect(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
 
-    Vector getTrackedPosition () const { return m_position + m_delta; }
-
-    void setPositionToStabilizedPositionOf (const Hand &hand) {
-      assert(hand.isValid());
-      setPosition(hand.id(), -1, hand.stabilizedPalmPosition());
-    }
-    void setPositionToStabilizedPositionOf (const Pointable &pointable) {
-      assert(pointable.isValid());
-      setPosition(pointable.hand().id(), pointable.id(), pointable.stabilizedTipPosition());
-    }
-
-    void clear () {
-      m_handId = -1;
-      m_pointableId = -1;
-      m_delta = Vector::zero();
-      m_position = Vector::zero();
-    }
-
-  private:
-
-    // A hand id of -1 is considered to be equal to any hand id.  Otherwise, different
-    // ids are considered to belong to different hands/pointables.  If pointableId is
-    // specified, then position is understood to be the pointable position, otherwise
-    // it is the hand position.  Specifying -1 for both handId and pointableId is not
-    // allowed.
-    //
-    // Different possible transitions:
-    //
-    // - If the hand id is different, then the delta is cleared, and the new position
-    //   is used directly.
-    // - Otherwise the hand id is the same.
-    //   * If the pointable id is the same, no delta is accumulated.
-    //   * Otherwise, the pointable id changed, so a delta is accumulated.
-    void setPosition (int32_t handId, int32_t pointableId, const Vector &position) {
-      // if this object is uninitialized, set everything and return.
-      if (m_handId == -1 && m_pointableId == -1) {
-        m_handId = handId;
-        m_pointableId = pointableId;
-        m_delta = Vector::zero();
-        m_position = position;
-        return;
-      }
-
-      // determine if a delta should be accumulated.
-      bool accumulateDelta = false;
-      if (handId == -1 || m_handId == -1) {
-        // -1 for hand id matches everything, so don't accumulate delta.
-      } else if (handId != m_handId) {
-        accumulateDelta = true;
-      } else {
-        if (pointableId != m_pointableId) {
-          accumulateDelta = true;
-        } else {
-          // the pointable ids match, so don't accumulate delta.
-        }
-      }
-      // if a delta accumulation was indicated, do so.
-      if (accumulateDelta) {
-        m_delta = m_position + m_delta - position;
-      }
-
-      // update state variables
-      m_handId = handId;
-      m_pointableId = pointableId;
-      m_position = position;
-    }
-
-    int32_t                   m_handId;
-    int32_t                   m_pointableId;
-    Vector                    m_delta;
-    Vector                    m_position;
-  };
-
-  PositionalDeltaTracker m_positionalDeltaTracker;
+  // API implementation
+  void emitTouchEvent();
 };
 
 }
