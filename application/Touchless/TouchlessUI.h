@@ -2,8 +2,6 @@
 #ifndef __TouchlessUI_h__
 #define __TouchlessUI_h__
 
-#include "ocuConfig.h"
-
 #include <qmainwindow.h>
 #include <qsystemtrayicon.h>
 

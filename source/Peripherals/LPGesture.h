@@ -12,7 +12,6 @@
 #define __LPGesture_h__
 
 #include "LPGeometry.h"
-#include "ocuConfig.h"
 #include "Heartbeat.h"
 #include "BoundedQueue.h"
 

@@ -4,9 +4,9 @@ if(COMMAND CMAKE_POLICY)
 endif(COMMAND CMAKE_POLICY)
 
 # This version number must conform to semver.org (2.0.0-rc.1) standard for any release starting with 1.0.0
-# set(LEAP_VERSION_MAJOR 1)
-# set(LEAP_VERSION_MINOR 0)
-# set(LEAP_VERSION_PATCH 9)
+set(TOUCHLESS_VERSION_MAJOR 1)
+set(TOUCHLESS_VERSION_MINOR 0)
+set(TOUCHLESS_VERSION_PATCH 9)
 # set(BUILD_NUMBER "-1" CACHE STRING "Build number")
 #
 # set(FILES_TO_TRANSLATE)
@@ -35,7 +35,6 @@ ENDMACRO(ADD_MSVC_PRECOMPILED_HEADER)
 # index of an existing Protocol Buffer structures is modified (e.g., changing a
 # type from double to float).
 #
-# Minimum SDK compatibility version
 # set(LEAP_COMPATIBILITY_VERSION_MAJOR 0)
 # set(LEAP_COMPATIBILITY_VERSION_MINOR 7)
 # set(LEAP_COMPATIBILITY_VERSION_PATCH 0)
@@ -561,7 +560,7 @@ include_directories(
   ${PROJECT_TEST_PATH}
   # ${CROSSROADS_DIR}/include
   ${Boost_INCLUDE_DIR}
-  # ${DRV_INT_DIR}/include
+  ${DRV_INT_DIR}/include
   # ${CURL_DIR}/include
   # ${PROTOBUF_DIR}/include
   # ${OPENSSL_DIR}/include
@@ -636,13 +635,6 @@ include_directories(
 # else(USE_CG)
 # set(HAVE_CG_FLAG 0)
 # endif(USE_CG)
-
-# Firmware images
-if(BUILD_WINDOWS)
-  add_target_file(${PROJECT_SOURCE_DIR}/application app0.dat)
-  add_target_file(${PROJECT_SOURCE_DIR}/application app1.dat)
-  add_target_file(${PROJECT_SOURCE_DIR}/application app2.dat)
-endif()
 
 configure_file(.editorconfig ${CMAKE_CURRENT_BINARY_DIR}/.editorconfig COPYONLY)
 

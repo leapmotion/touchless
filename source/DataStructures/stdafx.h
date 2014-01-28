@@ -27,10 +27,6 @@
 #endif
 
 #if _WIN32
-
-// General includes:
-#include "DataTypes.h"
-
 // Some hard-to-compile boost math modules:
 #include <boost/chrono/chrono.hpp>
 #include <boost/math/distributions/fisher_f.hpp>

@@ -1,5 +1,6 @@
 #if !defined(__Heartbeat_h__)
 #define __Heartbeat_h__
+#include "common.h"
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>

@@ -54,8 +54,9 @@ const char APPLICATION_DIRECTORY[] = ".Leap Motion"; // use this directory locat
 //#define LOCALHOST "localhost"
 #define LOCALHOST "127.0.0.1"
 
-#ifdef __APPLE__
 #include "C++11/cpp11.h"
+
+#ifdef __APPLE__
 #include RVALUE_HEADER
 #endif
 

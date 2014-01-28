@@ -23,7 +23,7 @@
 #ifndef __Config_h__
 #define __Config_h__
 
-#include "ocuConfig.h"
+#include "common.h"
 #include "DataStructures/Value.h"
 #include <iostream>
 #include <boost/thread.hpp>

@@ -7,7 +7,6 @@
  strictly forbidden unless prior written permission is obtained from Leap Motion.
 
  ===================================================================================================================*/
-#include "ocuConfig.h"
 #include "OutputPeripheralImplementation.h"
 #include "OutputPeripheralMode.h"
 

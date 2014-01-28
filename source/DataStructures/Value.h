@@ -22,6 +22,8 @@
 #if !defined(__Value_h__)
 #define __Value_h__
 
+#include "common.h"
+
 #include <boost/any.hpp>
 
 #include <map>

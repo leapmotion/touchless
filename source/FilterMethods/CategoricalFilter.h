@@ -147,7 +147,7 @@ private:
       assert(0.0 <= probabilities(i));
       normalizationFactor += probabilities(i);
     }
-    assert(normalizationFactor > OCU_EPSILON);
+    assert(normalizationFactor > 1e10);
 
     // the probabilities must sum to 1.
     m_probabilityVector = probabilities / normalizationFactor;

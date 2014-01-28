@@ -2,7 +2,7 @@
 #include "Touchless.h"
 #include "TouchlessListener.h"
 #include "TouchlessUI.h"
-#include "ocuConfig.h"
+#include "common.h"
 #include "Leap.h"
 #include "Utility/FileSystemUtil.h"
 

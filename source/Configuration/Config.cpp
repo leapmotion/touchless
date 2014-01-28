@@ -244,7 +244,7 @@ bool Config::SetAttribute(const std::string& attributeName, const Value& value, 
   if (curAccessType == READ_ONLY) {
     return false;
   }
-  if (IS_INTERNAL_BUILD != 1 && curAccessType == WRITE_NOPUBLIC && userSpecified) {
+  if (curAccessType == WRITE_NOPUBLIC && userSpecified) {
     return false;
   }
   if (found->second.value != value) {

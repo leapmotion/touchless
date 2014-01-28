@@ -2,7 +2,6 @@
 #ifndef __TouchlessListener_h__
 #define __TouchlessListener_h__
 
-#include "ocuConfig.h"
 #include "Leap.h"
 #include "LeapPluginPlus.h"
 #include "OutputPeripheralImplementation.h"

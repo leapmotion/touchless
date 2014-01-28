@@ -6,10 +6,8 @@
 
 #if _WIN32
 
-#include "AlgorithmUtil.h"
 #include "BoundedQueue.h"
 #include "Heartbeat.h"
-#include "MathUtil.h"
 #include "TouchManager.h"
 #include "DataStructures/Value.h"
 

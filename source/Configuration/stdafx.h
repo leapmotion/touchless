@@ -4,8 +4,6 @@
 
 #define __STDC_LIMIT_MACROS
 
-#include "ocuConfig.h"
-
 #ifndef _MSC_VER
 #ifdef __APPLE__
 // workaround for clang+libc++ bug 'call to isnan() is ambiguous'

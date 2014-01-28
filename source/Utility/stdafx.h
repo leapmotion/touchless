@@ -12,8 +12,6 @@
 
 #include <math.h>
 #include <float.h>
-#include <openssl/sha.h>
-#include <openssl/hmac.h>
 #include <time.h>
 
 #include <Windows.h>
@@ -46,9 +44,6 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/filesystem.hpp>
-
-// Slow internal libraries:
-#include "MathUtil.h"
 
 #endif // _WIN32
 
