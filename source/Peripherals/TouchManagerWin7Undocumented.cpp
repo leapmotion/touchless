@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "TouchManagerWin7Undocumented.h"
 
+typedef LONG NTSTATUS;
+
 typedef NTSTATUS (__stdcall *t_ZwUserSendTouchInput)(HWND hWnd, int rdx, TOUCHINPUT* touchData, DWORD touchDataSize);
 static auto ZwUserSendTouchInput = (t_ZwUserSendTouchInput)GetProcAddress(GetHmodUser32(), LPCSTR(1500));
 

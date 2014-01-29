@@ -10,7 +10,6 @@ include_directories(
   ${LEAP_INCLUDE_DIR}
   )
 
-
 SET(Peripherals_SRCS
   LPGeometry.h
   LPGesture.h
@@ -33,6 +32,13 @@ if(BUILD_WINDOWS)
     InterfaceCodes.h
     FocusAppInfo.h
     FocusAppInfo.cpp
+    GdiPlusInitializer.h
+    GdiPlusInitializer.cpp
+    TouchManagerWin7Undocumented.h
+    TouchManagerWin7Undocumented.cpp
+    TouchManagerWin8.h
+    TouchManagerWin8.cpp
+    Win8TouchStructures.h
     ${Peripherals_SRCS}
   )
 elseif(BUILD_MAC)

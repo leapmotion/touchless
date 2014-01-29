@@ -13,12 +13,10 @@
 #endif
 #include "LPVirtualScreen.h"
 
-#include "LeapPluginPlus.h"
 #include "OutputPeripheralBasic.h"
 #include "OutputPeripheralFingerMouse.h"
 #include "OutputPeripheralGestureOnly.h"
 #include "Touch.h"
-#include "API/LeapPlugin.h"
 #include "Peripherals/LPGesture.h"
 #include "TouchManager.h"
 #include <boost/circular_buffer.hpp>
