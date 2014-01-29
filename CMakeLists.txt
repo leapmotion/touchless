@@ -7,9 +7,6 @@ endif(COMMAND CMAKE_POLICY)
 set(TOUCHLESS_VERSION_MAJOR 1)
 set(TOUCHLESS_VERSION_MINOR 0)
 set(TOUCHLESS_VERSION_PATCH 9)
-# set(BUILD_NUMBER "-1" CACHE STRING "Build number")
-#
-# set(FILES_TO_TRANSLATE)
 
 # Adds a precompiled header
 MACRO(ADD_MSVC_PRECOMPILED_HEADER PrecompiledHeader PrecompiledSource SourcesVar)
@@ -29,18 +26,6 @@ MACRO(ADD_MSVC_PRECOMPILED_HEADER PrecompiledHeader PrecompiledSource SourcesVar
   endif(MSVC)
 ENDMACRO(ADD_MSVC_PRECOMPILED_HEADER)
 
-# WARNING!!! Only change the minimum compatibility SDK version if there are
-# breaking changes to the underlying Protocol Buffer structures or a structure
-# is no longer transmitted to clients. A breaking change is when a type or
-# index of an existing Protocol Buffer structures is modified (e.g., changing a
-# type from double to float).
-#
-# set(LEAP_COMPATIBILITY_VERSION_MAJOR 0)
-# set(LEAP_COMPATIBILITY_VERSION_MINOR 7)
-# set(LEAP_COMPATIBILITY_VERSION_PATCH 0)
-# # Minimum SDK compatibility build number
-# set(LEAP_COMPATIBILITY_VERSION_BUILD_NUMBER 701)
-
 project(Touchless)
 
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/..")
@@ -59,23 +44,6 @@ if(BUILD_LINUX)
   set(CMAKE_INSTALL_RPATH "\${ORIGIN}:\${ORIGIN}/../lib/Leap")
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 endif()
-
-#Setup Compiler Flags
-# OPTION(USE_PRODUCTION_FLAGS "Enable compiler optimizations that increase build time" OFF)
-# OPTION(USE_EXPERIMENTAL_MODELS "Enable kinematic model and various templates that double compile time on Windows" OFF)
-# option(USE_CRASH_REPORTING "Build crash reporting support (Mac-only for now)" ON)
-# if(BUILD_WINDOWS)
-#   # Fix for Zm flag error in Visual Studio
-#   option(USE_ZMPATCH "Fixes memory errors in windows builds using visual studio. Flagged by zm." ON)
-# endif()
-# set(USE_EXPERIMENTAL_MODELS_FLAG 0)
-# if(USE_EXPERIMENTAL_MODELS)
-#   set(USE_EXPERIMENTAL_MODELS_FLAG 1)
-# endif()
-# set(USE_CRASH_REPORTING_FLAG 0)
-# if(USE_CRASH_REPORTING)
-#   set(USE_CRASH_REPORTING_FLAG 1)
-# endif()
 
 set(ALTERNATE_LIBRARY "")
 if(BUILD_MAC)
@@ -278,12 +246,6 @@ find_package(Boost REQUIRED)
 link_directories(${Boost_LIBRARY_DIRS})
 mark_as_advanced(Boost_DIR)
 
-# if(BUILD_WINDOWS)
-# add_library(pipemanlib STATIC IMPORTED)
-# set_target_properties(pipemanlib PROPERTIES IMPORTED_LOCATION_DEBUG ${EXTERNAL_LIBRARY_DIR}/pipeman/lib/Debug/PipeManLib.lib IMPORTED_LOCATION_RELEASE ${EXTERNAL_LIBRARY_DIR}/pipeman/lib/Release/PipeManLib.lib)
-# include_directories(${EXTERNAL_LIBRARY_DIR}/pipeman/include/)
-# endif(BUILD_WINDOWS)
-
 set(LUAJIT_DIR ${EXTERNAL_LIBRARY_DIR}/luajit)
 set(LUAJIT_INCLUDE_DIR ${LUAJIT_DIR}/include)
 
@@ -310,33 +272,6 @@ endif()
 
 set(LUAJIT_EXE ${LUAJIT_BIN_DIR}/luajit${EXE_SUFFIX})
 set(LUAJIT_LIB ${LUAJIT_LIB_DIR}/${LIBRARY_PREFIX}luajit${STATIC_LIBRARY_SUFFIX})
-
-# option(BUILD_DEMO_APPS "Build demo applications in the main solution" OFF)
-# option(BUILD_UTIL_APPS "Build utility applications in the main solution" OFF)
-# option(BUILD_FIRMWARE_UPDATER "Build the firmware update tool (LeapFwPatch)" OFF)
-
-# if(BUILD_UTIL_APPS)
-# if(BUILD_WINDOWS)
-#   if(BUILD_64_BIT)
-#     find_package(OpenCV PATHS ${EXTERNAL_LIBRARY_DIR}/OpenCV/Build64 REQUIRED)
-#   else()
-#     find_package(OpenCV PATHS ${EXTERNAL_LIBRARY_DIR}/OpenCV/Build32 REQUIRED)
-#   endif()
-#   set(OpenCV_BIN_DIR ${OpenCV_DIR}/bin)
-#   set(OpenCV_SRC_DIR ${OpenCV_DIR}/..)
-# else()
-#   find_package(OpenCV PATHS ${EXTERNAL_LIBRARY_DIR}/OpenCV/share/OpenCV REQUIRED)
-# endif()
-# On Mac, OpenCV_LIB_DIR is two folders including lib and lib/..
-#
-# if(BUILD_WINDOWS)
-#   # we rely on a special in-source build of OpenCV where DLLs are in the bin dir
-#   install(DIRECTORY ${OpenCV_BIN_DIR}/ DESTINATION ${PROJECT_BINARY_DIR}/bin FILES_MATCHING PATTERN "*${SHARED_LIBRARY_SUFFIX}")
-# else()
-#   # but on Linux the .so or .dylib files are in the lib dir...
-#   install(DIRECTORY ${OpenCV_DIR}/lib/ DESTINATION ${PROJECT_BINARY_DIR}/bin FILES_MATCHING PATTERN "*${SHARED_LIBRARY_SUFFIX}")
-# endif()
-# endif(BUILD_UTIL_APPS)
 
 macro(target_strip Target)
   # primary function of this macro: strip symbols at link time on Mac and Linux
@@ -468,19 +403,21 @@ endif()
 
 if(DEFINED QT_QMAKE_EXECUTABLE)
   find_package(Qt4 REQUIRED)
-  set(Leap_DIR ${EXTERNAL_LIBRARY_DIR}/LeapSDK/ CACHE PATH "LeapSDK root path" FORCE)
-  find_package(Leap REQUIRED)
+  set(LEAP_INCLUDE_DIR ${PROJECT_BINARY_DIR}/../LeapSDK/include)
+  if(BUILD_WINDOWS)
+    set(LEAP_LIBRARIES ${PROJECT_BINARY_DIR}/../LeapSDK/lib/x86/Leap.dll)
+  else()
+    if(BUILD_MAC)
+      set(LEAP_LIBRARIES ${PROJECT_BINARY_DIR}/../LeapSDK/lib/libLeap.dylib)
+    else()
+      #linux
+    endif()
+  endif()
 endif()
 
 endif(USE_QT)
 
-# option(BUILD_PROCESS_PIPELINE "Build the command-line tool (ProcessPipeline) that predates the LeapControlPanel GUI" ON)
-
-# set(CROSSROADS_DIR ${EXTERNAL_LIBRARY_DIR}/libxs-1.2.0${ALTERNATE_LIBRARY})
 set(EIGEN_ROOT_DIR ${EXTERNAL_LIBRARY_DIR}/eigen-3.1.2)
-# set(FREEGLUT_DIR ${EXTERNAL_LIBRARY_DIR}/freeglut-2.8.0)
-# set(ZLIB_DIR ${EXTERNAL_LIBRARY_DIR}/zlib-1.2.8)
-# set(BREAKPAD_DIR ${EXTERNAL_LIBRARY_DIR}/breakpad-0.1)
 
 if(BUILD_MAC)
   find_library(OPENGL_FRAMEWORK OpenGL)
@@ -497,59 +434,9 @@ if(BUILD_MAC)
   find_library(CARBON_FRAMEWORK Carbon)
   find_library(IOKIT_FRAMEWORK IOKit)
   mark_as_advanced(OPENGL_FRAMEWORK GLUT_FRAMEWORK PYTHON_FRAMEWORK CORE_FOUNDATION_FRAMEWORK QUARTZ_CORE_FRAMEWORK CORE_SERVICES_FRAMEWORK APPKIT_FRAMEWORK FOUNDATION_FRAMEWORK PREFERENCE_PANES_FRAMEWORK COCOA_FRAMEWORK CARBON_FRAMEWORK IOKIT_FRAMEWORK)
-  # set(TBB_DIR ${EXTERNAL_LIBRARY_DIR}/tbb/4.0u4/bin)
 else() # Windows or Linux
-  # set(TBB_DIR ${EXTERNAL_LIBRARY_DIR}/tbb40_20111003oss/bin)
 endif()
-# if(BUILD_WINDOWS)
-#   set(CYAPI_DIR ${EXTERNAL_LIBRARY_DIR}/cyapi-1.2)
-# else() # Mac or Linux
-#   set(LIBUSB_DIR ${EXTERNAL_LIBRARY_DIR}/libusb)
-#   set(LIBUVC_DIR ${EXTERNAL_LIBRARY_DIR}/libuvc)
-# endif()
-# set(DRV_INT_DIR ${EXTERNAL_LIBRARY_DIR}/ocu-drv-int-1)
-# set(CURL_DIR ${EXTERNAL_LIBRARY_DIR}/curl-7.32.0)
-# if(NOT USE_PUBLIC_SETTINGS)
-#   set(ANTTWEAKBAR_DIR ${EXTERNAL_LIBRARY_DIR}/AntTweakBar)
-# endif()
-# set(PROTOBUF_DIR ${EXTERNAL_LIBRARY_DIR}/protobuf-2.5.0${ALTERNATE_LIBRARY})
-# set(OPENSSL_DIR ${EXTERNAL_LIBRARY_DIR}/openssl)
 set(WEBSOCKETPP_DIR ${EXTERNAL_LIBRARY_DIR}/websocketpp)
-# if(BUILD_MAC)
-#   set(PYTHON_DIR /Library/Frameworks/Python.framework/Versions/2.7)
-# else()
-#   set(PYTHON_DIR ${EXTERNAL_LIBRARY_DIR}/python2.7)
-# endif()
-# set(JDK_DIR ${EXTERNAL_LIBRARY_DIR}/jdk)
-# if(USE_CG)
-# set(GLEW_DIR ${EXTERNAL_LIBRARY_DIR}/glew-1.9.0)
-# set(CG_DIR ${EXTERNAL_LIBRARY_DIR}/cg-3.1)
-# if(USE_OPENSUBDIV)
-# set(OPENSUBDIV_DIR ${EXTERNAL_LIBRARY_DIR}/opensubdiv-0.1)
-# endif(USE_OPENSUBDIV)
-# endif(USE_CG)
-
-# if(BUILD_MAC)
-#   add_shared_library(${LIBUSB_DIR}/lib usb-1.0.0 "")
-# elseif(BUILD_LINUX)
-#   # special renaming
-#   configure_file(${LIBUSB_DIR}/lib/libusb-1.0.0${SHARED_LIBRARY_SUFFIX}
-#                  ${PROJECT_BINARY_DIR}/bin/libusb-1.0${SHARED_LIBRARY_SUFFIX}.0
-#                  COPYONLY)
-# endif()
-
-# if(NOT USE_PUBLIC_SETTINGS)
-#   if(BUILD_WINDOWS AND BUILD_64_BIT)
-#     add_shared_library(${ANTTWEAKBAR_DIR}/lib AntTweakBar64 .1)
-#   else()
-#     add_shared_library(${ANTTWEAKBAR_DIR}/lib AntTweakBar .1)
-#   endif()
-# endif()
-
-# if(USE_CRASH_REPORTING AND BUILD_MAC)
-#   file(REMOVE_RECURSE ${PROJECT_BINARY_DIR}/Frameworks/Breakpad.framework)
-#   file(COPY ${BREAKPAD_DIR}/lib/Breakpad.framework DESTINATION ${PROJECT_BINARY_DIR}/Frameworks)
-# endif()
 
 include_directories(
   ${PROJECT_BINARY_DIR}
@@ -558,107 +445,13 @@ include_directories(
   ${PROJECT_LIBRARY_PATH}
   ${PROJECT_EXECUTABLE_PATH}
   ${PROJECT_TEST_PATH}
-  # ${CROSSROADS_DIR}/include
   ${Boost_INCLUDE_DIR}
   ${DRV_INT_DIR}/include
-  # ${CURL_DIR}/include
-  # ${PROTOBUF_DIR}/include
-  # ${OPENSSL_DIR}/include
   ${WEBSOCKETPP_DIR}/include
-  # ${JDK_DIR}/include
   ${EIGEN_ROOT_DIR}
-  # ${FREEGLUT_DIR}/include/
   )
 
-# if(NOT USE_PUBLIC_SETTINGS)
-#   include_directories( ${ANTTWEAKBAR_DIR}/include )
-# endif()
-
-# if(BUILD_WINDOWS)
-#   # legacy: on Windows, should change zlib into an "install"
-#   include_directories(${ZLIB_DIR})
-# else()
-#   include_directories(${ZLIB_DIR}/include)
-# endif()
-
-# Python and Java unfortunately have very OS-specific directory structures
-# if(BUILD_WINDOWS)
-#   # Windows sample directory structure: C:\Python27\include, C:\Python27\libs
-#   include_directories(${PYTHON_DIR}/include)
-# else()
-#   # Mac or Linux
-#   include_directories(${PYTHON_DIR}/include/python2.7)
-# endif()
-
-# if(BUILD_WINDOWS)
-#   include_directories(${JDK_DIR}/include/win32)
-# elseif(NOT BUILD_MAC)
-#   include_directories(${JDK_DIR}/include/linux)
-# endif()
-
-# if(BUILD_WINDOWS)
-#   include_directories(${CYAPI_DIR}/inc
-#                       )
-# else()
-#   include_directories(${LIBUSB_DIR}/include
-#                       ${LIBUVC_DIR}/include
-#                       )
-# endif()
-
-# if(USE_CG)
-# if(USE_OPENSUBDIV)
-# include_directories(
-#   ${GLEW_DIR}/include
-#   ${CG_DIR}/include
-#   ${OPENSUBDIV_DIR}/include
-#   )
-# else(USE_OPENSUBDIV)
-# include_directories(
-#   ${GLEW_DIR}/include
-#   ${CG_DIR}/include
-#   )
-# endif(USE_OPENSUBDIV)
-# endif(USE_CG)
-
-# if(USE_CG)
-# set(HAVE_CG_FLAG 1)
-# install(FILES
-#   ${CG_DIR}/bin/cg.dll
-#   ${CG_DIR}/bin/cgGL.dll
-#   DESTINATION ${PROJECT_BINARY_DIR}/bin/Debug
-# )
-# install(FILES
-#   ${CG_DIR}/bin/cg.dll
-#   ${CG_DIR}/bin/cgGL.dll
-#   DESTINATION ${PROJECT_BINARY_DIR}/bin/Release
-# )
-# else(USE_CG)
-# set(HAVE_CG_FLAG 0)
-# endif(USE_CG)
-
 configure_file(.editorconfig ${CMAKE_CURRENT_BINARY_DIR}/.editorconfig COPYONLY)
-
-# option(USE_PANA_CAMERA "USE PANASONIC CAMERA" OFF)
-# if(USE_PANA_CAMERA)
-#   set(USE_PANA_FLAG 1)
-#   if(BUILD_UTIL_APPS)
-#     include_directories(
-#       ${OpenCV_SRC_DIR}/modules/highgui_pana/include
-#       ${OpenCV_SRC_DIR}/modules/highgui_pana/common/highgui_pana
-#     )
-#   endif(BUILD_UTIL_APPS)
-# else(USE_PANA_CAMERA)
-#   set(USE_PANA_FLAG 0)
-# endif(USE_PANA_CAMERA)
-
-# option(USE_PUBLIC_SETTINGS "Enable encryption, time-bomb countdown, and disable various visualizer options" ON)
-# if(USE_PUBLIC_SETTINGS)
-#   set(USE_PUBLIC_FLAG 1)
-#   set(BUILD_VIS_SANDBOX 0)
-# else(USE_PUBLIC_SETTINGS)
-#   set(USE_PUBLIC_FLAG 0)
-#   option(BUILD_VIS_SANDBOX "Build VisSandBox application in the main solution" OFF)
-# endif(USE_PUBLIC_SETTINGS)
 
 if(BUILD_WINDOWS)
   option(UNSIGNED_BINARIES_EXPECTED "Binaries being built are not expected to be digitally signed" OFF)
