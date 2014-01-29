@@ -6,10 +6,8 @@
 
 #if _WIN32
 
-#include "BoundedQueue.h"
-#include "Heartbeat.h"
-#include "TouchManager.h"
-#include "DataStructures/Value.h"
+#include "DataStructures/BoundedQueue.h"
+#include "Utility/Heartbeat.h"
 
 #include <math.h>
 
@@ -24,24 +22,7 @@ using std::max;
 #include <objidl.h>
 #include <GdiPlus.h>
 
-#include "Globals/Interface.h"
-#include "OcuInterfaceCodes.h"
-#include "PreprocFlags.h"
 #include "FocusAppInfo.h"
-#include "OcuHidInstance.h"
-#include "OcuIcon.h"
-#include "OcuImage.h"
-#include "OcuInterface.h"
-#include "hidsdi.h"
-#include "targetver.h"
-
-#include "LPIcon.h"
-#include "LPImage.h"
-#include "LPGeometry.h"
-#include "LPGesture.h"
-#include "LPScreen.h"
-#include "LPVirtualScreen.h"
-#include "TouchManager.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -49,8 +30,9 @@ using std::max;
 #include <string>
 #include <vector>
 
-#include <boost/thread.hpp>
+HMODULE GetHmodUser32(void);
 
 #endif // _WIN32
+
 
 #endif

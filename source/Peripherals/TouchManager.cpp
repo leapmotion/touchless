@@ -2,7 +2,7 @@
 #include "TouchManager.h"
 #include "LPVirtualScreen.h"
 #if _WIN32
-#include "TouchManagerWin7Driver.h"
+//#include "TouchManagerWin7Driver.h"
 #include "TouchManagerWin7Undocumented.h"
 #include "TouchManagerWin8.h"
 #endif
@@ -31,8 +31,8 @@ TouchManager* TouchManager::New(void) {
   if(TouchManagerWin7Undocumented::s_supported)
     return new TouchManagerWin7Undocumented;
 
-  if(TouchManagerWin7Driver::s_supported)
-    return new TouchManagerWin7Driver;
+//  if(TouchManagerWin7Driver::s_supported)
+//    return new TouchManagerWin7Driver;
 #endif
   return nullptr;
 }

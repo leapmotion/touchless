@@ -8,6 +8,8 @@
 #include "Peripherals/LPOverlay.h"
 #elif !defined _WIN32
 #include "LPLinux.h"
+#else
+#include "FocusAppInfo.h"
 #endif
 #include "LPVirtualScreen.h"
 
@@ -17,16 +19,14 @@
 #include "OutputPeripheralGestureOnly.h"
 #include "Touch.h"
 #include "API/LeapPlugin.h"
-//#include "Autowiring/Autowired.h"
 #include "Peripherals/LPGesture.h"
+#include "TouchManager.h"
 #include <boost/circular_buffer.hpp>
 #include <boost/thread/mutex.hpp>
 #include <vector>
 
-class CFocusAppInfo;
 class LPIcon;
 class LPImage;
-class TouchManager;
 
 namespace Leap {
 
@@ -73,7 +73,7 @@ public:
   void emitTouchEvent(const TouchEvent& evt);
   bool touchAvailable() const;
 
-  int DEPRECATED(numTouchScreens() const, "This method is provided directly by the touch manager");
+  int numTouchScreens() const;
 
   bool emitGestureEvents(const Frame& frame, const Frame& sinceFrame);
   void cancelGestureEvents();
@@ -121,9 +121,7 @@ private:
 
   CFocusAppInfo m_appInfo;
   LPVirtualScreen m_virtualScreen;
-#if _WIN32
-  TouchManager m_touchManager;
-#endif
+  TouchManager* m_touchManager;
 
   std::vector<AppInfo>            m_applicationInfos;
   AppInfo                         m_applicationInfoCache;

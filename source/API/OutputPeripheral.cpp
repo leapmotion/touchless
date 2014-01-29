@@ -28,7 +28,8 @@ OutputPeripheralImplementation::OutputPeripheralImplementation() :
   m_numOverlayPoints(0),
   m_numOverlayImages(0),
   m_filledImageIdx(0),
-  m_useCharmHelper(true)
+  m_useCharmHelper(true),
+  m_touchManager(TouchManager::New())
 {
   m_outputMode = OutputPeripheral::OUTPUT_MODE_DISABLED;
   m_lastOutputMode = OutputPeripheral::OUTPUT_MODE_DISABLED;
@@ -47,6 +48,7 @@ OutputPeripheralImplementation::~OutputPeripheralImplementation()
   for (int i = 0; i < m_numOverlayImages; ++i) {
     setIconVisibility(i, false);
   }
+  delete m_touchManager;
 }
 
 void OutputPeripheralImplementation::destroy() {
@@ -539,7 +541,7 @@ void OutputPeripheralImplementation::emitTouchEvent(std::set<Touch>&& touches)
 bool OutputPeripheralImplementation::touchAvailable() const
 {
 #if _WIN32
-  return m_touchManager.IsAutowired();
+  return true;
 #else
   return false;
 #endif
@@ -547,10 +549,7 @@ bool OutputPeripheralImplementation::touchAvailable() const
 
 int OutputPeripheralImplementation::numTouchScreens() const {
 #if _WIN32
-  return
-    m_touchManager ?
-    m_touchManager->numTouchScreens() :
-    0;
+  return m_touchManager->numTouchScreens();
 #else
   return 0;
 #endif

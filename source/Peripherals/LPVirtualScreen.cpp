@@ -9,6 +9,7 @@
 ===================================================================================================================*/
 #include "stdafx.h"
 #include "LPVirtualScreen.h"
+#include "LPIcon.h"
 
 //
 // LPVirtualScreen

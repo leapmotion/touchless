@@ -35,15 +35,6 @@
 #include <cassert>
 #include <climits>
 #include <iomanip>
-#include <deque>
-
-// Some hard-to-compile boost math modules:
-#include <boost/chrono/chrono.hpp>
-#include <boost/math/distributions/fisher_f.hpp>
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <boost/filesystem.hpp>
 
 #endif // _WIN32
 

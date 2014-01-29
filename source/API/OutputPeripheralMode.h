@@ -115,7 +115,7 @@ protected:
   void addTouchPoint(int touchId, float x, float y, bool touching);
   bool touchAvailable() const;
   int numTouchScreens() const;
-  int DEPRECATED(touchVersion() const, "This method is no longer supported");
+  int touchVersion() const;
   bool useProceduralOverlay() const;
   bool useCharmHelper() const;
 #if __APPLE__

@@ -20,7 +20,7 @@
 #include "LPLinux.h"
 #endif
 #include <math.h>
-//static inline float round(float r) { return (r > 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f); }
+inline float round(float r) { return (r > 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f); }
 #endif
 
 //

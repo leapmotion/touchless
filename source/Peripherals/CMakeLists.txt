@@ -28,7 +28,14 @@ SET(Peripherals_SRCS
   TouchManager.cpp
 )
 
-if(BUILD_MAC)
+if(BUILD_WINDOWS)
+  SET(Peripherals_SRCS
+    InterfaceCodes.h
+    FocusAppInfo.h
+    FocusAppInfo.cpp
+    ${Peripherals_SRCS}
+  )
+elseif(BUILD_MAC)
   SET(Peripherals_SRCS
     LPMac.h
     LPMac.mm
@@ -53,21 +60,21 @@ add_library(Peripherals ${Project_Libary_Mode} ${Peripherals_SRCS})
 set_target_properties(Peripherals PROPERTIES STATIC_LIBRARY_FLAGS "${STATIC_LIB_FLAGS}")
 
 if(BUILD_WINDOWS)
-  add_library(ocu-drv-int_debug STATIC IMPORTED)
-  add_library(ocu-drv-int_release STATIC IMPORTED)
-  add_library(hidlib STATIC IMPORTED)
-  if(BUILD_64_BIT)
-    set_property(TARGET ocu-drv-int_debug PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/x64/OcuInterfaced.lib)
-    set_property(TARGET ocu-drv-int_release PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/x64/OcuInterface.lib)
-    set_property(TARGET hidlib PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/x64/hid.lib)
-  else(BUILD_64_BIT)
-    set_property(TARGET ocu-drv-int_debug PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/win32/OcuInterfaced.lib)
-    set_property(TARGET ocu-drv-int_release PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/win32/OcuInterface.lib)
-    set_property(TARGET hidlib PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/win32/hid.lib)
-  endif(BUILD_64_BIT)
-  target_link_libraries(Peripherals GdiPlus.lib SetupAPI.Lib ShLwApi.Lib Psapi.Lib hidlib)
-  target_link_libraries(Peripherals debug ocu-drv-int_debug)
-  target_link_libraries(Peripherals optimized ocu-drv-int_release)
+  # add_library(ocu-drv-int_debug STATIC IMPORTED)
+  # add_library(ocu-drv-int_release STATIC IMPORTED)
+  # add_library(hidlib STATIC IMPORTED)
+  # if(BUILD_64_BIT)
+  #   set_property(TARGET ocu-drv-int_debug PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/x64/OcuInterfaced.lib)
+  #   set_property(TARGET ocu-drv-int_release PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/x64/OcuInterface.lib)
+  #   set_property(TARGET hidlib PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/x64/hid.lib)
+  # else(BUILD_64_BIT)
+  #   set_property(TARGET ocu-drv-int_debug PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/win32/OcuInterfaced.lib)
+  #   set_property(TARGET ocu-drv-int_release PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/win32/OcuInterface.lib)
+  #   set_property(TARGET hidlib PROPERTY IMPORTED_LOCATION ${DRV_INT_DIR}/lib/win32/hid.lib)
+  # endif(BUILD_64_BIT)
+  target_link_libraries(Peripherals GdiPlus.lib SetupAPI.Lib ShLwApi.Lib Psapi.Lib)
+  # target_link_libraries(Peripherals debug ocu-drv-int_debug)
+  # target_link_libraries(Peripherals optimized ocu-drv-int_release)
 elseif(BUILD_MAC)
   target_link_libraries(Peripherals ${APPKIT_FRAMEWORK} ${FOUNDATION_FRAMEWORK} ${QUARTZ_CORE_FRAMEWORK} ${OPENGL_FRAMEWORK} ${CARBON_FRAMEWORK})
 elseif(BUILD_LINUX)
