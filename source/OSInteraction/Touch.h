@@ -7,7 +7,6 @@
 class TouchManager;
 
 namespace Leap {
-
 class Touch {
 public:
   Touch(unsigned int id, double x = 0, double y = 0, bool touching = true, uint32_t orientation = 90):
@@ -42,6 +41,27 @@ private:
   double m_y;
   uint32_t m_orientation;
   bool m_touching;
+};
+
+//
+// Public Interface
+//
+class TouchEvent:
+  public std::set<Touch>
+{
+public:
+  void clearTouchPoints(void) {
+    clear();
+  }
+
+  void removeTouchPoint(int touchId) {
+    Touch touch(touchId);
+    erase(touch);
+  }
+
+  void addTouchPoint(int touchId, float x, float y, bool touching) {
+    insert(Touch(touchId, x, y, touching));
+  }
 };
 
 }

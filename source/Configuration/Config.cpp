@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "common.h"
 #include "Config.h"
-#include "API/LeapPluginPlus.h"
+#include "GestureInteractionManager.h"
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
@@ -131,7 +131,7 @@ void Config::InitializeDefaults()
 
   CreateAttribute("use_robust_tips",                true, WRITE_NOPUBLIC);
 
-  CreateAttribute("os_interaction_mode", Leap::OutputPeripheral::OUTPUT_MODE_DISABLED, WRITE_ALWAYS);
+  CreateAttribute("os_interaction_mode", Touchless::GestureInteractionMode::OUTPUT_MODE_DISABLED, WRITE_ALWAYS);
   CreateAttribute("os_interaction_multi_monitor",  false, WRITE_ALWAYS);
 
   CreateAttribute("interaction_box_auto",          false, WRITE_ALWAYS);

@@ -11,9 +11,9 @@
 #if !defined(__OutputPeripheralGestureOnly_h__)
 #define __OutputPeripheralGestureOnly_h__
 
-#include "OutputPeripheralMode.h"
+#include "GestureInteractionManager.h"
 
-namespace Leap {
+namespace Touchless {
 
 /*
 The design criteria of gesture-only mode are to provide gesture-recognition (e.g. multiple finger
@@ -29,9 +29,9 @@ Perhaps cursor control and hover-to-click could also be added, though this would
 diverge slightly from "gesture only".
 */
 
-class OutputPeripheralGestureOnly : public OutputPeripheralMode {
+class OutputPeripheralGestureOnly : public GestureInteractionManager {
 public:
-  OutputPeripheralGestureOnly(OutputPeripheralImplementation& outputPeripheral);
+  OutputPeripheralGestureOnly(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
   virtual ~OutputPeripheralGestureOnly();
   virtual void stopActiveEvents();
 

@@ -9,15 +9,15 @@
 ===================================================================================================================*/
 
 #include "PluginImplementation.h"
-
-namespace Leap {
-
 //
-// PluginPlus
+// namespace Leap {
 //
-
-PluginPlus::PluginPlus(const Plugin& plugin) : Plugin(plugin) {}
-PluginPlus::PluginPlus() {}
-OutputPeripheral& PluginPlus::outputPeripheral() const { return get<PluginImplementation>()->outputPeripheral(); }
-
-}
+// //
+// // PluginPlus
+// //
+//
+// PluginPlus::PluginPlus(const Plugin& plugin) : Plugin(plugin) {}
+// PluginPlus::PluginPlus() {}
+// OutputPeripheral& PluginPlus::outputPeripheral() const { return get<PluginImplementation>()->outputPeripheral(); }
+//
+// }

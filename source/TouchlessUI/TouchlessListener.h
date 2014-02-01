@@ -3,8 +3,14 @@
 #define __TouchlessListener_h__
 
 #include "Leap.h"
-#include "LeapPluginPlus.h"
-#include "OutputPeripheralImplementation.h"
+#include "LPVirtualScreen.h"
+#include "OSInteraction.h"
+#include "Overlay.h"
+#include "GestureInteractionManager.h"
+#include "GestureInteractionManager.h"
+#include "OutputPeripheralBasic.h"
+#include "OutputPeripheralFingerMouse.h"
+#include "OutputPeripheralGestureOnly.h"
 
 #include <qobject.h>
 
@@ -27,8 +33,8 @@ public:
   virtual void onFocusGained(const Leap::Controller& leap) override;
   virtual void onFocusLost(const Leap::Controller& leap) override;
 
-  Leap::OutputPeripheral::OutputMode getDesiredMode() const;
-  void setDesiredMode(Leap::OutputPeripheral::OutputMode mode);
+  Touchless::GestureInteractionMode getDesiredMode() const;
+  void setDesiredMode(Touchless::GestureInteractionMode mode);
 
   bool getUseMultipleMonitors() const;
   void setUseMultipleMonitors(bool use);
@@ -44,14 +50,18 @@ private:
 
   void updateDefaultScreen();
 
-  Leap::OutputPeripheral m_outputPeripheral;
   Leap::Frame m_lastFrame;
   bool m_updateSettings;
   bool m_useMultipleMonitors;
-  Leap::OutputPeripheral::OutputMode m_desiredMode;
   boost::condition_variable m_condVar;
   boost::mutex m_mutex;
   bool m_ready;
+
+  LPVirtualScreen                       m_virtualScreen;
+  Touchless::OSInteractionDriver       *m_osInteractionDriver;
+  Touchless::OverlayDriver             *m_overlayDriver;
+  Touchless::GestureInteractionMode     m_desiredMode;
+  Touchless::GestureInteractionManager *m_interactionManager;
 
 };
 

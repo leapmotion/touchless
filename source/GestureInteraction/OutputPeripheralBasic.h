@@ -11,14 +11,14 @@
 #if !defined(__OutputPeripheralBasic_h__)
 #define __OutputPeripheralBasic_h__
 
-#include "OutputPeripheralMode.h"
+#include "GestureInteractionManager.h"
 
-namespace Leap {
+namespace Touchless {
 
-class OutputPeripheralBasic : public OutputPeripheralMode {
+class OutputPeripheralBasic : public GestureInteractionManager {
 // This class is used for both Intro and Basic modes
 public:
-  OutputPeripheralBasic(OutputPeripheralImplementation& outputPeripheral);
+  OutputPeripheralBasic(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
   virtual ~OutputPeripheralBasic();
   virtual void stopActiveEvents();
 

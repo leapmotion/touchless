@@ -5,11 +5,14 @@
 #include "OutputPeripheralMode.h"
 #include "Leap.h"
 
-class TouchPeripheral : public Leap::OutputPeripheralMode {
+namespace Touchless
+{
+
+class TouchPeripheral : public GestureInteractionManager {
 
 public:
 
-  TouchPeripheral(Leap::OutputPeripheralImplementation& outputPeripheral);
+  TouchPeripheral(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
 
 protected:
 
@@ -22,5 +25,7 @@ private:
   int m_lastNumIcons;
 
 };
+
+}
 
 #endif

@@ -14,7 +14,7 @@
 #include <sys/sysctl.h>
 #endif
 
-namespace Leap {
+namespace Touchless {
 
 float OutputPeripheralGestureOnly::ZoomScaleFactor = 1.5;
 float OutputPeripheralGestureOnly::TranslationScaleFactor = 1.5;
@@ -23,9 +23,9 @@ const float OutputPeripheralGestureOnly::BUCKET_THRESHOLD = 0.75f;
 const float OutputPeripheralGestureOnly::BUCKET_THRESHOLD_LOW = 0.50f;
 
 
-OutputPeripheralGestureOnly::OutputPeripheralGestureOnly(OutputPeripheralImplementation& outputPeripheral)
+OutputPeripheralGestureOnly::OutputPeripheralGestureOnly(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
   :
-  OutputPeripheralMode(outputPeripheral),
+  GestureInteractionManager(osInteractionDriver, overlayDriver),
   m_noTouching(true),
   m_justScrolled(false),
   m_timedCountHistory(500*MILLISECONDS),

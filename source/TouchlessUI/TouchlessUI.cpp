@@ -7,7 +7,8 @@
 
 #include "TouchlessUI.h"
 #include "Utility/FileSystemUtil.h"
-#include "OutputPeripheralImplementation.h"
+
+#include "GestureInteractionManager.h"
 
 #include <qapplication.h>
 #include <qmenu.h>
@@ -196,14 +197,14 @@ void TouchlessUI::connectChangedSlot(bool connected, int mode, bool useMultiMoni
 #endif
   m_multiMonitorAction->setEnabled(connected);
 
-  Leap::OutputPeripheral::OutputMode outputMode = static_cast<enum Leap::OutputPeripheral::OutputMode>(mode);
+  Touchless::GestureInteractionMode outputMode = static_cast<enum Touchless::GestureInteractionMode>(mode);
 
   QAction* action = 0;
   switch (outputMode) {
-  case Leap::OutputPeripheral::OUTPUT_MODE_DISABLED: action = m_disabledAction; break;
-  case Leap::OutputPeripheral::OUTPUT_MODE_INTRO:    action = m_introAction;    break;
-  case Leap::OutputPeripheral::OUTPUT_MODE_BASIC:    action = m_basicAction;    break;
-  case Leap::OutputPeripheral::OUTPUT_MODE_ADVANCED: action = m_advancedAction; break;
+  case Touchless::GestureInteractionMode::OUTPUT_MODE_DISABLED: action = m_disabledAction; break;
+  case Touchless::GestureInteractionMode::OUTPUT_MODE_INTRO:    action = m_introAction;    break;
+  case Touchless::GestureInteractionMode::OUTPUT_MODE_BASIC:    action = m_basicAction;    break;
+  case Touchless::GestureInteractionMode::OUTPUT_MODE_ADVANCED: action = m_advancedAction; break;
   default: break;
   }
 

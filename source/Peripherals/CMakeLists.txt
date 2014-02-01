@@ -22,9 +22,9 @@ SET(Peripherals_SRCS
   LPScreen.cpp
   LPVirtualScreen.h
   LPVirtualScreen.cpp
-  Touch.h
-  TouchManager.h
-  TouchManager.cpp
+  # Touch.h
+  # TouchManager.h
+  # TouchManager.cpp
 )
 
 if(BUILD_WINDOWS)
@@ -32,13 +32,13 @@ if(BUILD_WINDOWS)
     InterfaceCodes.h
     FocusAppInfo.h
     FocusAppInfo.cpp
-    GdiPlusInitializer.h
-    GdiPlusInitializer.cpp
-    TouchManagerWin7Undocumented.h
-    TouchManagerWin7Undocumented.cpp
-    TouchManagerWin8.h
-    TouchManagerWin8.cpp
-    Win8TouchStructures.h
+    # GdiPlusInitializer.h
+    # GdiPlusInitializer.cpp
+    # TouchManagerWin7Undocumented.h
+    # TouchManagerWin7Undocumented.cpp
+    # TouchManagerWin8.h
+    # TouchManagerWin8.cpp
+    # Win8TouchStructures.h
     ${Peripherals_SRCS}
   )
 elseif(BUILD_MAC)

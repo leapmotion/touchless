@@ -14,7 +14,7 @@
 #include <sys/sysctl.h>
 #endif
 
-namespace Leap {
+namespace Touchless {
 
 const bool OutputPeripheralFingerMouse::UseAbsolutePositioning = true;
 const bool OutputPeripheralFingerMouse::UseAcceleratedScrolling = false;//true;
@@ -44,9 +44,9 @@ const int64_t OutputPeripheralFingerMouse::HoverDurationToActivateDrag = 500*Out
 //
 // The states correspond roughly exactly with the state of interaction.
 
-OutputPeripheralFingerMouse::OutputPeripheralFingerMouse(OutputPeripheralImplementation& outputPeripheral)
+OutputPeripheralFingerMouse::OutputPeripheralFingerMouse(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
   :
-  OutputPeripheralMode(outputPeripheral),
+  GestureInteractionManager(osInteractionDriver, overlayDriver),
   m_drawOverlays(true),
   m_noTouching(true),
   m_clickDuration(0),
@@ -348,7 +348,7 @@ void OutputPeripheralFingerMouse::setDeltaTrackedAbsoluteCursorPositionHand (con
   }
   // use the hand to update the PositionalDeltaTracker
   m_positionalDeltaTracker.setPositionToStabilizedPositionOf(hand);
-  OutputPeripheralMode::setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
+  GestureInteractionManager::setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
 }
 
 void OutputPeripheralFingerMouse::setDeltaTrackedAbsoluteCursorPositionPointable (const Pointable &pointable, Vector *calculatedScreenPosition) {
@@ -357,7 +357,7 @@ void OutputPeripheralFingerMouse::setDeltaTrackedAbsoluteCursorPositionPointable
   }
   // use the hand to update the PositionalDeltaTracker
   m_positionalDeltaTracker.setPositionToStabilizedPositionOf(pointable); // false indicates it is not a hand
-  OutputPeripheralMode::setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
+  GestureInteractionManager::setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
 }
 
 void OutputPeripheralFingerMouse::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
@@ -804,7 +804,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Rotating (StateMach
       m_drawOverlays = true;
       // generate begin-rotate event
       beginGesture(LPGesture::GestureRotate);
-      applyRotation(-RAD_TO_DEG*m_currentFrame.rotationAngle(m_gestureStart, Vector::zAxis()));
+      applyRotation(-Leap::RAD_TO_DEG*m_currentFrame.rotationAngle(m_gestureStart, Vector::zAxis()));
       return true;
 
     case SM_EXIT:
@@ -840,7 +840,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Rotating (StateMach
       }
 
       // apply rotation
-      applyRotation(-RAD_TO_DEG*m_currentFrame.rotationAngle(m_sinceFrame, Vector::zAxis()));
+      applyRotation(-Leap::RAD_TO_DEG*m_currentFrame.rotationAngle(m_sinceFrame, Vector::zAxis()));
 
       return true;
   }

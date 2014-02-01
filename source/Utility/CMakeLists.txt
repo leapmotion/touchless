@@ -8,6 +8,8 @@ SET(Utility_SRCS
   Heartbeat.h
   Heartbeat.cpp
   StateMachine.h
+  PositionalDeltaTracker.h
+  PositionalDeltaTracker.cpp
 )
 
 ADD_MSVC_PRECOMPILED_HEADER("stdafx.h" "stdafx.cpp" Utility_SRCS)

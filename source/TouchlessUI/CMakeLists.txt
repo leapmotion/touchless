@@ -2,14 +2,20 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/application
   ${PROJECT_SOURCE_DIR}/source
   ${PROJECT_SOURCE_DIR}/source/API
+  ${PROJECT_SOURCE_DIR}/source/Utility
+  ${PROJECT_SOURCE_DIR}/source/FilterMethods
   ${PROJECT_SOURCE_DIR}/source/DataStructures
   ${PROJECT_SOURCE_DIR}/source/Peripherals
+  ${PROJECT_SOURCE_DIR}/source/OSInteraction
+  ${PROJECT_SOURCE_DIR}/source/Overlay
+  ${PROJECT_SOURCE_DIR}/source/GestureInteraction
   ${LEAP_INCLUDE_DIR}
   )
 
 file(COPY touchless-icon.ico DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 if(USE_QT)
+  include_directories(${QT_QTOPENGL_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_HEADERS_DIR})
   set(QT_USE_QTNETWORK TRUE)
   set(QT_USE_QTWEBKIT TRUE)
   set(QT_USE_QTSCRIPT TRUE)
@@ -32,5 +38,5 @@ if(USE_QT)
     add_executable(Touchless ${Touchless_HEADERS} ${Touchless_HEADERS_MOC} ${Touchless_SOURCES})
   endif()
   target_strip(Touchless)
-  target_link_libraries(Touchless LeapPluginPlus Peripherals Utility ${LEAP_LIBRARIES} ${QT_LIBRARIES} )
+  target_link_libraries(Touchless Peripherals Utility Overlay OSInteraction GestureInteraction ${LEAP_LIBRARIES} ${QT_LIBRARIES} )
 endif()

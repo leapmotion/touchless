@@ -1,34 +1,46 @@
-#if !defined(__OutputPeripheralMode_h__)
-#define __OutputPeripheralMode_h__
+#if !defined(__GestureInteractionManager_h__)
+#define __GestureInteractionManager_h__
 
 #include "common.h"
 
-#if LEAP_API_INTERNAL
-#include "Leap/LeapInternal.h"
-#else
 #include "Leap.h"
-#endif
+
+#include "OSInteraction.h"
+#include "Overlay.h"
 
 #include "DataStructures/TimedHistory.h"
 #include "PositionalDeltaTracker.h"
 #include "FilterMethods/CategoricalFilter.h"
 #include "FilterMethods/RollingMean.h"
 #include "Utility/StateMachine.h"
-#include "LeapPluginPlus.h"
 
 #include <vector>
 
 #define MAX_POINTABLES 10
 
-namespace Leap {
+namespace Touchless {
+using Leap::Frame;
+using Leap::Pointable;
+using Leap::PointableList;
+using Leap::Hand;
+using Leap::Vector;
+using Leap::InteractionBox;
+using Leap::TouchEvent;
+
+class OSInteractionDriver;
+class OverlayDriver;
+
+enum GestureInteractionMode { OUTPUT_MODE_DISABLED = 0, OUTPUT_MODE_INTRO, OUTPUT_MODE_BASIC, OUTPUT_MODE_ADVANCED };
 
 class OutputPeripheralImplementation;
 
-class OutputPeripheralMode {
+class GestureInteractionManager {
 public:
 
-  OutputPeripheralMode(OutputPeripheralImplementation& outputPeripheral);
-  virtual ~OutputPeripheralMode();
+  GestureInteractionManager(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
+  virtual ~GestureInteractionManager();
+
+  static GestureInteractionManager* New(Touchless::GestureInteractionMode desiredMode, OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
 
   void processFrame (const Frame& frame, const Frame& sinceFrame);
 
@@ -149,13 +161,14 @@ protected:
   InteractionBox                              m_interactionBox;
   int32_t                                     m_foremostPointableId;
   int32_t                                     m_favoritePointableId;
-  OutputPeripheralImplementation             &m_outputPeripheral;
-  PositionalDeltaTracker                      m_positionalDeltaTracker;
+  OSInteractionDriver                        &m_osInteractionDriver;
+  OverlayDriver                              &m_overlayDriver;
+  Leap::PositionalDeltaTracker                m_positionalDeltaTracker;
   TouchEvent                                  m_touchEvent;
 
 public:
   // Accessor methods:
-  PositionalDeltaTracker& positionalDeltaTracker(void) {return m_positionalDeltaTracker;}
+  Leap::PositionalDeltaTracker& positionalDeltaTracker(void) {return m_positionalDeltaTracker;}
   const InteractionBox& interactionBox() const {return m_interactionBox;}
 
   /// <summary>
@@ -173,4 +186,4 @@ public:
 
 }
 
-#endif // __OutputPeripheralMode_h__
+#endif // __GestureInteractionManager_h__

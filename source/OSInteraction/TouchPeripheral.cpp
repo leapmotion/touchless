@@ -2,8 +2,11 @@
 
 using namespace Leap;
 
-TouchPeripheral::TouchPeripheral(OutputPeripheralImplementation& outputPeripheral) :
-  OutputPeripheralMode(outputPeripheral),
+namespace Touchless
+{
+
+TouchPeripheral::TouchPeripheral(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver) :
+  GestureInteractionManager(osInteractionDriver, overlayDriver),
   m_charmsMode(-1),
   m_lastNumIcons(0)
 {
@@ -69,4 +72,6 @@ void TouchPeripheral::identifyRelevantPointables(const Leap::PointableList &poin
                                   return pointable.touchZone() == Pointable::ZONE_NONE || pointable.direction().z > 0;
                                 });
   relevantPointables.erase(new_end, relevantPointables.end());
+}
+
 }

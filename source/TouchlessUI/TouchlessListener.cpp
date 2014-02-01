@@ -5,8 +5,26 @@
 
 #include <fstream>
 
+Touchless::GestureInteractionManager* Touchless::GestureInteractionManager::New(Touchless::GestureInteractionMode desiredMode, Touchless::OSInteractionDriver &osInteractionDriver, Touchless::OverlayDriver &overlayDriver)
+{
+  switch(desiredMode) {
+    case Touchless::GestureInteractionMode::OUTPUT_MODE_INTRO:
+      return new Touchless::OutputPeripheralGestureOnly(osInteractionDriver, overlayDriver);
+    case Touchless::GestureInteractionMode::OUTPUT_MODE_BASIC:
+      Touchless::OutputPeripheralBasic::SetBasicMode();
+      return new Touchless::OutputPeripheralBasic(osInteractionDriver, overlayDriver);
+    case Touchless::GestureInteractionMode::OUTPUT_MODE_ADVANCED:
+#if _WIN32
+      return new Touchless::TouchPeripheral(osInteractionDriver, overlayDriver);
+#else
+      return new Touchless::OutputPeripheralFingerMouse(osInteractionDriver, overlayDriver);
+#endif
+    default:
+      return nullptr;
+  }
+}
+
 TouchlessListener::TouchlessListener()
-  : m_outputPeripheral(new Leap::OutputPeripheralImplementation())
 {
   Config::InitializeDefaults();
   std::string configPath = FileSystemUtil::GetUserPath("touchless-config.json");
@@ -21,17 +39,24 @@ TouchlessListener::TouchlessListener()
   }
 
   Config::LoadFromFile(configPath, false);
-  m_outputPeripheral.initializeTouchAndOverlay();
-  m_desiredMode = Leap::OutputPeripheral::OUTPUT_MODE_DISABLED;
+  m_desiredMode = Touchless::GestureInteractionMode::OUTPUT_MODE_DISABLED;
   m_updateSettings = false;
   m_useMultipleMonitors = false;
   m_ready = false;
+  m_osInteractionDriver = Touchless::OSInteractionDriver::New(m_virtualScreen);
+  m_overlayDriver       = Touchless::OverlayDriver::New(m_virtualScreen);
+  m_interactionManager  = Touchless::GestureInteractionManager::New(m_desiredMode, *m_osInteractionDriver, *m_overlayDriver);
+
+  m_osInteractionDriver->initializeTouch();
+  m_overlayDriver->initializeOverlay();
+  
   updateDefaultScreen();
-  m_outputPeripheral.setOutputMode(m_desiredMode);
 }
 
 TouchlessListener::~TouchlessListener() {
-  m_outputPeripheral.destroy();
+  delete m_osInteractionDriver;
+  delete m_overlayDriver;
+  delete m_interactionManager;
 }
 
 void TouchlessListener::onInit(const Leap::Controller& leap) { }
@@ -39,9 +64,9 @@ void TouchlessListener::onInit(const Leap::Controller& leap) { }
 void TouchlessListener::onConnect(const Leap::Controller& leap) {
   leap.setPolicyFlags(static_cast<Leap::Controller::PolicyFlag>((0xDA << 24) | // Secret sauce
                       Leap::Controller::POLICY_BACKGROUND_FRAMES));
-  int tempMode = static_cast<int>(Leap::OutputPeripheral::OUTPUT_MODE_DISABLED);
+  int tempMode = static_cast<int>(Touchless::GestureInteractionMode::OUTPUT_MODE_DISABLED);
   Config::GetAttribute<int>("os_interaction_mode", tempMode);
-  m_desiredMode = static_cast<enum Leap::OutputPeripheral::OutputMode>(tempMode);
+  m_desiredMode = static_cast<enum Touchless::GestureInteractionMode>(tempMode);
   Config::GetAttribute<bool>("os_interaction_multi_monitor", m_useMultipleMonitors);
   boost::unique_lock<boost::mutex> lock(m_mutex);
   if (!m_ready) {
@@ -51,13 +76,13 @@ void TouchlessListener::onConnect(const Leap::Controller& leap) {
 }
 
 void TouchlessListener::onDisconnect(const Leap::Controller& leap) {
-  m_outputPeripheral.cancelGestureEvents();
+  m_osInteractionDriver->cancelGestureEvents();
   m_lastFrame = Leap::Frame();
   Q_EMIT(connectChangedSignal(false, static_cast<int>(m_desiredMode), m_useMultipleMonitors));
 }
 
 void TouchlessListener::onExit(const Leap::Controller& leap) {
-  m_outputPeripheral.cancelGestureEvents();
+  m_osInteractionDriver->cancelGestureEvents();
   Q_EMIT(connectChangedSignal(false, static_cast<int>(m_desiredMode), m_useMultipleMonitors));
 }
 
@@ -70,7 +95,9 @@ void TouchlessListener::onFrame(const Leap::Controller& leap) {
     Config::Save();
     m_updateSettings = false;
   }
-  m_outputPeripheral.emitGestureEvents(frame, m_lastFrame);
+  if (m_interactionManager) {
+    m_interactionManager->processFrame(frame, m_lastFrame);
+  }
   m_lastFrame = frame;
 }
 
@@ -79,18 +106,21 @@ void TouchlessListener::onFocusGained(const Leap::Controller& leap) {
 }
 
 void TouchlessListener::onFocusLost(const Leap::Controller& leap) {
-  m_outputPeripheral.cancelGestureEvents();
+  m_osInteractionDriver->cancelGestureEvents();
   m_lastFrame = Leap::Frame();
 }
 
-Leap::OutputPeripheral::OutputMode TouchlessListener::getDesiredMode() const {
+Touchless::GestureInteractionMode TouchlessListener::getDesiredMode() const {
   return m_desiredMode;
 }
 
-void TouchlessListener::setDesiredMode(Leap::OutputPeripheral::OutputMode mode) {
+void TouchlessListener::setDesiredMode(Touchless::GestureInteractionMode mode) {
   m_desiredMode = mode;
   m_updateSettings = true;
-  m_outputPeripheral.setOutputMode(m_desiredMode);
+
+  delete m_interactionManager;
+  m_osInteractionDriver->cancelGestureEvents();
+  m_interactionManager  = Touchless::GestureInteractionManager::New(m_desiredMode, *m_osInteractionDriver, *m_overlayDriver);
 }
 
 bool TouchlessListener::getUseMultipleMonitors() const {
@@ -104,7 +134,8 @@ void TouchlessListener::setUseMultipleMonitors(bool use) {
 }
 
 int TouchlessListener::supportedTouchVersion() const {
-  return m_outputPeripheral.touchVersion();
+//  return m_osInteractionDriver->touchVersion();
+  return 0;
 }
 
 void TouchlessListener::setReady() {
@@ -115,9 +146,9 @@ void TouchlessListener::setReady() {
 
 void TouchlessListener::updateDefaultScreen() {
   if (m_useMultipleMonitors) {
-    const int numScreens = m_outputPeripheral.numTouchScreens();
-    m_outputPeripheral.useDefaultScreen(numScreens == 1);
+    const int numScreens = m_osInteractionDriver->numTouchScreens();
+    m_osInteractionDriver->useDefaultScreen(numScreens == 1);
   } else {
-    m_outputPeripheral.useDefaultScreen(true);
+    m_osInteractionDriver->useDefaultScreen(true);
   }
 }

@@ -97,19 +97,19 @@ bool TouchlessApp::IsAlreadyRunning() const {
 }
 
 void TouchlessApp::disabledModeSlot() {
-  m_listener->setDesiredMode(Leap::OutputPeripheral::OUTPUT_MODE_DISABLED);
+  m_listener->setDesiredMode(Touchless::GestureInteractionMode::OUTPUT_MODE_DISABLED);
 }
 
 void TouchlessApp::introModeSlot() {
-  m_listener->setDesiredMode(Leap::OutputPeripheral::OUTPUT_MODE_INTRO);
+  m_listener->setDesiredMode(Touchless::GestureInteractionMode::OUTPUT_MODE_INTRO);
 }
 
 void TouchlessApp::basicModeSlot() {
-  m_listener->setDesiredMode(Leap::OutputPeripheral::OUTPUT_MODE_BASIC);
+  m_listener->setDesiredMode(Touchless::GestureInteractionMode::OUTPUT_MODE_BASIC);
 }
 
 void TouchlessApp::advancedModeSlot() {
-  m_listener->setDesiredMode(Leap::OutputPeripheral::OUTPUT_MODE_ADVANCED);
+  m_listener->setDesiredMode(Touchless::GestureInteractionMode::OUTPUT_MODE_ADVANCED);
 }
 
 void TouchlessApp::multiMonitorSlot(bool use) {

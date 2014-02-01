@@ -1,21 +1,23 @@
 #include "stdafx.h"
-#include "OutputPeripheralImplementation.h"
-#include "OutputPeripheralMode.h"
+#include "GestureInteractionManager.h"
+#include "OSInteraction.h"
+#include "Overlay.h"
 
 #if __APPLE__
 #include <sys/sysctl.h>
 #endif
 
-namespace Leap {
+namespace Touchless {
 
 // for self-documentation of time-based constants
-const int64_t OutputPeripheralMode::SECONDS = 1000000;
-const int64_t OutputPeripheralMode::MILLISECONDS = 1000;
-const int64_t OutputPeripheralMode::MICROSECONDS = 1;
+const int64_t GestureInteractionManager::SECONDS = 1000000;
+const int64_t GestureInteractionManager::MILLISECONDS = 1000;
+const int64_t GestureInteractionManager::MICROSECONDS = 1;
 
-OutputPeripheralMode::OutputPeripheralMode(OutputPeripheralImplementation& outputPeripheral)
+GestureInteractionManager::GestureInteractionManager(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
   :
-  m_outputPeripheral(outputPeripheral),
+  m_osInteractionDriver(osInteractionDriver),
+  m_overlayDriver(overlayDriver),
   m_numOverlayImages(32),
   m_timedFrameHistory(500*MILLISECONDS),
   m_foremostPointableId(-1),
@@ -56,19 +58,19 @@ OutputPeripheralMode::OutputPeripheralMode(OutputPeripheralImplementation& outpu
   }
 }
 
-OutputPeripheralMode::~OutputPeripheralMode() {
+GestureInteractionManager::~GestureInteractionManager() {
 #if __APPLE__
-  m_outputPeripheral.flushOverlay();
+  m_overlayDriver.flushOverlay();
 #endif
   delete m_filteredPointableCount;
   delete m_filteredRTS;
 }
 
-OutputPeripheralImplementation* OutputPeripheralImplementation::New(void) {
-  return new OutputPeripheralImplementation;
-}
+//OutputPeripheralImplementation* OutputPeripheralImplementation::New(void) {
+//  return new OutputPeripheralImplementation;
+//}
 
-void OutputPeripheralMode::processFrame (const Frame& frame, const Frame& sinceFrame) {
+void GestureInteractionManager::processFrame (const Frame& frame, const Frame& sinceFrame) {
   m_timedFrameHistory.addFrame(frame.timestamp(), frame);
   m_interactionBox = frame.interactionBox();
   m_currentFrame = frame;
@@ -93,7 +95,7 @@ void OutputPeripheralMode::processFrame (const Frame& frame, const Frame& sinceF
   processFrameInternal();
 }
 
-void OutputPeripheralMode::identifyRelevantPointables (const PointableList &pointables, std::vector<Pointable> &relevantPointables) const {
+void GestureInteractionManager::identifyRelevantPointables (const PointableList &pointables, std::vector<Pointable> &relevantPointables) const {
   // Remove all ZONE_NONE pointables, backwards pointables,
   // and compare each pointable to the foremost pointable with the same hand id with a linear discriminant.
   std::map<int32_t, int32_t> best_pointables; //map hand id to pointable id
@@ -127,7 +129,7 @@ void OutputPeripheralMode::identifyRelevantPointables (const PointableList &poin
   relevantPointables.erase(new_end, relevantPointables.end());
 }
 
-Pointable::Zone OutputPeripheralMode::identifyCollectivePointableZone (const std::vector<Pointable> &pointables) const {
+Pointable::Zone GestureInteractionManager::identifyCollectivePointableZone (const std::vector<Pointable> &pointables) const {
   // NOTE: this is the implementation from finger mouse, which will be used until something different is needed.
 
   // if there are no pointables, return ZONE_NONE.
@@ -160,20 +162,20 @@ Pointable::Zone OutputPeripheralMode::identifyCollectivePointableZone (const std
   return Pointable::ZONE_HOVERING;
 }
 
-void OutputPeripheralMode::DrawOverlays() {
+void GestureInteractionManager::DrawOverlays() {
   // NOTE: this is the implementation from finger mouse, which will be used until something different is needed.
 
   Vector screenPosition, clampVec;
   for (int i = 0; i < m_numOverlayImages; ++i) {
     if (i < static_cast<int>(m_relevantPointables.size()) &&
-        m_outputPeripheral.normalizedToScreen(m_interactionBox.normalizePoint(m_relevantPointables[i].stabilizedTipPosition()),
+        m_overlayDriver.normalizedToScreen(m_interactionBox.normalizePoint(m_relevantPointables[i].stabilizedTipPosition()),
                                               screenPosition,
                                               clampVec)) {
       float clampDist = clampVec.magnitude();
-      if (m_outputPeripheral.useProceduralOverlay()) {
+      if (m_overlayDriver.useProceduralOverlay()) {
         float touchDistance = m_relevantPointables[i].touchDistance();
-        double radius = m_outputPeripheral.touchDistanceToRadius(touchDistance);
-        m_outputPeripheral.drawRasterIcon(i,
+        double radius = m_overlayDriver.touchDistanceToRadius(touchDistance);
+        m_overlayDriver.drawRasterIcon(i,
                                           screenPosition.x,
                                           screenPosition.y,
                                           true,
@@ -183,23 +185,23 @@ void OutputPeripheralMode::DrawOverlays() {
                                           clampDist,
                                           alphaFromTimeVisible(m_relevantPointables[i].timeVisible()));
       } else {
-        int imageIndex = m_outputPeripheral.findImageIndex(m_relevantPointables[i].touchDistance(), 0, 1);
-        m_outputPeripheral.drawImageIcon(i, imageIndex, screenPosition.x, screenPosition.y, true);
+        int imageIndex = m_overlayDriver.findImageIndex(m_relevantPointables[i].touchDistance(), 0, 1);
+        m_overlayDriver.drawImageIcon(i, imageIndex, screenPosition.x, screenPosition.y, true);
       }
     } else {
-      m_outputPeripheral.setIconVisibility(i, false);
+      m_overlayDriver.setIconVisibility(i, false);
     }
   }
 #if __APPLE__
-  m_outputPeripheral.flushOverlay();
+  m_overlayDriver.flushOverlay();
 #endif
 }
 
-int32_t OutputPeripheralMode::foremostPointableId () const {
+int32_t GestureInteractionManager::foremostPointableId () const {
   return m_foremostPointableId;
 }
 
-int32_t OutputPeripheralMode::foremostPointableIdOfHand(const Hand &hand) const {
+int32_t GestureInteractionManager::foremostPointableIdOfHand(const Hand &hand) const {
   int32_t id;
   std::vector<Pointable> pointableVector;
   PointableList pointables = hand.pointables();
@@ -210,11 +212,11 @@ int32_t OutputPeripheralMode::foremostPointableIdOfHand(const Hand &hand) const 
   return id;
 }
 
-void OutputPeripheralMode::resetFavoritePointableId() {
+void GestureInteractionManager::resetFavoritePointableId() {
   m_favoritePointableId = foremostPointableId();
 }
 
-int32_t OutputPeripheralMode::favoritePointableId() {
+int32_t GestureInteractionManager::favoritePointableId() {
   if (m_favoritePointableId < 0 || !m_currentFrame.pointable(m_favoritePointableId).isValid())
   {
     resetFavoritePointableId();
@@ -222,19 +224,19 @@ int32_t OutputPeripheralMode::favoritePointableId() {
   return m_favoritePointableId;
 }
 
-double OutputPeripheralMode::fps() const {
+double GestureInteractionManager::fps() const {
   return m_FPS.Predict(0)(0,0); // Predict returns a 1x1 matrix, so we have to get the single component out of it
 }
 
-bool OutputPeripheralMode::rtsIsUnambiguous() const {
+bool GestureInteractionManager::rtsIsUnambiguous() const {
   return m_filteredRTS->filteredCategoryIsUnambiguous();
 }
 
-OutputPeripheralMode::RTS OutputPeripheralMode::rts() const {
+GestureInteractionManager::RTS GestureInteractionManager::rts() const {
   return m_filteredRTS->filteredCategory();
 }
 
-OutputPeripheralMode::RTSFilter::ProbabilityVector OutputPeripheralMode::rtsProbabilityVector () const {
+GestureInteractionManager::RTSFilter::ProbabilityVector GestureInteractionManager::rtsProbabilityVector () const {
   double probability = 0.0;
   RTSFilter::ProbabilityVector v;
   auto it = m_timedFrameHistory.getFrameHavingAgeAtLeast(20*MILLISECONDS);
@@ -258,90 +260,90 @@ OutputPeripheralMode::RTSFilter::ProbabilityVector OutputPeripheralMode::rtsProb
   }
 }
 
-bool OutputPeripheralMode::pointableCountIsUnambiguous() const{
+bool GestureInteractionManager::pointableCountIsUnambiguous() const{
   return m_filteredPointableCount->filteredCategoryIsUnambiguous();
 }
 
-int OutputPeripheralMode::pointableCount() const {
+int GestureInteractionManager::pointableCount() const {
   return static_cast<int>(m_filteredPointableCount->filteredCategory());
 }
 
-Pointable::Zone OutputPeripheralMode::collectiveZone() const {
+Pointable::Zone GestureInteractionManager::collectiveZone() const {
   return m_collectiveZone;
 }
 
-bool OutputPeripheralMode::deviceToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale, bool clamp) {
-  return m_outputPeripheral.deviceToScreen(position, output, clampVec, scale, clamp);
+bool GestureInteractionManager::deviceToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale, bool clamp) {
+  return m_overlayDriver.deviceToScreen(position, output, clampVec, scale, clamp);
 }
 
-bool OutputPeripheralMode::normalizedToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale, bool clamp) {
-  return m_outputPeripheral.normalizedToScreen(position, output, clampVec, scale, clamp);
+bool GestureInteractionManager::normalizedToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale, bool clamp) {
+  return m_overlayDriver.normalizedToScreen(position, output, clampVec, scale, clamp);
 }
 
-bool OutputPeripheralMode::normalizedToAspect(const Vector& position, Vector& output, Vector& clampVec, float scale, bool clamp) {
-  return m_outputPeripheral.normalizedToAspect(position, output, clampVec, scale, clamp);
+bool GestureInteractionManager::normalizedToAspect(const Vector& position, Vector& output, Vector& clampVec, float scale, bool clamp) {
+  return m_overlayDriver.normalizedToAspect(position, output, clampVec, scale, clamp);
 }
 
-void OutputPeripheralMode::setCursorPosition(float fx, float fy, bool absolute) {
-  m_outputPeripheral.setCursorPosition(fx, fy, absolute);
+void GestureInteractionManager::setCursorPosition(float fx, float fy, bool absolute) {
+  m_osInteractionDriver.setCursorPosition(fx, fy, absolute);
 }
 
-void OutputPeripheralMode::clickDown(int button, int number) {
-  m_outputPeripheral.clickDown(button, number);
+void GestureInteractionManager::clickDown(int button, int number) {
+  m_osInteractionDriver.clickDown(button, number);
 }
 
-void OutputPeripheralMode::clickUp(int button, int number) {
-  m_outputPeripheral.clickUp(button, number);
+void GestureInteractionManager::clickUp(int button, int number) {
+  m_osInteractionDriver.clickUp(button, number);
 }
 
-bool OutputPeripheralMode::beginGesture(uint32_t gestureType) {
-  return m_outputPeripheral.beginGesture(gestureType);
+bool GestureInteractionManager::beginGesture(uint32_t gestureType) {
+  return m_osInteractionDriver.beginGesture(gestureType);
 }
 
-bool OutputPeripheralMode::endGesture() {
-  return m_outputPeripheral.endGesture();
+bool GestureInteractionManager::endGesture() {
+  return m_osInteractionDriver.endGesture();
 }
 
-bool OutputPeripheralMode::applyZoom(float zoom) {
-  return m_outputPeripheral.applyZoom(zoom);
+bool GestureInteractionManager::applyZoom(float zoom) {
+  return m_osInteractionDriver.applyZoom(zoom);
 }
 
-bool OutputPeripheralMode::applyRotation(float rotation) {
-  return m_outputPeripheral.applyRotation(rotation);
+bool GestureInteractionManager::applyRotation(float rotation) {
+  return m_osInteractionDriver.applyRotation(rotation);
 }
 
-bool OutputPeripheralMode::applyScroll(float dx, float dy, int64_t timeDiff) {
-  return m_outputPeripheral.applyScroll(dx, dy, timeDiff);
+bool GestureInteractionManager::applyScroll(float dx, float dy, int64_t timeDiff) {
+  return m_osInteractionDriver.applyScroll(dx, dy, timeDiff);
 }
 
-bool OutputPeripheralMode::applyDesktopSwipe(float dx, float dy) {
-  return m_outputPeripheral.applyDesktopSwipe(dx, dy);
+bool GestureInteractionManager::applyDesktopSwipe(float dx, float dy) {
+  return m_osInteractionDriver.applyDesktopSwipe(dx, dy);
 }
 
-void OutputPeripheralMode::applyCharms(const Vector& aspectNormalized, int numPointablesActive, int& charmsMode) {
+void GestureInteractionManager::applyCharms(const Vector& aspectNormalized, int numPointablesActive, int& charmsMode) {
 #if _WIN32
-  m_outputPeripheral.applyCharms(aspectNormalized, numPointablesActive, charmsMode);
+  m_osInteractionDriver.applyCharms(aspectNormalized, numPointablesActive, charmsMode);
 #endif
 }
 
-float OutputPeripheralMode::acceptableClampDistance() const {
-  return m_outputPeripheral.acceptableClampDistance();
+float GestureInteractionManager::acceptableClampDistance() const {
+  return m_overlayDriver.acceptableClampDistance();
 }
 
-void OutputPeripheralMode::setIconVisibility(int index, bool visible) {
-  m_outputPeripheral.setIconVisibility(index, visible);
+void GestureInteractionManager::setIconVisibility(int index, bool visible) {
+  m_overlayDriver.setIconVisibility(index, visible);
 }
 
-int OutputPeripheralMode::findImageIndex(float z, float touchThreshold, float touchRange) const {
-  return m_outputPeripheral.findImageIndex(z, touchThreshold, touchRange);
+int GestureInteractionManager::findImageIndex(float z, float touchThreshold, float touchRange) const {
+  return m_overlayDriver.findImageIndex(z, touchThreshold, touchRange);
 }
 
-void OutputPeripheralMode::drawImageIcon(int iconIndex, int imageIndex, float x, float y, bool visible) {
-  m_outputPeripheral.drawImageIcon(iconIndex, imageIndex, x, y, visible);
+void GestureInteractionManager::drawImageIcon(int iconIndex, int imageIndex, float x, float y, bool visible) {
+  m_overlayDriver.drawImageIcon(iconIndex, imageIndex, x, y, visible);
 }
 
 
-void OutputPeripheralMode::drawOverlayForPointable (const Pointable &pointable, int32_t iconIndex, float alphaMult, bool deltaTracked) {
+void GestureInteractionManager::drawOverlayForPointable (const Pointable &pointable, int32_t iconIndex, float alphaMult, bool deltaTracked) {
   if (!pointable.isValid()) {
     return; // can't do anything in this case
   }
@@ -387,11 +389,11 @@ void OutputPeripheralMode::drawOverlayForPointable (const Pointable &pointable, 
   }
 }
 
-void OutputPeripheralMode::drawOverlayForHand (const Hand &hand, int32_t iconIndex, float alphaMult) {
+void GestureInteractionManager::drawOverlayForHand (const Hand &hand, int32_t iconIndex, float alphaMult) {
   if (!hand.isValid()) {
     return; // can't do anything in this case
   }
-  
+
   Vector screenPosition, clampVec;
   normalizedToScreen(interactionBox().normalizePoint(m_positionalDeltaTracker.getTrackedPosition(), false), screenPosition, clampVec);
   Vector3 vel = hand.palmVelocity().toVector3<Vector3>();
@@ -428,7 +430,7 @@ void OutputPeripheralMode::drawOverlayForHand (const Hand &hand, int32_t iconInd
 }
 
 
-void OutputPeripheralMode::drawGestureOverlayForHand (const Hand& hand, float rotationAngle, float scaleFactor, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
+void GestureInteractionManager::drawGestureOverlayForHand (const Hand& hand, float rotationAngle, float scaleFactor, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
   assert(scaleFactor >= 0.0f);
 
   Vector screenPosition, clampVec, tipVelocity;
@@ -454,15 +456,15 @@ void OutputPeripheralMode::drawGestureOverlayForHand (const Hand& hand, float ro
       touchDistance = std::min(touchDistance, pointables[i].touchDistance());
     }
   }
-  
-  
+
+
   double radius = touchDistanceToRadius(touchDistance);
   float alpha = alphaMult * alphaFromTimeVisible(hand.timeVisible());
 
   drawGestureOverlayCore(screenPosition, clampVec, tipVelocity, radius, touchDistance, alpha, rotationAngle, scaleFactor, alphaMult, doubleHorizontalDots, doubleVerticalDots, verticalMovementGlow, horizontalMovementGlow);
 }
 
-void OutputPeripheralMode::drawGestureOverlayForPointable (const Pointable& pointable, float rotationAngle, float scaleFactor, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
+void GestureInteractionManager::drawGestureOverlayForPointable (const Pointable& pointable, float rotationAngle, float scaleFactor, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
   assert(scaleFactor >= 0.0f);
 
   Vector screenPosition, clampVec, tipVelocity;
@@ -486,7 +488,7 @@ void OutputPeripheralMode::drawGestureOverlayForPointable (const Pointable& poin
   drawGestureOverlayCore(screenPosition, clampVec, tipVelocity, radius, touchDistance, alpha, rotationAngle, scaleFactor, alphaMult, doubleHorizontalDots, doubleVerticalDots, verticalMovementGlow, horizontalMovementGlow);
 }
 
-void OutputPeripheralMode::drawGestureOverlayCore(Vector screenPosition, Vector clampVec, Vector tipVelocity, double radius, float touchDistance, float alpha, float rotationAngle, float scaleFactor, float alphaMult, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
+void GestureInteractionManager::drawGestureOverlayCore(Vector screenPosition, Vector clampVec, Vector tipVelocity, double radius, float touchDistance, float alpha, float rotationAngle, float scaleFactor, float alphaMult, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
   const double velocityLevel = 30;
   if (useProceduralOverlay()) {
     float xdistance1 = std::abs(touchDistance);
@@ -637,17 +639,17 @@ void OutputPeripheralMode::drawGestureOverlayCore(Vector screenPosition, Vector 
   }
 }
 
-void OutputPeripheralMode::drawScrollOverlayForHand (const Hand& hand, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
+void GestureInteractionManager::drawScrollOverlayForHand (const Hand& hand, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
   // no rotation, unit scale
   drawGestureOverlayForHand(hand, 0.0f, 1.0f, alphaMult, positionOverride, doubleHorizontalDots, doubleVerticalDots, verticalMovementGlow, horizontalMovementGlow);
 }
 
-void OutputPeripheralMode::drawScrollOverlayForPointable (const Pointable& pointable, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
+void GestureInteractionManager::drawScrollOverlayForPointable (const Pointable& pointable, float alphaMult, const Vector *positionOverride, bool doubleHorizontalDots, bool doubleVerticalDots, bool verticalMovementGlow, bool horizontalMovementGlow) {
   // no rotation, unit scale
   drawGestureOverlayForPointable(pointable, 0.0f, 1.0f, alphaMult, positionOverride, doubleHorizontalDots, doubleVerticalDots, verticalMovementGlow, horizontalMovementGlow);
 }
 
-void OutputPeripheralMode::drawRotateOverlayForHand (const Hand& hand, float alphaMult, const Vector *positionOverride) {
+void GestureInteractionManager::drawRotateOverlayForHand (const Hand& hand, float alphaMult, const Vector *positionOverride) {
   float rotationRate = 0.0f;
   auto it = m_timedFrameHistory.getFrameHavingAgeAtLeast(500*MILLISECONDS);
   if (it != m_timedFrameHistory.end()) {
@@ -659,7 +661,7 @@ void OutputPeripheralMode::drawRotateOverlayForHand (const Hand& hand, float alp
   drawGestureOverlayForHand(hand, rotationRate, 1.0f, alphaMult, positionOverride, false, false, false, false);
 }
 
-void OutputPeripheralMode::drawRotateOverlayForPointable (const Pointable& pointable, float alphaMult, const Vector *positionOverride) {
+void GestureInteractionManager::drawRotateOverlayForPointable (const Pointable& pointable, float alphaMult, const Vector *positionOverride) {
   float rotationRate = 0.0f;
   auto it = m_timedFrameHistory.getFrameHavingAgeAtLeast(500*MILLISECONDS);
   if (it != m_timedFrameHistory.end()) {
@@ -671,7 +673,7 @@ void OutputPeripheralMode::drawRotateOverlayForPointable (const Pointable& point
   drawGestureOverlayForPointable(pointable, rotationRate, 1.0f, alphaMult, positionOverride, false, false, false, false);
 }
 
-void OutputPeripheralMode::drawZoomOverlayForHand (const Hand& hand, float alphaMult, const Vector *positionOverride) {
+void GestureInteractionManager::drawZoomOverlayForHand (const Hand& hand, float alphaMult, const Vector *positionOverride) {
   float scaleFactor = 1.0f;
   auto it = m_timedFrameHistory.getFrameHavingAgeAtLeast(500*MILLISECONDS);
   if (it != m_timedFrameHistory.end()) {
@@ -682,7 +684,7 @@ void OutputPeripheralMode::drawZoomOverlayForHand (const Hand& hand, float alpha
   drawGestureOverlayForHand(hand, 0.0f, scaleFactor, alphaMult, positionOverride, false, false, false, false);
 }
 
-void OutputPeripheralMode::drawZoomOverlayForPointable (const Pointable& pointable, float alphaMult, const Vector *positionOverride) {
+void GestureInteractionManager::drawZoomOverlayForPointable (const Pointable& pointable, float alphaMult, const Vector *positionOverride) {
   float scaleFactor = 1.0f;
   auto it = m_timedFrameHistory.getFrameHavingAgeAtLeast(500*MILLISECONDS);
   if (it != m_timedFrameHistory.end()) {
@@ -693,7 +695,7 @@ void OutputPeripheralMode::drawZoomOverlayForPointable (const Pointable& pointab
   drawGestureOverlayForPointable(pointable, 0.0f, scaleFactor, alphaMult, positionOverride, false, false, false, false);
 }
 
-void OutputPeripheralMode::addTouchPointForHand (const Hand &hand, bool touching) {
+void GestureInteractionManager::addTouchPointForHand (const Hand &hand, bool touching) {
   if (!hand.isValid()) {
     return;
   }
@@ -708,7 +710,7 @@ void OutputPeripheralMode::addTouchPointForHand (const Hand &hand, bool touching
   }
 }
 
-void OutputPeripheralMode::addTouchPointForPointable (int touchId, const Pointable &pointable, bool touching, bool deltaTracked) {
+void GestureInteractionManager::addTouchPointForPointable (int touchId, const Pointable &pointable, bool touching, bool deltaTracked) {
   if (!pointable.isValid()) {
     return;
   }
@@ -726,7 +728,7 @@ void OutputPeripheralMode::addTouchPointForPointable (int touchId, const Pointab
   }
 }
 
-void OutputPeripheralMode::setAbsoluteCursorPosition (const Vector &deviceCoordinatePosition, Vector *calculatedScreenPosition) {
+void GestureInteractionManager::setAbsoluteCursorPosition (const Vector &deviceCoordinatePosition, Vector *calculatedScreenPosition) {
   Vector screenPosition, clampVec;
   if (normalizedToScreen(interactionBox().normalizePoint(deviceCoordinatePosition),
                          screenPosition,
@@ -738,26 +740,26 @@ void OutputPeripheralMode::setAbsoluteCursorPosition (const Vector &deviceCoordi
   }
 }
 
-void OutputPeripheralMode::setAbsoluteCursorPositionHand (const Hand &hand, Vector *calculatedScreenPosition) {
+void GestureInteractionManager::setAbsoluteCursorPositionHand (const Hand &hand, Vector *calculatedScreenPosition) {
   if (hand.isValid()) {
     m_positionalDeltaTracker.setPositionToStabilizedPositionOf(hand);
     setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
   }
 }
 
-void OutputPeripheralMode::setAbsoluteCursorPositionPointable (const Pointable &pointable, Vector *calculatedScreenPosition) {
+void GestureInteractionManager::setAbsoluteCursorPositionPointable (const Pointable &pointable, Vector *calculatedScreenPosition) {
   if (pointable.isValid()) {
     m_positionalDeltaTracker.setPositionToStabilizedPositionOf(pointable);
     setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
   }
 }
 
-float OutputPeripheralMode::alphaFromTimeVisible(float timeVisible) const {
+float GestureInteractionManager::alphaFromTimeVisible(float timeVisible) const {
   static const float VISIBILITY_WARMUP_TIME = 0.4f;
   return std::min(1.0f, timeVisible/VISIBILITY_WARMUP_TIME);
 }
 
-float OutputPeripheralMode::scrollDampingFactor (const Vector &scrollVelocity) {
+float GestureInteractionManager::scrollDampingFactor (const Vector &scrollVelocity) {
   static const float SPEED_THRESHOLD = 60.0f; // TODO: tune this
   float speed = scrollVelocity.magnitude();
   // use a cubic polynomial to damp out small motions
@@ -773,55 +775,55 @@ float OutputPeripheralMode::scrollDampingFactor (const Vector &scrollVelocity) {
   return scaleFactor;
 }
 
-double OutputPeripheralMode::touchDistanceToRadius (float touchDistance) {
-  return OutputPeripheralImplementation::touchDistanceToRadius(touchDistance);
+double GestureInteractionManager::touchDistanceToRadius (float touchDistance) {
+  return OverlayDriver::touchDistanceToRadius(touchDistance);
 }
 
-void OutputPeripheralMode::drawRasterIcon(int iconIndex, float x, float y, bool visible, const Vector3& velocity, float touchDistance, double radius, float clampDistance, float alphaMult, int numFingers) {
-  m_outputPeripheral.drawRasterIcon(iconIndex, x, y, visible, velocity, touchDistance, radius, clampDistance, alphaMult, numFingers);
+void GestureInteractionManager::drawRasterIcon(int iconIndex, float x, float y, bool visible, const Vector3& velocity, float touchDistance, double radius, float clampDistance, float alphaMult, int numFingers) {
+  m_overlayDriver.drawRasterIcon(iconIndex, x, y, visible, velocity, touchDistance, radius, clampDistance, alphaMult, numFingers);
 }
 
-void OutputPeripheralMode::emitTouchEvent() {
-  m_outputPeripheral.emitTouchEvent(m_touchEvent);
+void GestureInteractionManager::emitTouchEvent() {
+  m_osInteractionDriver.emitTouchEvent(m_touchEvent);
 }
 
-void OutputPeripheralMode::clearTouchPoints() {
+void GestureInteractionManager::clearTouchPoints() {
   m_touchEvent.clear();
 }
 
-void OutputPeripheralMode::addTouchPoint(int touchId, float x, float y, bool touching) {
+void GestureInteractionManager::addTouchPoint(int touchId, float x, float y, bool touching) {
   m_touchEvent.insert(Touch(touchId, x, y, touching));
 }
 
-bool OutputPeripheralMode::touchAvailable() const {
-  return m_outputPeripheral.touchAvailable();
+bool GestureInteractionManager::touchAvailable() const {
+  return m_osInteractionDriver.touchAvailable();
 }
 
-int OutputPeripheralMode::numTouchScreens() const {
-  return m_outputPeripheral.numTouchScreens();
+int GestureInteractionManager::numTouchScreens() const {
+  return m_osInteractionDriver.numTouchScreens();
 }
 
-int OutputPeripheralMode::touchVersion() const {
+int GestureInteractionManager::touchVersion() const {
   return -1;
 }
 
-bool OutputPeripheralMode::useProceduralOverlay() const {
-  return m_outputPeripheral.useProceduralOverlay();
+bool GestureInteractionManager::useProceduralOverlay() const {
+  return m_overlayDriver.useProceduralOverlay();
 }
 
-bool OutputPeripheralMode::useCharmHelper() const {
-  return m_outputPeripheral.useCharmHelper();
+bool GestureInteractionManager::useCharmHelper() const {
+  return m_osInteractionDriver.useCharmHelper();
 }
 
 #if __APPLE__
-void OutputPeripheralMode::flushOverlay() {
+void GestureInteractionManager::flushOverlay() {
   if (m_flushOverlay) {
-    m_outputPeripheral.flushOverlay();
+    m_overlayDriver.flushOverlay();
   }
 }
 #endif
 
-void OutputPeripheralMode::setForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const {
+void GestureInteractionManager::setForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const {
   if ((m_filteredPointableCount->filteredCategoryIsUnambiguous() && m_filteredPointableCount->filteredCategory() == m_relevantPointables.size())
       || !m_filteredPointableCount->filteredCategoryIsUnambiguous()) {
     identifyForemostPointable(relevantPointables, foremostPointableId);
@@ -830,7 +832,7 @@ void OutputPeripheralMode::setForemostPointable (const std::vector<Pointable> &r
   }
 }
 
-void OutputPeripheralMode::identifyForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const {
+void GestureInteractionManager::identifyForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const {
   if (relevantPointables.empty()) {
     foremostPointableId = -1;
     return;

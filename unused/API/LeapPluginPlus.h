@@ -10,31 +10,10 @@
 #define __LeapPluginPlus_h__
 
 #include "LeapPlugin.h"
-#include "Peripherals/Touch.h"
+#include "OSInteraction/Touch.h"
 #include <set>
 
 namespace Leap {
-
-//
-// Public Interface
-//
-class TouchEvent:
-  public std::set<Touch>
-{
-public:
-  void clearTouchPoints(void) {
-    clear();
-  }
-
-  void removeTouchPoint(int touchId) {
-    Touch touch(touchId);
-    erase(touch);
-  }
-
-  void addTouchPoint(int touchId, float x, float y, bool touching) {
-    insert(Touch(touchId, x, y, touching));
-  }
-};
 
 //
 // This is the interface to the underlying OS peripherals (i.e., keyboard,

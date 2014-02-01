@@ -15,7 +15,7 @@
 #include <sys/sysctl.h>
 #endif
 
-namespace Leap {
+namespace Touchless {
 
 #if _WIN32
 const bool OutputPeripheralBasic::UseMouseOutput = false;
@@ -43,9 +43,9 @@ float OutputPeripheralBasic::ZoomScaleFactor = 1.5;
 //
 // The states correspond roughly exactly with the state of interaction.
 
-OutputPeripheralBasic::OutputPeripheralBasic(OutputPeripheralImplementation& outputPeripheral)
+OutputPeripheralBasic::OutputPeripheralBasic(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
   :
-  OutputPeripheralMode(outputPeripheral),
+  GestureInteractionManager(osInteractionDriver, overlayDriver),
   m_drawOverlays(true),
   m_noTouching(true),
   m_clickDuration(0),
@@ -129,7 +129,7 @@ void OutputPeripheralBasic::setAbsoluteCursorPositionHand (Vector *calculatedScr
   }
   Hand favoriteHand = m_currentFrame.hand(m_favoriteHandId);
   // call the baseclass version
-  OutputPeripheralMode::setAbsoluteCursorPositionHand(favoriteHand, calculatedScreenPosition);
+  GestureInteractionManager::setAbsoluteCursorPositionHand(favoriteHand, calculatedScreenPosition);
 }
 
 void OutputPeripheralBasic::setAbsoluteCursorPositionPointable (Vector *calculatedScreenPosition) {
@@ -138,7 +138,7 @@ void OutputPeripheralBasic::setAbsoluteCursorPositionPointable (Vector *calculat
   }
   Pointable favoritePointable = m_currentFrame.pointable(favoritePointableId());
   // call the baseclass version
-  OutputPeripheralMode::setAbsoluteCursorPositionPointable(favoritePointable, calculatedScreenPosition);
+  GestureInteractionManager::setAbsoluteCursorPositionPointable(favoritePointable, calculatedScreenPosition);
 }
 
 void OutputPeripheralBasic::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
@@ -600,7 +600,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_Hovering (StateMachineInput i
 
       if (UseMouseOutput) {
         // handle cursor positioning
-        OutputPeripheralMode::setAbsoluteCursorPositionPointable(m_currentFrame.pointable(pointable1));
+        GestureInteractionManager::setAbsoluteCursorPositionPointable(m_currentFrame.pointable(pointable1));
       } else {
         addTouchPointForPointable(pointable1, m_currentFrame.pointable(pointable1), false, false);
         addTouchPointForPointable(pointable2, m_currentFrame.pointable(pointable2), false, false);
@@ -680,7 +680,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_Rotating (StateMachineInput i
       m_drawOverlays = true;
       // generate begin-rotate event
       beginGesture(LPGesture::GestureRotate);
-      applyRotation(-RAD_TO_DEG*m_currentFrame.rotationAngle(m_gestureStart, Vector::zAxis()));
+      applyRotation(-Leap::RAD_TO_DEG*m_currentFrame.rotationAngle(m_gestureStart, Vector::zAxis()));
       return true;
 
     case SM_EXIT:
@@ -704,7 +704,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_Rotating (StateMachineInput i
       }
 
       // apply rotation
-      applyRotation(-RAD_TO_DEG*m_currentFrame.rotationAngle(m_sinceFrame, Vector::zAxis()));
+      applyRotation(-Leap::RAD_TO_DEG*m_currentFrame.rotationAngle(m_sinceFrame, Vector::zAxis()));
 
       float alphaMult = alphaFromTimeVisible((1.0f/SECONDS)*static_cast<float>(m_currentFrame.timestamp() - m_lastStateChangeTime));
       drawOverlayForPointable(m_currentFrame.pointable(pointable1), 0, alphaMult, false);

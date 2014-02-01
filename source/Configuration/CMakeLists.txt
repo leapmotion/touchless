@@ -1,5 +1,11 @@
 include_directories(
 ${LEAP_INCLUDE_DIR}
+../GestureInteraction/
+../OSInteraction/
+../Overlay/
+../Peripherals/
+../Utility/
+../DataStructures/
 )
 
 set(

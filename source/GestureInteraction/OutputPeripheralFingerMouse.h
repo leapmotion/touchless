@@ -11,13 +11,13 @@
 #if !defined(__OutputPeripheralFingerMouse_h__)
 #define __OutputPeripheralFingerMouse_h__
 
-#include "OutputPeripheralMode.h"
+#include "GestureInteractionManager.h"
 
-namespace Leap {
+namespace Touchless {
 
-class OutputPeripheralFingerMouse : public OutputPeripheralMode {
+class OutputPeripheralFingerMouse : public GestureInteractionManager {
 public:
-  OutputPeripheralFingerMouse(OutputPeripheralImplementation& outputPeripheral);
+  OutputPeripheralFingerMouse(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
   virtual ~OutputPeripheralFingerMouse();
   virtual void stopActiveEvents();
 
