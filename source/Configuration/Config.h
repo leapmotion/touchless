@@ -24,7 +24,7 @@
 #define __Config_h__
 
 #include "common.h"
-#include "DataStructures/Value.h"
+#include "Utility/Value.h"
 #include <iostream>
 #include <boost/thread.hpp>
 #include SHARED_PTR_HEADER

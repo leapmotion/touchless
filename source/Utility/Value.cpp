@@ -17,6 +17,7 @@
 #ifdef __APPLE__
 // workaround for clang+libc++ bug 'call to isnan() is ambiguous'
 #include <math.h>
+#define _isnan std::isnan
 #else
 #include <cmath>
 #endif

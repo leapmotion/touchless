@@ -6,12 +6,10 @@
 #include "LeapMath.h"
 
 #if __APPLE__
-#include "Peripherals/LPMac.h"
-#include "Peripherals/LPOverlay.h"
+#include "Overlay/LPOverlay.h"
 #elif !defined _WIN32
-#include "Peripherals/LPLinux.h"
 #endif
-#include "Peripherals/LPVirtualScreen.h"
+#include "Utility/LPVirtualScreen.h"
 #include "AxisAlignedBox.h"
 #include "FileSystemUtil.h"
 

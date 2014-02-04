@@ -11,7 +11,7 @@
 #if !defined(__LPLinux_h__)
 #define __LPLinux_h__
 
-#include "LPGeometry.h"
+#include "Utility/LPGeometry.h"
 #include <string>
 
 class CFocusAppInfo {

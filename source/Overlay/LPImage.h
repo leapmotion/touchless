@@ -19,7 +19,7 @@ using std::max;
 #include <objidl.h>
 #include <gdiplus.h>
 #else
-#include "LPGeometry.h"
+#include "Utility/LPGeometry.h"
 #endif
 
 #include "common.h"

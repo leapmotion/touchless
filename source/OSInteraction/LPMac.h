@@ -11,7 +11,7 @@
 #if !defined(__LPMac_h__)
 #define __LPMac_h__
 
-#include "LPGeometry.h"
+#include "Utility/LPGeometry.h"
 
 #include <string>
 

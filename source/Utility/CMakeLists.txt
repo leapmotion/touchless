@@ -3,13 +3,26 @@ ${LEAP_INCLUDE_DIR}
 )
 
 SET(Utility_SRCS
+  AxisAlignedBox.h
+  BoundedQueue.h
+  CategoricalFilter.h
+  FilterBase.h
   FileSystemUtil.h
   FileSystemUtil.cpp
   Heartbeat.h
   Heartbeat.cpp
-  StateMachine.h
+  LPGeometry.h
+  LPScreen.h
+  LPScreen.cpp
+  LPVirtualScreen.h
+  LPVirtualScreen.cpp
   PositionalDeltaTracker.h
   PositionalDeltaTracker.cpp
+  RollingMean.h
+  StateMachine.h
+  TimedHistory.h
+  Value.h
+  Value.cpp
 )
 
 ADD_MSVC_PRECOMPILED_HEADER("stdafx.h" "stdafx.cpp" Utility_SRCS)
@@ -33,7 +46,7 @@ add_library(Utility ${Project_Libary_Mode} ${Utility_SRCS})
 set_target_properties(Utility PROPERTIES COMPILE_FLAGS "${ADDITIONAL_COMPILER_FLAGS}")
 set_target_properties(Utility PROPERTIES STATIC_LIBRARY_FLAGS "${STATIC_LIB_FLAGS}")
 
-target_link_libraries(Utility DataStructures)
+# target_link_libraries(Utility DataStructures)
 target_link_libraries(Utility Configuration)
 if(BUILD_WINDOWS)
   target_link_libraries(Utility psapi)

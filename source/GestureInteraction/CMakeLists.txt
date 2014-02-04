@@ -3,7 +3,6 @@ include_directories(
   ../Configuration/
   ../DataStructures/
   ../Networking/
-  ../Peripherals/
   ../Utility/
   ../API/
   ../Overlay/

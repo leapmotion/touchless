@@ -8,10 +8,10 @@
 #include "OSInteraction.h"
 #include "Overlay.h"
 
-#include "DataStructures/TimedHistory.h"
+#include "Utility/TimedHistory.h"
 #include "PositionalDeltaTracker.h"
-#include "FilterMethods/CategoricalFilter.h"
-#include "FilterMethods/RollingMean.h"
+#include "Utility/CategoricalFilter.h"
+#include "Utility/RollingMean.h"
 #include "Utility/StateMachine.h"
 
 #include <vector>

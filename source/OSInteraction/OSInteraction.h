@@ -6,19 +6,17 @@
 #include "Leap.h"
 
 #if __APPLE__
-#include "Peripherals/LPMac.h"
-#include "Peripherals/LPOverlay.h"
+#include "OSInteraction/LPMac.h"
 #elif !defined _WIN32
-#include "Peripherals/LPLinux.h"
+#include "OSInteraction/LPLinux.h"
 #endif
-#include "Peripherals/LPVirtualScreen.h"
+#include "Utility/LPVirtualScreen.h"
 #include "Touch.h"
 #include "TouchManager.h"
 
-#include "Peripherals/LPGesture.h"
+#include "OSInteraction/LPGesture.h"
 #include <boost/thread/mutex.hpp>
 
-class LPIcon;
 class LPImage;
 
 namespace Touchless {

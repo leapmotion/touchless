@@ -11,7 +11,7 @@
 #if !defined(__LPScreen_h__)
 #define __LPScreen_h__
 
-#include "LPGeometry.h"
+#include "Utility/LPGeometry.h"
 
 #if __APPLE__
 typedef CGDirectDisplayID LPDirectDisplayID;

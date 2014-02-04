@@ -1,6 +1,6 @@
 // #include "stdafx.h"
 #include "OSInteraction.h"
-#include "Peripherals/LPVirtualScreen.h"
+#include "Utility/LPVirtualScreen.h"
 #include EXCEPTION_PTR_HEADER
 #include <fstream>
 
@@ -47,7 +47,10 @@ void windowsKeyCombo(WORD key1, WORD key2, WORD key3) {
 
 
 OSInteractionDriver::OSInteractionDriver(LPVirtualScreen &virtualScreen)
-  : m_virtualScreen(virtualScreen) {}
+  : m_virtualScreen(virtualScreen),
+  m_movingCursor(false),
+  m_useCharmHelper(true)
+{}
 
 OSInteractionDriver::~OSInteractionDriver() {}
 

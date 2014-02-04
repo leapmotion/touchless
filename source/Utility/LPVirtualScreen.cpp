@@ -9,7 +9,7 @@
 ===================================================================================================================*/
 #include "stdafx.h"
 #include "LPVirtualScreen.h"
-#include "LPIcon.h"
+#include "Overlay/LPIcon.h"
 
 //
 // LPVirtualScreen

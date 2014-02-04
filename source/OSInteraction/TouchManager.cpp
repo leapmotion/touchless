@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "TouchManager.h"
-#include "LPVirtualScreen.h"
+#include "Utility/LPVirtualScreen.h"
 #if _WIN32
 //#include "TouchManagerWin7Driver.h"
 #include "TouchManagerWin7Undocumented.h"

@@ -11,7 +11,7 @@
 #if !defined(__LPIcon_h__)
 #define __LPIcon_h__
 #include "C++11/cpp11.h"
-#include "LPGeometry.h"
+#include "Utility/LPGeometry.h"
 #include SHARED_PTR_HEADER
 
 class LPImage;

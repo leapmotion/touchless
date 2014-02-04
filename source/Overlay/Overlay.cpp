@@ -1,8 +1,8 @@
 // #include "stdafx.h"
 #include "Overlay.h"
-#include "Peripherals/LPIcon.h"
-#include "Peripherals/LPImage.h"
-#include "Peripherals/LPVirtualScreen.h"
+#include "Overlay/LPIcon.h"
+#include "Overlay/LPImage.h"
+#include "Utility/LPVirtualScreen.h"
 #include EXCEPTION_PTR_HEADER
 #include <fstream>
 
@@ -11,7 +11,13 @@ namespace Touchless
 {
 
 OverlayDriver::OverlayDriver(LPVirtualScreen &virtualScreen)
-  : m_virtualScreen(virtualScreen) {}
+  : m_virtualScreen(virtualScreen),
+  m_UseProceduralOverlay(true),
+  m_numOverlayPoints(0),
+  m_numOverlayImages(0),
+  m_filledImageIdx(0)
+{}
+
 OverlayDriver::~OverlayDriver() {}
 
 OverlayDriver* OverlayDriver::New(LPVirtualScreen &virtualScreen)

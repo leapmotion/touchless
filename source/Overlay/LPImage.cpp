@@ -8,17 +8,34 @@
 
 ===================================================================================================================*/
 #include "stdafx.h"
-#include "LPImage.h"
-#include "LPIcon.h"
-#include "DataStructures/SSEfoo.h"
+#include "Overlay/LPImage.h"
+#include "Overlay/LPIcon.h"
 #include <memory>
 #include <algorithm>
+
+//Determine minimum version of SSE to require (Windows defaults to SSE2)
+#if defined(__SSE4_2__)
+#define HAS_SSE _X_SSE4_2
+#include <nmmintrin.h>
+#elif defined(__SSE4_1__)
+#define HAS_SSE _X_SSE4_1
+#include <smmintrin.h>
+#elif defined(__SSSE3__)
+#define HAS_SSE _X_SSSE3
+#include <tmmintrin.h>
+#elif defined(__SSE3__)
+#define HAS_SSE _X_SSE3
+#include <pmmintrin.h>
+#else
+#define HAS_SSE _X_SSE2
+#include <emmintrin.h>
+#endif
 
 #if _WIN32
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 #elif __APPLE__
-#include "DataStructures/Value.h"
+#include "Utility/Value.h"
 #include <NSData.h>
 #include <NSString.h>
 #include <NSURL.h>
@@ -83,15 +100,20 @@ void LPImage::RasterCircle(const Vector2& centerOffset, const Vector2& direction
   bunit *= yScale;
 
   //Setup colors
-  SSEf dark;
+  // SSEf dark;
+  __m128 dark;
   if (glow > 0.0) {
     float mult = (glow > 1.0 ? 1.0f : 0.2f);
-    dark = SSEf(mult*255, mult*255, mult*255, 200);
+    // dark = SSEf(mult*255, mult*255, mult*255, 200);
+    dark = _mm_set_ps(200, mult*255, mult*255, mult*255);
   } else {
-    dark = SSEf(b*0.2f, g*0.2f, r*0.2f, 200);
+    // dark = SSEf(b*0.2f, g*0.2f, r*0.2f, 200);
+    dark = _mm_set_ps(200, r*0.2f, g*0.2f, b*0.2f);
   }
-  SSEf color(b, g, r, 255);
-  SSEf gray = SSEAvg(color, SSEf(255));
+  // SSEf color(b, g, r, 255);
+  // SSEf gray = SSEAvg(color, SSEf(255));
+  __m128 color(_mm_set_ps(255, r, g, b));
+  __m128 gray = _mm_mul_ps(_mm_add_ps(color, _mm_set1_ps(255)), _mm_set1_ps(0.5f));
 
   //Fill dynamic image with solid transparent color
 #if _WIN32
@@ -123,7 +145,8 @@ void LPImage::RasterCircle(const Vector2& centerOffset, const Vector2& direction
         float blend = 1.0f;
 
         //Check if point is inside of ellipse
-        SSEf orig = color;
+        // SSEf orig = color;
+        __m128 orig = color;
         if (distSq < radiusSq) {
           blend = static_cast<float>(std::max(0.0, std::min(1.0, (borderSq - distSq)/(2*outerRadius))));
           alpha *= static_cast<float>(std::min(1.0, (glowSq - distSq)/(2*outerRadius)));
@@ -137,8 +160,13 @@ void LPImage::RasterCircle(const Vector2& centerOffset, const Vector2& direction
 
 #if _WIN32 || __APPLE__
         //Apply blending to pixel
-        SSEf blended = (orig*blend + dark*(1.0f - blend))*alpha;
-        uint32_t finalColor = SSEPackChars((SSEi)blended);
+        // SSEf blended = (orig*blend + dark*(1.0f - blend))*alpha;
+        __m128 blended = _mm_mul_ps(_mm_add_ps(_mm_mul_ps(orig, _mm_set1_ps(blend)), _mm_mul_ps(dark, _mm_set1_ps(1.0f - blend))), _mm_set1_ps(alpha));
+        __m128i packedColor = _mm_and_si128(_mm_cvttps_epi32(blended), _mm_set1_epi32(0x000000FF));
+        packedColor = _mm_or_si128(packedColor, _mm_srli_si128(packedColor, 3));
+        packedColor = _mm_or_si128(packedColor, _mm_srli_si128(packedColor, 6));
+        uint32_t finalColor;// = SSEPackChars(_mm_cvttps_epi32(blended));
+        _mm_store_ss((float*)&finalColor, _mm_castsi128_ps(packedColor));
 #endif
 
         //Write pixel to memory

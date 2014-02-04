@@ -3,7 +3,7 @@
 #if _WIN32
 #include "GdiPlusInitializer.h"
 #endif
-#include "LPVirtualScreen.h"
+#include "Utility/LPVirtualScreen.h"
 #include "Touch.h"
 #include <set>
 

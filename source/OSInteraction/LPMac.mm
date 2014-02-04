@@ -10,9 +10,9 @@
 
 #import "stdafx.h"
 #import "LPMac.h"
-#import "LPGeometry.h"
-#import "LPIcon.h"
-#import "LPImage.h"
+#import "Utility/LPGeometry.h"
+#import "Overlay/LPIcon.h"
+#import "Overlay/LPImage.h"
 
 #import <NSArray.h>
 #import <NSBundle.h>
@@ -39,7 +39,7 @@ void LPMac::cursorPosition(float &x, float &y)
 {
   NSPoint mouseLoc;
   mouseLoc = [NSEvent mouseLocation];
-  
+
   NSRect screenRect;
   NSArray *screenArray = [NSScreen screens];
 //   unsigned screenCount = [screenArray count];
@@ -49,7 +49,7 @@ void LPMac::cursorPosition(float &x, float &y)
   screenRect = [screen visibleFrame];
 
 //   NSRect screenRect = [[NSScreen mainScreen] frame];
-  
+
   x = mouseLoc.x;
   y = screenRect.size.height - mouseLoc.y;
 }

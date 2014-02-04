@@ -11,7 +11,7 @@
 #if !defined(__LPGesture_h__)
 #define __LPGesture_h__
 
-#include "LPGeometry.h"
+#include "Utility/LPGeometry.h"
 #include "Heartbeat.h"
 #include "BoundedQueue.h"
 

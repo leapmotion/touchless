@@ -8,8 +8,8 @@
 
 ===================================================================================================================*/
 #include "stdafx.h"
-#include "LPIcon.h"
-#include "LPImage.h"
+#include "Overlay/LPIcon.h"
+#include "Overlay/LPImage.h"
 
 #if _WIN32
 /// <summary>
