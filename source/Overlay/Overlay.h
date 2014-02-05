@@ -13,6 +13,7 @@
 #include "AxisAlignedBox.h"
 #include "FileSystemUtil.h"
 
+#include <memory>
 #include <vector>
 
 class LPIcon;

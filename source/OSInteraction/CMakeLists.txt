@@ -48,6 +48,8 @@ elseif(BUILD_LINUX)
   SET(OS_INTERACTION_SRCS
     LPLinux.h
     LPLinux.cpp
+    OSInteractionLinux.h
+    OSInteractionLinux.cpp
     ${OS_INTERACTION_SRCS}
   )
 endif()

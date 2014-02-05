@@ -41,7 +41,7 @@ set(PROJECT_TEST_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR})
 if(BUILD_LINUX)
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-  set(CMAKE_INSTALL_RPATH "\${ORIGIN}:\${ORIGIN}/../lib/Leap")
+  set(CMAKE_INSTALL_RPATH ${PROJECT_BINARY_DIR}/../LeapSDK/lib/x64) # maybe make a cmake option to specify x86 or x64
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 endif()
 
@@ -59,7 +59,7 @@ endif()
 set(BASE_MSVC_FLAGS /arch:SSE2)
 # misnomer: The above MSVC flags are not used in Debug mode
 set(PRODUCTION_MSVC_FLAGS /GL /Ox /Oi /Ot /Ob2 ) # TODO: remove whole-program optimization
-set(BASE_GCC_FLAGS -std=c++0x -fpermissive -msse2 -Wall -Wno-reorder -Wno-strict-aliasing -Wno-missing-braces -Wno-uninitialized -Wno-sequence-point )
+set(BASE_GCC_FLAGS -std=c++0x -fpermissive -msse2 -Wall -Wno-reorder -Wno-strict-aliasing -Wno-missing-braces -Wno-uninitialized -Wno-sequence-point -Wno-unused-local-typedefs )
 if(BUILD_64_BIT)
   set(BASE_GCC_FLAGS ${BASE_GCC_FLAGS} -fPIC )
 else()
@@ -411,6 +411,7 @@ if(DEFINED QT_QMAKE_EXECUTABLE)
       set(LEAP_LIBRARIES ${PROJECT_BINARY_DIR}/../LeapSDK/lib/libLeap.dylib)
     else()
       #linux
+      set(LEAP_LIBRARIES ${PROJECT_BINARY_DIR}/../LeapSDK/lib/x64/libLeap.so)
     endif()
   endif()
 endif()
