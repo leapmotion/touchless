@@ -7,11 +7,6 @@
 #include "OSInteraction.h"
 #include "Overlay.h"
 #include "GestureInteractionManager.h"
-#include "GestureInteractionManager.h"
-#include "OutputPeripheralBasic.h"
-#include "OutputPeripheralFingerMouse.h"
-#include "OutputPeripheralGestureOnly.h"
-#include "TouchPeripheral.h"
 
 #include <qobject.h>
 

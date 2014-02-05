@@ -66,10 +66,6 @@ GestureInteractionManager::~GestureInteractionManager() {
   delete m_filteredRTS;
 }
 
-//OutputPeripheralImplementation* OutputPeripheralImplementation::New(void) {
-//  return new OutputPeripheralImplementation;
-//}
-
 void GestureInteractionManager::processFrame (const Frame& frame, const Frame& sinceFrame) {
   m_timedFrameHistory.addFrame(frame.timestamp(), frame);
   m_interactionBox = frame.interactionBox();
