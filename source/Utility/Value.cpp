@@ -14,13 +14,7 @@
 #endif
 #include "Value.h"
 #include <stdint.h>
-#ifdef __APPLE__
-// workaround for clang+libc++ bug 'call to isnan() is ambiguous'
-#include <math.h>
-#define _isnan std::isnan
-#else
 #include <cmath>
-#endif
 
 std::string Value::ToJSON(bool escapeSlashes, bool prettify) const
 {
@@ -94,7 +88,7 @@ bool Value::toStream(std::ostream& stream, bool asJSON, bool escapeSlashes, int 
     stream << Cast<long long>();
   } else if (Is<double>()) {
     const double value = Cast<double>();
-    if (!_isnan(value)) {
+    if (!std::isnan(value)) {
       stream << value;
     } else {
       stream << "null"; // NaN is not valid JSON, use null instead
