@@ -7,7 +7,7 @@
 #include "Touch.h"
 #include <set>
 
-using Leap::Touch;
+using Touchless::Touch;
 
 class TouchManager {
 public:

@@ -22,6 +22,8 @@ if(BUILD_WINDOWS)
     GdiPlusInitializer.h
     GdiPlusInitializer.cpp
     InterfaceCodes.h
+    OSInteractionWin.h
+    OSInteractionWin.cpp
     TouchManagerWin7Driver.cpp
     TouchManagerWin7Driver.h
     TouchManagerWin7Undocumented.cpp
@@ -37,6 +39,8 @@ elseif(BUILD_MAC)
   SET(OS_INTERACTION_SRCS
     LPMac.h
     LPMac.mm
+    OSInteractionMac.h
+    OSInteractionMac.cpp
     ${OS_INTERACTION_SRCS}
   )
   include_directories(${CMAKE_OSX_SYSROOT}/${APPKIT_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${FOUNDATION_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${QUARTZ_CORE_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${CARBON_FRAMEWORK}/Frameworks/HIToolbox.framework/Headers)

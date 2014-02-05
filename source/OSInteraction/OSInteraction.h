@@ -5,50 +5,45 @@
 
 #include "Leap.h"
 
-#if __APPLE__
-#include "OSInteraction/LPMac.h"
-#elif !defined _WIN32
-#include "OSInteraction/LPLinux.h"
-#endif
 #include "Utility/LPVirtualScreen.h"
-#include "Touch.h"
-#include "TouchManager.h"
-
 #include "OSInteraction/LPGesture.h"
-#include <boost/thread/mutex.hpp>
 
 class LPImage;
 
 namespace Touchless {
+class TouchEvent;
 using Leap::Frame;
 using Leap::Vector;
-using Leap::TouchEvent;
 
 class OSInteractionDriver
 {
 public:
   OSInteractionDriver(LPVirtualScreen &virtualScreen);
-  ~OSInteractionDriver();
+  virtual ~OSInteractionDriver();
+
+  virtual bool initializeTouch() = 0;
+  virtual void clickDown(int button, int number = 1) = 0;
+  virtual void clickUp(int button, int number = 1) = 0;
+  virtual bool cursorPosition(float* fx, float* fy) const = 0;
+  virtual void setCursorPosition(float fx, float fy, bool absolute = true) = 0;
+  virtual void cancelGestureEvents() = 0;
+  virtual void applyCharms(const Leap::Vector& aspectNormalized, int numPointablesActive, int& charmsMode) = 0;
+  virtual bool useCharmHelper() const = 0;
+  virtual bool checkTouching(const Vector& position, float noTouchBorder) const = 0;
+  virtual void emitTouchEvent(const TouchEvent& evt) = 0;
+  virtual bool touchAvailable() const = 0;
+  virtual int numTouchScreens() const = 0;
+  virtual void emitKeyboardEvent(int key, bool down) = 0;
+  virtual void emitKeyboardEvents(int* keys, int numKeys, bool down) = 0;
+  virtual void syncPosition() = 0;
 
   static OSInteractionDriver* New(LPVirtualScreen &virtualScreen);
 
-  void destroy();
-
-  bool initializeTouch();
-
   void useDefaultScreen(bool use);
 
-  void clickDown(int button, int number = 1);
-  void clickUp(int button, int number = 1);
   bool isClickedDown(int button) const;
   void keyDown(int code);
   void keyUp(int code);
-
-  bool cursorPosition(float* fx, float* fy) const;
-  void setCursorPosition(float fx, float fy, bool absolute = true);
-
-  bool emitGestureEvents(const Frame& frame, const Frame& sinceFrame);
-  void cancelGestureEvents();
 
   uint32_t gestureType() const;
   bool beginGesture(uint32_t gestureType);
@@ -57,31 +52,15 @@ public:
   bool applyRotation(float rotation);
   bool applyScroll(float dx, float dy, int64_t timeDiff = 0);
   bool applyDesktopSwipe(float dx, float dy);
-  void applyCharms(const Leap::Vector& aspectNormalized, int numPointablesActive, int& charmsMode);
 
-  bool useCharmHelper() const;
-
-  bool checkTouching(const Vector& position, float noTouchBorder) const;
-  void emitTouchEvent(const TouchEvent& evt);
-
-  bool touchAvailable() const;
-
-  int numTouchScreens() const;
-
-  void emitKeyboardEvent(int key, bool down);
-  void emitKeyboardEvents(int* keys, int numKeys, bool down);
-  void syncPosition();
-
+protected:
   enum { NUM_BUTTONS = 8 };
 
   LPVirtualScreen &m_virtualScreen;
   LPGesture        m_gesture;
-  TouchManager    *m_touchManager;
   bool             m_movingCursor;
-  boost::mutex     m_touchMutex;
   bool             m_buttonDown;
   bool             m_clickedButtons[NUM_BUTTONS];
-  bool             m_useCharmHelper;
 
 
 };

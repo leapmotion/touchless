@@ -1,7 +1,8 @@
 #ifndef __TouchPeripheral_h__
 #define __TouchPeripheral_h__
 
-#include "OutputPeripheralImplementation.h"
+#include "Overlay/Overlay.h"
+#include "OSInteraction/OSInteraction.h"
 #include "OutputPeripheralMode.h"
 #include "Leap.h"
 

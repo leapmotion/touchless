@@ -13,6 +13,7 @@
 #include "Utility/CategoricalFilter.h"
 #include "Utility/RollingMean.h"
 #include "Utility/StateMachine.h"
+#include "OSInteraction/Touch.h"
 
 #include <vector>
 
@@ -25,7 +26,6 @@ using Leap::PointableList;
 using Leap::Hand;
 using Leap::Vector;
 using Leap::InteractionBox;
-using Leap::TouchEvent;
 
 class OSInteractionDriver;
 class OverlayDriver;

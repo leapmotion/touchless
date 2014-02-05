@@ -6,7 +6,7 @@
 
 class TouchManager;
 
-namespace Leap {
+namespace Touchless {
 class Touch {
 public:
   Touch(unsigned int id, double x = 0, double y = 0, bool touching = true, uint32_t orientation = 90):
@@ -73,8 +73,8 @@ namespace std {
     struct hash;
 
     template<>
-    struct hash<Leap::Touch> {
-      size_t operator()(const Leap::Touch& rhs) const {
+    struct hash<Touchless::Touch> {
+      size_t operator()(const Touchless::Touch& rhs) const {
         return rhs;
       }
     };
