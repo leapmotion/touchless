@@ -18,7 +18,7 @@
 
 #if _WIN32
 #define isnan _isnan
-#else
+#elseif __APPLE__
 using std::isnan;
 #endif
 
