@@ -50,10 +50,10 @@ bool OverlayDriver::initializeOverlay()
   }
 
   for (int i=0; i<m_numOverlayPoints; i++) {
-    m_overlayPoints.push_back(std::shared_ptr<LPIcon>(new LPIcon()));
+    m_overlayPoints.push_back(std::shared_ptr<LPIcon>(LPIcon::New()));
   }
   for (int i=0; i<m_numOverlayImages; i++) {
-    m_overlayImages.push_back(std::shared_ptr<LPImage>(new LPImage()));
+    m_overlayImages.push_back(std::shared_ptr<LPImage>(LPImage::New()));
   }
   if (m_filledImageIdx >= m_numOverlayImages) {
     m_filledImageIdx = (m_numOverlayImages > 0) ? m_numOverlayImages - 1 : 0;
@@ -109,7 +109,7 @@ bool OverlayDriver::normalizedToScreen(const Vector& position, Vector& output, V
   return isOkay;
 }
 
-float OverlayDriver::acceptableClampDistance() const
+float OverlayDriver::acceptableClampDistance()
 {
   return 0.6f;
 }
@@ -241,11 +241,11 @@ void OverlayDriver::drawImageIcon(int iconIndex, int imageIndex, float x, float 
 }
 
 
-#if __APPLE__
 void OverlayDriver::flushOverlay()
 {
+#if __APPLE__
   m_overlay.Flush();
-}
 #endif
+}
 
 }

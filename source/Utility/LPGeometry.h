@@ -86,6 +86,15 @@ static inline LPRect LPRectUnion(const LPRect& r1, const LPRect& r2)
 
 #if !_WIN32
 
+#pragma pack(push, 1)
+typedef struct tagRGBQUAD {
+  unsigned char    rgbBlue;
+  unsigned char    rgbGreen;
+  unsigned char    rgbRed;
+  unsigned char    rgbReserved;
+} RGBQUAD;
+#pragma pack(pop)
+
 typedef struct _RECT {
   int32_t left;
   int32_t right;

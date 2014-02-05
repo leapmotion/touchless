@@ -36,7 +36,7 @@ public:
   bool deviceToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
   bool normalizedToScreen(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
   bool normalizedToAspect(const Vector& position, Vector& output, Vector& clampVec, float scale = 1, bool clamp = true);
-  float acceptableClampDistance() const;
+  static float acceptableClampDistance();
 
   void setIconVisibility(int index, bool visible);
   int findImageIndex(float z, float touchThreshold, float touchRange) const;
@@ -53,9 +53,7 @@ public:
 
   bool loadIfAvailable(std::shared_ptr<LPImage>& image, const std::string& fileName);
 
-#if __APPLE__
   void flushOverlay();
-#endif
 
   LPVirtualScreen                        &m_virtualScreen;
   std::vector<std::shared_ptr<LPImage> >  m_overlayImages;

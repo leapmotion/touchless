@@ -18,11 +18,26 @@ if(BUILD_MAC)
   SET(OVERLAY_SRCS
     LPOverlay.h
     LPOverlay.mm
+  	LPIconMac.h
+  	LPIconMac.cpp
+  	LPImageMac.h
+  	LPImageMac.cpp
     ${OVERLAY_SRCS}
   )
-  set_property(SOURCE LPIcon.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
-  set_property(SOURCE LPImage.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
+  # set_property(SOURCE LPIcon.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
+  # set_property(SOURCE LPImage.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
+  set_property(SOURCE LPImageMac.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
   include_directories(${CMAKE_OSX_SYSROOT}/${APPKIT_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${FOUNDATION_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${QUARTZ_CORE_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${CARBON_FRAMEWORK}/Frameworks/HIToolbox.framework/Headers)
+  elseif(BUILD_WINDOWS)
+    SET(OVERLAY_SRCS
+      LPIconWin.h
+      LPIconWin.cpp
+      LPIconWindowClass.h
+      LPIconWindowClass.cpp
+      LPImageWin.h
+      LPImageWin.cpp
+      ${OVERLAY_SRCS}
+    )
 endif()
 
 ADD_MSVC_PRECOMPILED_HEADER("stdafx.h" "stdafx.cpp" OVERLAY_SRCS)
