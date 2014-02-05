@@ -61,7 +61,11 @@ void TouchManager::setTouches(std::set<Touch>&& touches) {
   std::swap(m_touches, removedTouches);
 
   // Then we consider the passed touches to be the new touches:
+#if __APPLE__
+  m_touches = touches;
+#else
   m_touches = std::move(touches);
+#endif
 
   // Handle new and existing touches
   for(auto iter = m_touches.begin(); iter != m_touches.end(); ++iter) {
