@@ -1,4 +1,4 @@
-// #include "stdafx.h"
+#include "stdafx.h"
 #include "OSInteractionWin.h"
 #include "Utility/LPVirtualScreen.h"
 #include EXCEPTION_PTR_HEADER
@@ -50,7 +50,7 @@ void windowsKeyCombo(WORD key1, WORD key2, WORD key3) {
 
 OSInteractionDriverWin::OSInteractionDriverWin(LPVirtualScreen &virtualScreen)
   : OSInteractionDriver(virtualScreen),
-    m_touchManger(nullptr),
+    m_touchManager(nullptr),
     m_useCharmHelper(true)
 { }
 

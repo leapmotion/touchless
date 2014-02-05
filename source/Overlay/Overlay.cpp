@@ -1,4 +1,4 @@
-// #include "stdafx.h"
+#include "stdafx.h"
 #include "Overlay.h"
 #include "Overlay/LPIcon.h"
 #include "Overlay/LPImage.h"

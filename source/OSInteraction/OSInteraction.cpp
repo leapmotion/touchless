@@ -1,4 +1,4 @@
-// #include "stdafx.h"
+#include "stdafx.h"
 #include "OSInteraction.h"
 #include "Utility/LPVirtualScreen.h"
 #include EXCEPTION_PTR_HEADER

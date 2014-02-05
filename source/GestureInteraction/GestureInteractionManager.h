@@ -5,8 +5,8 @@
 
 #include "Leap.h"
 
-#include "OSInteraction.h"
-#include "Overlay.h"
+#include "OSInteraction/OSInteraction.h"
+#include "Overlay/Overlay.h"
 
 #include "Utility/TimedHistory.h"
 #include "PositionalDeltaTracker.h"

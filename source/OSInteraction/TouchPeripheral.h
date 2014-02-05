@@ -3,7 +3,7 @@
 
 #include "Overlay/Overlay.h"
 #include "OSInteraction/OSInteraction.h"
-#include "OutputPeripheralMode.h"
+#include "GestureInteraction/GestureInteractionManager.h"
 #include "Leap.h"
 
 namespace Touchless

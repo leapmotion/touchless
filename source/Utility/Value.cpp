@@ -16,6 +16,12 @@
 #include <stdint.h>
 #include <cmath>
 
+#if _WIN32
+#define isnan _isnan
+#else
+using std::isnan;
+#endif
+
 std::string Value::ToJSON(bool escapeSlashes, bool prettify) const
 {
   std::ostringstream oss;
@@ -88,7 +94,7 @@ bool Value::toStream(std::ostream& stream, bool asJSON, bool escapeSlashes, int 
     stream << Cast<long long>();
   } else if (Is<double>()) {
     const double value = Cast<double>();
-    if (!std::isnan(value)) {
+    if (!isnan(value)) {
       stream << value;
     } else {
       stream << "null"; // NaN is not valid JSON, use null instead

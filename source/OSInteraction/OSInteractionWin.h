@@ -18,7 +18,6 @@ class LPImage;
 namespace Touchless {
 using Leap::Frame;
 using Leap::Vector;
-using Leap::TouchEvent;
 
 class OSInteractionDriverWin : public OSInteractionDriver
 {

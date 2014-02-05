@@ -1,4 +1,9 @@
 #include "stdafx.h"
+#include <algorithm>
+using std::min;
+using std::max;
+#include <windows.h>
+#include <objidl.h>
 #include "GdiPlusInitializer.h"
 #include <GdiPlus.h>
 
