@@ -8,7 +8,7 @@
 
  ===================================================================================================================*/
 #include "LPGesture.h"
-#include "OutputPeripheralFingerMouse.h"
+#include "FingerMouse.h"
 
 #if __APPLE__
 #include <sys/sysctl.h>
@@ -16,16 +16,16 @@
 
 namespace Touchless {
 
-const bool OutputPeripheralFingerMouse::UseAbsolutePositioning = true;
-const bool OutputPeripheralFingerMouse::UseAcceleratedScrolling = false;//true;
-const bool OutputPeripheralFingerMouse::UseAcceleratedDesktopSwipe = false;//true;
-bool OutputPeripheralFingerMouse::Use3PlusFingerGestures = true;
-bool OutputPeripheralFingerMouse::UseRotateandZoom = true;
-bool OutputPeripheralFingerMouse::DisableAllOverlays = false;
-OutputPeripheralFingerMouse::CURSOR_MOVE_TYPE OutputPeripheralFingerMouse::CursorMoveType = ANY_HOVER;
-float OutputPeripheralFingerMouse::ZoomScaleFactor = 1.5;
-float OutputPeripheralFingerMouse::TranslationScaleFactor = 1.5;
-const int64_t OutputPeripheralFingerMouse::HoverDurationToActivateDrag = 500*OutputPeripheralFingerMouse::MILLISECONDS;
+const bool FingerMouse::UseAbsolutePositioning = true;
+const bool FingerMouse::UseAcceleratedScrolling = false;//true;
+const bool FingerMouse::UseAcceleratedDesktopSwipe = false;//true;
+bool FingerMouse::Use3PlusFingerGestures = true;
+bool FingerMouse::UseRotateandZoom = true;
+bool FingerMouse::DisableAllOverlays = false;
+FingerMouse::CURSOR_MOVE_TYPE FingerMouse::CursorMoveType = ANY_HOVER;
+float FingerMouse::ZoomScaleFactor = 1.5;
+float FingerMouse::TranslationScaleFactor = 1.5;
+const int64_t FingerMouse::HoverDurationToActivateDrag = 500*FingerMouse::MILLISECONDS;
 
 // ////////////////////////////////////////////////////
 //OUTPUT_MODE_FINGER_MOUSE process helper functions
@@ -44,7 +44,7 @@ const int64_t OutputPeripheralFingerMouse::HoverDurationToActivateDrag = 500*Out
 //
 // The states correspond roughly exactly with the state of interaction.
 
-OutputPeripheralFingerMouse::OutputPeripheralFingerMouse(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
+FingerMouse::FingerMouse(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
   :
   GestureInteractionManager(osInteractionDriver, overlayDriver),
   m_drawOverlays(true),
@@ -54,7 +54,7 @@ OutputPeripheralFingerMouse::OutputPeripheralFingerMouse(OSInteractionDriver& os
   m_lastClickTime(0),
   m_mountainLionOrNewer(false)
 {
-  m_fingerMouseStateMachine.SetOwnerClass(this, "OutputPeripheralFingerMouse");
+  m_fingerMouseStateMachine.SetOwnerClass(this, "FingerMouse");
 
   // This tells the state machine to log transitions to cerr.  An optional second can be used to specify
   // an event ID to ignore (such as something that happens every single frame) to avoid spamming the console.
@@ -73,7 +73,7 @@ OutputPeripheralFingerMouse::OutputPeripheralFingerMouse(OSInteractionDriver& os
 #endif
 }
 
-OutputPeripheralFingerMouse::~OutputPeripheralFingerMouse() {
+FingerMouse::~FingerMouse() {
   for (int i = 0; i < m_numOverlayImages; ++i) {
     setIconVisibility(i, false);
   }
@@ -83,12 +83,12 @@ OutputPeripheralFingerMouse::~OutputPeripheralFingerMouse() {
   m_fingerMouseStateMachine.Shutdown();
 }
 
-void OutputPeripheralFingerMouse::processFrameInternal() {
+void FingerMouse::processFrameInternal() {
   m_noTouching = std::count_if(m_relevantPointables.begin(), m_relevantPointables.end(),
                           [this] (const Pointable& pointable) {return pointable.touchZone() == Pointable::ZONE_TOUCHING;}) == 0;
   // initialize finger mouse state machine if necessary
   if (!m_fingerMouseStateMachine.IsInitialized()) {
-    m_fingerMouseStateMachine.Initialize(&OutputPeripheralFingerMouse::State_FingerMouse_0Fingers_NoInteraction,
+    m_fingerMouseStateMachine.Initialize(&FingerMouse::State_FingerMouse_0Fingers_NoInteraction,
                                          "State_FingerMouse_0Fingers_NoInteraction");
   }
 
@@ -109,7 +109,7 @@ void OutputPeripheralFingerMouse::processFrameInternal() {
 #endif
 }
 
-Pointable::Zone OutputPeripheralFingerMouse::identifyCollectivePointableZone (const std::vector<Pointable> &pointables) const {
+Pointable::Zone FingerMouse::identifyCollectivePointableZone (const std::vector<Pointable> &pointables) const {
   // for now, use the "maximum" of the pointables' zones, where the order is given by the enum values
   // ZONE_NONE = 0, ZONE_HOVERING = 1, ZONE_TOUCHING = 2.
 
@@ -122,7 +122,7 @@ Pointable::Zone OutputPeripheralFingerMouse::identifyCollectivePointableZone (co
   return max;
 }
 
-void OutputPeripheralFingerMouse::DrawOverlays() {
+void FingerMouse::DrawOverlays() {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -140,7 +140,7 @@ void OutputPeripheralFingerMouse::DrawOverlays() {
         // TEMP: hacky way to do hover-drag visualization
         // if we are clicking, grow the radius of the icon to indicate drag progress
         if (m_fingerMouseStateMachine.CurrentState() ==
-            &OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Clicking &&
+            &FingerMouse::State_FingerMouse_1Finger_Clicking &&
             m_clickEligibleForDrag) {
           double parameter = double(m_clickDuration) / HoverDurationToActivateDrag;
           if (parameter > 1.0) {
@@ -149,7 +149,7 @@ void OutputPeripheralFingerMouse::DrawOverlays() {
           // linearly interpolate from the touchDistance-based radius to the max dragging-icon-radius.
           radius = (1.0-parameter)*radius + parameter*30.0*0.7*0.8;
         } else if (m_fingerMouseStateMachine.CurrentState() ==
-                   &OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Dragging) {
+                   &FingerMouse::State_FingerMouse_1Finger_Dragging) {
           radius = 30.0*0.7;
         } else {
           if (touchDistance < 0.0) {
@@ -175,12 +175,12 @@ void OutputPeripheralFingerMouse::DrawOverlays() {
   }
 }
 
-void OutputPeripheralFingerMouse::stopActiveEvents()
+void FingerMouse::stopActiveEvents()
 {
   m_fingerMouseStateMachine.RunCurrentState(OMFM__LOST_FOCUS);
 }
 
-void OutputPeripheralFingerMouse::DrawPointingOverlay() {
+void FingerMouse::DrawPointingOverlay() {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -188,7 +188,7 @@ void OutputPeripheralFingerMouse::DrawPointingOverlay() {
   drawOverlayForPointable(m_currentFrame.pointable(favoritePointableId()));
 }
 
-void OutputPeripheralFingerMouse::DrawClickingOrDraggingOverlay() {
+void FingerMouse::DrawClickingOrDraggingOverlay() {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -212,13 +212,13 @@ void OutputPeripheralFingerMouse::DrawClickingOrDraggingOverlay() {
     // TEMP: hacky way to do hover-drag visualization
     // if we are clicking, grow the radius of the icon to indicate drag progress
     if (m_fingerMouseStateMachine.CurrentState() ==
-        &OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Clicking &&
+        &FingerMouse::State_FingerMouse_1Finger_Clicking &&
         m_clickEligibleForDrag) {
       double parameter = double(m_clickDuration) / HoverDurationToActivateDrag;
       // linearly interpolate from the touchDistance-based radius to the max dragging-icon-radius.
       radius = (1.0-parameter)*radius + parameter*30.0*0.7*0.8;
     } else if (m_fingerMouseStateMachine.CurrentState() ==
-               &OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Dragging) {
+               &FingerMouse::State_FingerMouse_1Finger_Dragging) {
       radius = 30.0*0.7;
     } else {
       if (touchDistance < 0.0) {
@@ -237,7 +237,7 @@ void OutputPeripheralFingerMouse::DrawClickingOrDraggingOverlay() {
   }
 }
 
-void OutputPeripheralFingerMouse::DrawScrollOverlay(bool doubleHorizontalDots, bool doubleVerticalDots) {
+void FingerMouse::DrawScrollOverlay(bool doubleHorizontalDots, bool doubleVerticalDots) {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -257,7 +257,7 @@ void OutputPeripheralFingerMouse::DrawScrollOverlay(bool doubleHorizontalDots, b
   }
 }
 
-void OutputPeripheralFingerMouse::DrawRotateOverlay() {
+void FingerMouse::DrawRotateOverlay() {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -277,7 +277,7 @@ void OutputPeripheralFingerMouse::DrawRotateOverlay() {
   }
 }
 
-void OutputPeripheralFingerMouse::DrawZoomOverlay() {
+void FingerMouse::DrawZoomOverlay() {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -297,7 +297,7 @@ void OutputPeripheralFingerMouse::DrawZoomOverlay() {
   }
 }
 
-void OutputPeripheralFingerMouse::DrawDesktopSwipeOverlay(bool movementGlow) {
+void FingerMouse::DrawDesktopSwipeOverlay(bool movementGlow) {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -317,7 +317,7 @@ void OutputPeripheralFingerMouse::DrawDesktopSwipeOverlay(bool movementGlow) {
   }
 }
 
-void OutputPeripheralFingerMouse::DrawVerticalPalmOverlay() {
+void FingerMouse::DrawVerticalPalmOverlay() {
   if (!m_drawOverlays || DisableAllOverlays) {
     return;
   }
@@ -342,7 +342,7 @@ void OutputPeripheralFingerMouse::DrawVerticalPalmOverlay() {
   }
 }
 
-void OutputPeripheralFingerMouse::setDeltaTrackedAbsoluteCursorPositionHand (const Hand &hand, Vector *calculatedScreenPosition) {
+void FingerMouse::setDeltaTrackedAbsoluteCursorPositionHand (const Hand &hand, Vector *calculatedScreenPosition) {
   if (!hand.isValid()) {
     return;
   }
@@ -351,7 +351,7 @@ void OutputPeripheralFingerMouse::setDeltaTrackedAbsoluteCursorPositionHand (con
   GestureInteractionManager::setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
 }
 
-void OutputPeripheralFingerMouse::setDeltaTrackedAbsoluteCursorPositionPointable (const Pointable &pointable, Vector *calculatedScreenPosition) {
+void FingerMouse::setDeltaTrackedAbsoluteCursorPositionPointable (const Pointable &pointable, Vector *calculatedScreenPosition) {
   if (!pointable.isValid()) {
     return;
   }
@@ -360,7 +360,7 @@ void OutputPeripheralFingerMouse::setDeltaTrackedAbsoluteCursorPositionPointable
   GestureInteractionManager::setAbsoluteCursorPosition(m_positionalDeltaTracker.getTrackedPosition(), calculatedScreenPosition);
 }
 
-void OutputPeripheralFingerMouse::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
+void FingerMouse::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
   float scroll_dx, scroll_dy;
   if (UseAcceleratedScrolling) {
     if (currentFrame.pointables().count() == 0) {
@@ -391,7 +391,7 @@ void OutputPeripheralFingerMouse::generateScrollBetweenFrames (const Frame &curr
   applyScroll(scroll_dx, scroll_dy, currentFrame.timestamp() - sinceFrame.timestamp());
 }
 
-void OutputPeripheralFingerMouse::generateDesktopSwipeBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
+void FingerMouse::generateDesktopSwipeBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
   float scroll_dx, scroll_dy;
   if (UseAcceleratedDesktopSwipe) {
     if (currentFrame.pointables().count() == 0) {
@@ -422,7 +422,7 @@ void OutputPeripheralFingerMouse::generateDesktopSwipeBetweenFrames (const Frame
   applyDesktopSwipe(scroll_dx, scroll_dy);
 }
 
-double OutputPeripheralFingerMouse::cdGain (double magnitude,
+double FingerMouse::cdGain (double magnitude,
                                             double maxVelocity,
                                             double initialPower) const {
   //   const double maxVelocity = 20000;//3200;
@@ -437,7 +437,7 @@ double OutputPeripheralFingerMouse::cdGain (double magnitude,
   return cdGain;
 }
 
-// double OutputPeripheralFingerMouse::awesomeAccel (double velocity, double maxVelocity) const {
+// double FingerMouse::awesomeAccel (double velocity, double maxVelocity) const {
 //   if (velocity >= maxVelocity) {
 //     return velocity;
 //   } else {
@@ -445,7 +445,7 @@ double OutputPeripheralFingerMouse::cdGain (double magnitude,
 //   }
 // }
 
-bool OutputPeripheralFingerMouse::shouldBeInPalmSwipeMode () const {
+bool FingerMouse::shouldBeInPalmSwipeMode () const {
   static const double COS_X_AXIS_ANGLE_THRESHOLD = 0.75; // the cosine of the angle to the X axis
 
   //Find a hand
@@ -469,9 +469,9 @@ bool OutputPeripheralFingerMouse::shouldBeInPalmSwipeMode () const {
 
 // This macro is part of the state machine -- used for convenience, to avoid
 // having to type such a long and ugly statement.
-#define FINGERMOUSE_TRANSITION_TO(x) m_fingerMouseStateMachine.SetNextState(&OutputPeripheralFingerMouse::x, #x)
+#define FINGERMOUSE_TRANSITION_TO(x) m_fingerMouseStateMachine.SetNextState(&FingerMouse::x, #x)
 
-void OutputPeripheralFingerMouse::FingerMouse_TransitionTo_NFingers_NoInteraction () {
+void FingerMouse::FingerMouse_TransitionTo_NFingers_NoInteraction () {
   if (Use3PlusFingerGestures && shouldBeInPalmSwipeMode()) {
     FINGERMOUSE_TRANSITION_TO(State_FingerMouse_Palm_GestureRecognition);
     return;
@@ -507,7 +507,7 @@ void OutputPeripheralFingerMouse::FingerMouse_TransitionTo_NFingers_NoInteractio
 // ////////////////////////////////////////////////////
 // beginning of OUTPUT_MODE_FINGER_MOUSE state handlers
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_0Fingers_NoInteraction (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_0Fingers_NoInteraction (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       return true;
@@ -527,7 +527,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_0Fingers_NoInteraction (Stat
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Hovering (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_1Finger_Hovering (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -560,7 +560,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Hovering (StateMachi
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Clicking (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_1Finger_Clicking (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -641,7 +641,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Clicking (StateMachi
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Dragging (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_1Finger_Dragging (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -678,7 +678,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_1Finger_Dragging (StateMachi
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Hovering (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_2Fingers_Hovering (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -718,7 +718,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Hovering (StateMach
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_GestureRecognition (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_2Fingers_GestureRecognition (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -794,7 +794,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_GestureRecognition 
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Rotating (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_2Fingers_Rotating (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -847,7 +847,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Rotating (StateMach
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Scrolling (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_2Fingers_Scrolling (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -940,7 +940,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Scrolling (StateMac
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Zooming (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_2Fingers_Zooming (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -993,7 +993,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_2Fingers_Zooming (StateMachi
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_NoInteraction (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_3PlusFingers_NoInteraction (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -1035,7 +1035,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_NoInteraction (
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_Hovering (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_3PlusFingers_Hovering (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -1074,7 +1074,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_Hovering (State
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_GestureRecognition (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_3PlusFingers_GestureRecognition (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -1137,7 +1137,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_GestureRecognit
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_SwipeVertical (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_3PlusFingers_SwipeVertical (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -1192,7 +1192,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_SwipeVertical (
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_SwipeHorizontal (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_3PlusFingers_SwipeHorizontal (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -1241,7 +1241,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_3PlusFingers_SwipeHorizontal
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_Palm_GestureRecognition (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_Palm_GestureRecognition (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);
@@ -1290,7 +1290,7 @@ bool OutputPeripheralFingerMouse::State_FingerMouse_Palm_GestureRecognition (Sta
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralFingerMouse::State_FingerMouse_Palm_Swipe (StateMachineInput input) {
+bool FingerMouse::State_FingerMouse_Palm_Swipe (StateMachineInput input) {
   switch (input) {
     case OMFM__LOST_FOCUS:
       FINGERMOUSE_TRANSITION_TO(State_FingerMouse_0Fingers_NoInteraction);

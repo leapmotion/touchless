@@ -8,7 +8,7 @@
 
  ===================================================================================================================*/
 #include "LPGesture.h"
-#include "OutputPeripheralBasic.h"
+#include "BasicMode.h"
 #include <algorithm>
 
 #if __APPLE__
@@ -18,16 +18,16 @@
 namespace Touchless {
 
 #if _WIN32
-const bool OutputPeripheralBasic::UseMouseOutput = false;
+const bool BasicMode::UseMouseOutput = false;
 #else
-const bool OutputPeripheralBasic::UseMouseOutput = true;
+const bool BasicMode::UseMouseOutput = true;
 #endif
-bool OutputPeripheralBasic::DisableClicking = false;
-bool OutputPeripheralBasic::DisablePalmSwipe = true;
-bool OutputPeripheralBasic::DisableAllOverlays = false;
-bool OutputPeripheralBasic::DisableHorizontalScrolling = true;
-float OutputPeripheralBasic::TranslationScaleFactor = 1.5;
-float OutputPeripheralBasic::ZoomScaleFactor = 1.5;
+bool BasicMode::DisableClicking = false;
+bool BasicMode::DisablePalmSwipe = true;
+bool BasicMode::DisableAllOverlays = false;
+bool BasicMode::DisableHorizontalScrolling = true;
+float BasicMode::TranslationScaleFactor = 1.5;
+float BasicMode::ZoomScaleFactor = 1.5;
 
 // GENERAL OVERVIEW OF BASIC MODE STATE MACHINE
 //
@@ -43,7 +43,7 @@ float OutputPeripheralBasic::ZoomScaleFactor = 1.5;
 //
 // The states correspond roughly exactly with the state of interaction.
 
-OutputPeripheralBasic::OutputPeripheralBasic(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
+BasicMode::BasicMode(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
   :
   GestureInteractionManager(osInteractionDriver, overlayDriver),
   m_drawOverlays(true),
@@ -56,7 +56,7 @@ OutputPeripheralBasic::OutputPeripheralBasic(OSInteractionDriver& osInteractionD
   m_charmsMode(-1),
   m_updateCursor(true)
 {
-  m_basicModeStateMachine.SetOwnerClass(this, "OutputPeripheralBasic");
+  m_basicModeStateMachine.SetOwnerClass(this, "BasicMode");
 
   // This tells the state machine to log transitions to cerr.  An optional second can be used to specify
   // an event ID to ignore (such as something that happens every single frame) to avoid spamming the console.
@@ -64,29 +64,29 @@ OutputPeripheralBasic::OutputPeripheralBasic(OSInteractionDriver& osInteractionD
   //m_basicModeStateMachine.SetTransitionLogger(&std::cerr, OMB__PROCESS_FRAME);
 }
 
-OutputPeripheralBasic::~OutputPeripheralBasic() {
+BasicMode::~BasicMode() {
   m_basicModeStateMachine.Shutdown();
 #if __APPLE__
   flushOverlay();
 #endif
 }
 
-void OutputPeripheralBasic::SetIntroMode(){
-  OutputPeripheralBasic::DisableClicking = true;
-  OutputPeripheralBasic::DisablePalmSwipe = false;
+void BasicMode::SetIntroMode(){
+  BasicMode::DisableClicking = true;
+  BasicMode::DisablePalmSwipe = false;
 }
 
-void OutputPeripheralBasic::SetBasicMode(){
-  OutputPeripheralBasic::DisableClicking = false;
-  OutputPeripheralBasic::DisablePalmSwipe = true;
+void BasicMode::SetBasicMode(){
+  BasicMode::DisableClicking = false;
+  BasicMode::DisablePalmSwipe = true;
 }
 
-void OutputPeripheralBasic::processFrameInternal() {
+void BasicMode::processFrameInternal() {
   m_noTouching = std::count_if(m_relevantPointables.begin(), m_relevantPointables.end(),
                           [this] (const Pointable& pointable) {return pointable.touchZone() == Pointable::ZONE_TOUCHING;}) == 0;
   // initialize basic mode state machine if necessary
   if (!m_basicModeStateMachine.IsInitialized()) {
-    m_basicModeStateMachine.Initialize(&OutputPeripheralBasic::State_BasicMode_0Pointables_NoInteraction,
+    m_basicModeStateMachine.Initialize(&BasicMode::State_BasicMode_0Pointables_NoInteraction,
                                        "State_BasicMode_0Pointables_NoInteraction");
   }
 
@@ -118,12 +118,12 @@ void OutputPeripheralBasic::processFrameInternal() {
   }
 }
 
-void OutputPeripheralBasic::stopActiveEvents()
+void BasicMode::stopActiveEvents()
 {
   m_basicModeStateMachine.RunCurrentState(OMB__LOST_FOCUS);
 }
 
-void OutputPeripheralBasic::setAbsoluteCursorPositionHand (Vector *calculatedScreenPosition) {
+void BasicMode::setAbsoluteCursorPositionHand (Vector *calculatedScreenPosition) {
   if (!m_updateCursor) {
     return;
   }
@@ -132,7 +132,7 @@ void OutputPeripheralBasic::setAbsoluteCursorPositionHand (Vector *calculatedScr
   GestureInteractionManager::setAbsoluteCursorPositionHand(favoriteHand, calculatedScreenPosition);
 }
 
-void OutputPeripheralBasic::setAbsoluteCursorPositionPointable (Vector *calculatedScreenPosition) {
+void BasicMode::setAbsoluteCursorPositionPointable (Vector *calculatedScreenPosition) {
   if (!m_updateCursor) {
     return;
   }
@@ -141,7 +141,7 @@ void OutputPeripheralBasic::setAbsoluteCursorPositionPointable (Vector *calculat
   GestureInteractionManager::setAbsoluteCursorPositionPointable(favoritePointable, calculatedScreenPosition);
 }
 
-void OutputPeripheralBasic::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
+void BasicMode::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
   float scroll_dx, scroll_dy;
 
   // damp out small motions
@@ -159,7 +159,7 @@ void OutputPeripheralBasic::generateScrollBetweenFrames (const Frame &currentFra
   applyScroll(scroll_dx, scroll_dy, currentFrame.timestamp() - sinceFrame.timestamp());
 }
 
-void OutputPeripheralBasic::generateDesktopSwipeBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
+void BasicMode::generateDesktopSwipeBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
   float scroll_dx, scroll_dy;
 
   // damp out small motions
@@ -173,7 +173,7 @@ void OutputPeripheralBasic::generateDesktopSwipeBetweenFrames (const Frame &curr
   applyDesktopSwipe(scroll_dx, scroll_dy);
 }
 
-bool OutputPeripheralBasic::shouldBeInMultiHandMode(int32_t *pointableId1, int32_t *pointableId2) {
+bool BasicMode::shouldBeInMultiHandMode(int32_t *pointableId1, int32_t *pointableId2) {
   std::list<Hand> handList;
   if (m_currentFrame.hands().count() > 1) {
     for (int i = 0; i < m_currentFrame.hands().count(); ++i) {
@@ -196,14 +196,14 @@ bool OutputPeripheralBasic::shouldBeInMultiHandMode(int32_t *pointableId1, int32
   return false;
 }
 
-bool OutputPeripheralBasic::shouldBeInPalmSwipeMode () const {
+bool BasicMode::shouldBeInPalmSwipeMode () const {
   static const double COS_X_AXIS_ANGLE_THRESHOLD = 0.75; // the cosine of the angle to the X axis
   return !DisablePalmSwipe && !m_currentFrame.hands().isEmpty()
   && std::abs(m_currentFrame.hands()[0].palmNormal().x) >= COS_X_AXIS_ANGLE_THRESHOLD
   && m_currentFrame.hands()[0].palmPosition().z <= 150;
 }
 
-bool OutputPeripheralBasic::hasFingersTouching(const Hand& hand) const {
+bool BasicMode::hasFingersTouching(const Hand& hand) const {
   if (!hand.isValid()) {
     return false;
   }
@@ -218,9 +218,9 @@ bool OutputPeripheralBasic::hasFingersTouching(const Hand& hand) const {
 
 // This macro is part of the state machine -- used for convenience, to avoid
 // having to type such a long and ugly statement.
-#define BASICMODE_TRANSITION_TO(x) m_basicModeStateMachine.SetNextState(&OutputPeripheralBasic::x, #x)
+#define BASICMODE_TRANSITION_TO(x) m_basicModeStateMachine.SetNextState(&BasicMode::x, #x)
 
-void OutputPeripheralBasic::BasicMode_TransitionTo_NPointables_NoInteraction () {
+void BasicMode::BasicMode_TransitionTo_NPointables_NoInteraction () {
   m_lastStateChangeTime = m_currentFrame.timestamp();
   if (shouldBeInMultiHandMode()) {
     BASICMODE_TRANSITION_TO(State_BasicMode_2Hands_Hovering);
@@ -254,7 +254,7 @@ void OutputPeripheralBasic::BasicMode_TransitionTo_NPointables_NoInteraction () 
 // ////////////////////////////////////////////////////
 // beginning of OUTPUT_MODE_BASIC state handlers
 
-bool OutputPeripheralBasic::State_BasicMode_0Pointables_NoInteraction (StateMachineInput input) {
+bool BasicMode::State_BasicMode_0Pointables_NoInteraction (StateMachineInput input) {
   switch (input) {
     case SM_ENTER:
       m_updateCursor = true;
@@ -282,7 +282,7 @@ bool OutputPeripheralBasic::State_BasicMode_0Pointables_NoInteraction (StateMach
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralBasic::State_BasicMode_1Pointable_Hovering (StateMachineInput input) {
+bool BasicMode::State_BasicMode_1Pointable_Hovering (StateMachineInput input) {
   switch (input) {
     case OMB__LOST_FOCUS:
       BASICMODE_TRANSITION_TO(State_BasicMode_0Pointables_NoInteraction);
@@ -349,7 +349,7 @@ bool OutputPeripheralBasic::State_BasicMode_1Pointable_Hovering (StateMachineInp
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralBasic::State_BasicMode_1Pointable_ClickCooldown (StateMachineInput input) {
+bool BasicMode::State_BasicMode_1Pointable_ClickCooldown (StateMachineInput input) {
   switch (input) {
     case OMB__LOST_FOCUS:
       BASICMODE_TRANSITION_TO(State_BasicMode_0Pointables_NoInteraction);
@@ -410,7 +410,7 @@ bool OutputPeripheralBasic::State_BasicMode_1Pointable_ClickCooldown (StateMachi
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralBasic::State_BasicMode_2PlusPointables_Hovering (StateMachineInput input) {
+bool BasicMode::State_BasicMode_2PlusPointables_Hovering (StateMachineInput input) {
   switch (input) {
     case OMB__LOST_FOCUS:
       BASICMODE_TRANSITION_TO(State_BasicMode_0Pointables_NoInteraction);
@@ -484,7 +484,7 @@ bool OutputPeripheralBasic::State_BasicMode_2PlusPointables_Hovering (StateMachi
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralBasic::State_BasicMode_2PlusPointables_Scrolling (StateMachineInput input) {
+bool BasicMode::State_BasicMode_2PlusPointables_Scrolling (StateMachineInput input) {
   switch (input) {
     case OMB__LOST_FOCUS:
       BASICMODE_TRANSITION_TO(State_BasicMode_0Pointables_NoInteraction);
@@ -570,7 +570,7 @@ bool OutputPeripheralBasic::State_BasicMode_2PlusPointables_Scrolling (StateMach
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralBasic::State_BasicMode_2Hands_Hovering (StateMachineInput input) {
+bool BasicMode::State_BasicMode_2Hands_Hovering (StateMachineInput input) {
   int32_t pointable1, pointable2;
   switch (input) {
     case OMB__LOST_FOCUS:
@@ -618,7 +618,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_Hovering (StateMachineInput i
 }
 
 // Mouse mode only
-bool OutputPeripheralBasic::State_BasicMode_2Hands_GestureRecognition (StateMachineInput input) {
+bool BasicMode::State_BasicMode_2Hands_GestureRecognition (StateMachineInput input) {
   int32_t pointable1, pointable2;
   switch (input) {
     case OMB__LOST_FOCUS:
@@ -668,7 +668,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_GestureRecognition (StateMach
 }
 
 // Mouse mode only
-bool OutputPeripheralBasic::State_BasicMode_2Hands_Rotating (StateMachineInput input) {
+bool BasicMode::State_BasicMode_2Hands_Rotating (StateMachineInput input) {
   int32_t pointable1, pointable2;
   switch (input) {
     case OMB__LOST_FOCUS:
@@ -718,7 +718,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_Rotating (StateMachineInput i
 }
 
 // Mouse mode only
-bool OutputPeripheralBasic::State_BasicMode_2Hands_Zooming (StateMachineInput input) {
+bool BasicMode::State_BasicMode_2Hands_Zooming (StateMachineInput input) {
   int32_t pointable1, pointable2;
   switch (input) {
     case OMB__LOST_FOCUS:
@@ -768,7 +768,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_Zooming (StateMachineInput in
 }
 
 // Touch mode only
-bool OutputPeripheralBasic::State_BasicMode_2Hands_Touch (StateMachineInput input) {
+bool BasicMode::State_BasicMode_2Hands_Touch (StateMachineInput input) {
   int32_t pointable1, pointable2;
   switch (input) {
     case OMB__LOST_FOCUS:
@@ -804,7 +804,7 @@ bool OutputPeripheralBasic::State_BasicMode_2Hands_Touch (StateMachineInput inpu
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralBasic::State_BasicMode_Palm_GestureRecognition (StateMachineInput input) {
+bool BasicMode::State_BasicMode_Palm_GestureRecognition (StateMachineInput input) {
   switch (input) {
     case OMB__LOST_FOCUS:
       BASICMODE_TRANSITION_TO(State_BasicMode_0Pointables_NoInteraction);
@@ -830,7 +830,7 @@ bool OutputPeripheralBasic::State_BasicMode_Palm_GestureRecognition (StateMachin
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralBasic::State_BasicMode_Palm_Swipe (StateMachineInput input) {
+bool BasicMode::State_BasicMode_Palm_Swipe (StateMachineInput input) {
   switch (input) {
     case OMB__LOST_FOCUS:
       BASICMODE_TRANSITION_TO(State_BasicMode_0Pointables_NoInteraction);

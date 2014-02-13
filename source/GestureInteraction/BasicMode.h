@@ -8,18 +8,18 @@
 
  ===================================================================================================================*/
 
-#if !defined(__OutputPeripheralBasic_h__)
-#define __OutputPeripheralBasic_h__
+#if !defined(__BasicMode_h__)
+#define __BasicMode_h__
 
 #include "GestureInteractionManager.h"
 
 namespace Touchless {
 
-class OutputPeripheralBasic : public GestureInteractionManager {
+class BasicMode : public GestureInteractionManager {
 // This class is used for both Intro and Basic modes
 public:
-  OutputPeripheralBasic(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
-  virtual ~OutputPeripheralBasic();
+  BasicMode(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
+  virtual ~BasicMode();
   virtual void stopActiveEvents();
 
   static void SetIntroMode();
@@ -56,7 +56,7 @@ private:
   Vector                                m_clickDownScreenPosition;
   Vector                                m_scrollStartPosition;
   int                                   m_scrollDrawCount;
-  StateMachine<OutputPeripheralBasic>   m_basicModeStateMachine;
+  StateMachine<BasicMode>   m_basicModeStateMachine;
   int                                   m_lastNumIcons;
   int                                   m_charmsMode;
   int64_t                               m_lastStateChangeTime;
@@ -97,4 +97,4 @@ private:
 
 }
 
-#endif // __OutputPeripheralBasic_h__
+#endif // __BasicMode_h__

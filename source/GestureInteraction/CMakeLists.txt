@@ -11,12 +11,12 @@ include_directories(
 )
 
 SET(GESTURE_INTERACTION_API_SRCS
-  OutputPeripheralBasic.cpp
-  OutputPeripheralBasic.h
-  OutputPeripheralFingerMouse.cpp
-  OutputPeripheralFingerMouse.h
-  OutputPeripheralGestureOnly.cpp
-  OutputPeripheralGestureOnly.h
+  BasicMode.cpp
+  BasicMode.h
+  FingerMouse.cpp
+  FingerMouse.h
+  GestureOnlyMode.cpp
+  GestureOnlyMode.h
   GestureInteractionManager.cpp
   GestureInteractionManager.h
 )

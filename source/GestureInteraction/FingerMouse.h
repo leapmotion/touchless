@@ -8,17 +8,17 @@
 
  ===================================================================================================================*/
 
-#if !defined(__OutputPeripheralFingerMouse_h__)
-#define __OutputPeripheralFingerMouse_h__
+#if !defined(__FingerMouse_h__)
+#define __FingerMouse_h__
 
 #include "GestureInteractionManager.h"
 
 namespace Touchless {
 
-class OutputPeripheralFingerMouse : public GestureInteractionManager {
+class FingerMouse : public GestureInteractionManager {
 public:
-  OutputPeripheralFingerMouse(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
-  virtual ~OutputPeripheralFingerMouse();
+  FingerMouse(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
+  virtual ~FingerMouse();
   virtual void stopActiveEvents();
 
 protected:
@@ -70,7 +70,7 @@ private:
   Vector                                      m_lastClickLocation;
   Frame                                       m_gestureStart;
   Vector                                      m_clickDownScreenPosition;
-  StateMachine<OutputPeripheralFingerMouse>   m_fingerMouseStateMachine;
+  StateMachine<FingerMouse>   m_fingerMouseStateMachine;
   bool                                        m_mountainLionOrNewer;
 
 
@@ -110,4 +110,4 @@ private:
 
 }
 
-#endif // __OutputPeripheralFingerMouse_h__
+#endif // __FingerMouse_h__

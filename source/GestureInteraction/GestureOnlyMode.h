@@ -8,8 +8,8 @@
 
  ===================================================================================================================*/
 
-#if !defined(__OutputPeripheralGestureOnly_h__)
-#define __OutputPeripheralGestureOnly_h__
+#if !defined(__GestureOnlyMode_h__)
+#define __GestureOnlyMode_h__
 
 #include "GestureInteractionManager.h"
 
@@ -29,10 +29,10 @@ Perhaps cursor control and hover-to-click could also be added, though this would
 diverge slightly from "gesture only".
 */
 
-class OutputPeripheralGestureOnly : public GestureInteractionManager {
+class GestureOnlyMode : public GestureInteractionManager {
 public:
-  OutputPeripheralGestureOnly(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
-  virtual ~OutputPeripheralGestureOnly();
+  GestureOnlyMode(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver);
+  virtual ~GestureOnlyMode();
   virtual void stopActiveEvents();
 
 protected:
@@ -77,7 +77,7 @@ private:
   bool                                        m_noTouching;
   bool                                        m_justScrolled;
   Frame                                       m_gestureStart;
-  StateMachine<OutputPeripheralGestureOnly>   m_stateMachine;
+  StateMachine<GestureOnlyMode>   m_stateMachine;
   int64_t                                     m_cooldownStartTime;
   int64_t                                     m_lastStateChangeTime;
   // TODO: write "history" filter (based on Gabe's Filter interface) and use CategoricalFilter with it
@@ -107,4 +107,4 @@ private:
 
 }
 
-#endif // __OutputPeripheralGestureOnly_h__
+#endif // __GestureOnlyMode_h__

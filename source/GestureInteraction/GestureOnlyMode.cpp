@@ -8,7 +8,7 @@
 
  ===================================================================================================================*/
 #include "LPGesture.h"
-#include "OutputPeripheralGestureOnly.h"
+#include "GestureOnlyMode.h"
 
 #if __APPLE__
 #include <sys/sysctl.h>
@@ -16,14 +16,14 @@
 
 namespace Touchless {
 
-float OutputPeripheralGestureOnly::ZoomScaleFactor = 1.5;
-float OutputPeripheralGestureOnly::TranslationScaleFactor = 1.5;
-const int64_t OutputPeripheralGestureOnly::GestureRecognitionDuration = 100*MILLISECONDS;
-const float OutputPeripheralGestureOnly::BUCKET_THRESHOLD = 0.75f;
-const float OutputPeripheralGestureOnly::BUCKET_THRESHOLD_LOW = 0.50f;
+float GestureOnlyMode::ZoomScaleFactor = 1.5;
+float GestureOnlyMode::TranslationScaleFactor = 1.5;
+const int64_t GestureOnlyMode::GestureRecognitionDuration = 100*MILLISECONDS;
+const float GestureOnlyMode::BUCKET_THRESHOLD = 0.75f;
+const float GestureOnlyMode::BUCKET_THRESHOLD_LOW = 0.50f;
 
 
-OutputPeripheralGestureOnly::OutputPeripheralGestureOnly(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
+GestureOnlyMode::GestureOnlyMode(OSInteractionDriver& osInteractionDriver, OverlayDriver& overlayDriver)
   :
   GestureInteractionManager(osInteractionDriver, overlayDriver),
   m_noTouching(true),
@@ -31,7 +31,7 @@ OutputPeripheralGestureOnly::OutputPeripheralGestureOnly(OSInteractionDriver& os
   m_timedCountHistory(500*MILLISECONDS),
   m_favoriteHandId(-1)
 {
-  m_stateMachine.SetOwnerClass(this, "OutputPeripheralGestureOnly");
+  m_stateMachine.SetOwnerClass(this, "GestureOnlyMode");
 
   // This tells the state machine to log transitions to cerr.  An optional second can be used to specify
   // an event ID to ignore (such as something that happens every single frame) to avoid spamming the console.
@@ -39,11 +39,11 @@ OutputPeripheralGestureOnly::OutputPeripheralGestureOnly(OSInteractionDriver& os
   //m_stateMachine.SetTransitionLogger(&std::cerr, OMGO__PROCESS_FRAME);
 }
 
-OutputPeripheralGestureOnly::~OutputPeripheralGestureOnly() {
+GestureOnlyMode::~GestureOnlyMode() {
   m_stateMachine.Shutdown();
 }
 
-void OutputPeripheralGestureOnly::processFrameInternal() {
+void GestureOnlyMode::processFrameInternal() {
   PointableCountBucketCategory category = PCBC_OTHER;
   if (shouldBeInPalmSwipeMode()) {
     category = PCBC_PALM;
@@ -61,7 +61,7 @@ void OutputPeripheralGestureOnly::processFrameInternal() {
                                }) == 0;
   // initialize finger mouse state machine if necessary
   if (!m_stateMachine.IsInitialized()) {
-    m_stateMachine.Initialize(&OutputPeripheralGestureOnly::State_GestureRecognition, "State_GestureRecognition");
+    m_stateMachine.Initialize(&GestureOnlyMode::State_GestureRecognition, "State_GestureRecognition");
   }
 
   // make the pointable count buckets
@@ -126,7 +126,7 @@ void OutputPeripheralGestureOnly::processFrameInternal() {
 #endif
 }
 
-void OutputPeripheralGestureOnly::identifyRelevantPointables (const PointableList &pointables, std::vector<Pointable> &relevantPointables) const {
+void GestureOnlyMode::identifyRelevantPointables (const PointableList &pointables, std::vector<Pointable> &relevantPointables) const {
   // Remove all ZONE_NONE pointables, backwards pointables, pointables pointing too close to straight up or down,
   // and compare each pointable to the foremost pointable with the same hand id with a linear discriminant.
   std::map<int32_t, int32_t> best_pointables; //map hand id to pointable id
@@ -161,16 +161,16 @@ void OutputPeripheralGestureOnly::identifyRelevantPointables (const PointableLis
   relevantPointables.erase(new_end, relevantPointables.end());
 }
 
-void OutputPeripheralGestureOnly::setForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const {
+void GestureOnlyMode::setForemostPointable (const std::vector<Pointable> &relevantPointables, int32_t &foremostPointableId) const {
     identifyForemostPointable(relevantPointables, foremostPointableId);
 }
 
-void OutputPeripheralGestureOnly::stopActiveEvents()
+void GestureOnlyMode::stopActiveEvents()
 {
   m_stateMachine.RunCurrentState(OMGO__LOST_FOCUS);
 }
 
-void OutputPeripheralGestureOnly::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
+void GestureOnlyMode::generateScrollBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
   float scroll_dx, scroll_dy;
 
   // scaled scrolling
@@ -187,7 +187,7 @@ void OutputPeripheralGestureOnly::generateScrollBetweenFrames (const Frame &curr
   applyScroll(scroll_dx, scroll_dy, currentFrame.timestamp() - sinceFrame.timestamp());
 }
 
-void OutputPeripheralGestureOnly::generateDesktopSwipeBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
+void GestureOnlyMode::generateDesktopSwipeBetweenFrames (const Frame &currentFrame, const Frame &sinceFrame) {
   float scroll_dx, scroll_dy;
 
   // scaled scrolling
@@ -203,7 +203,7 @@ void OutputPeripheralGestureOnly::generateDesktopSwipeBetweenFrames (const Frame
   applyDesktopSwipe(scroll_dx, scroll_dy);
 }
 
-bool OutputPeripheralGestureOnly::shouldBeInPalmSwipeMode () const {
+bool GestureOnlyMode::shouldBeInPalmSwipeMode () const {
   static const double COS_X_AXIS_ANGLE_THRESHOLD = 0.75; // the cosine of the angle to the X axis
 
   //Find a hand
@@ -225,7 +225,7 @@ bool OutputPeripheralGestureOnly::shouldBeInPalmSwipeMode () const {
   return std::abs(hand.palmNormal().x) >= COS_X_AXIS_ANGLE_THRESHOLD;
 }
 
-bool OutputPeripheralGestureOnly::hasFingersTouching(const Hand& hand) const {
+bool GestureOnlyMode::hasFingersTouching(const Hand& hand) const {
   if (!hand.isValid()) {
     return false;
   }
@@ -240,12 +240,12 @@ bool OutputPeripheralGestureOnly::hasFingersTouching(const Hand& hand) const {
 
 // This macro is part of the state machine -- used for convenience, to avoid
 // having to type such a long and ugly statement.
-#define GESTUREONLY_TRANSITION_TO(x) m_stateMachine.SetNextState(&OutputPeripheralGestureOnly::x, #x)
+#define GESTUREONLY_TRANSITION_TO(x) m_stateMachine.SetNextState(&GestureOnlyMode::x, #x)
 
 // ////////////////////////////////////////////////////
 // beginning of OUTPUT_MODE_FINGER_MOUSE state handlers
 
-bool OutputPeripheralGestureOnly::State_GestureRecognition (StateMachineInput input) {
+bool GestureOnlyMode::State_GestureRecognition (StateMachineInput input) {
   m_positionalDeltaTracker.clear();
   m_justScrolled = false;
   auto frameWindowEnd = m_timedFrameHistory.getFrameHavingAgeAtLeast(GestureRecognitionDuration);
@@ -297,7 +297,7 @@ bool OutputPeripheralGestureOnly::State_GestureRecognition (StateMachineInput in
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralGestureOnly::State_Cooldown (StateMachineInput input) {
+bool GestureOnlyMode::State_Cooldown (StateMachineInput input) {
   switch (input) {
     case OMGO__LOST_FOCUS:
       GESTUREONLY_TRANSITION_TO(State_GestureRecognition);
@@ -323,7 +323,7 @@ bool OutputPeripheralGestureOnly::State_Cooldown (StateMachineInput input) {
 }
 
 
-bool OutputPeripheralGestureOnly::State_2Fingers_Hovering (StateMachineInput input) {
+bool GestureOnlyMode::State_2Fingers_Hovering (StateMachineInput input) {
   switch (input) {
     case OMGO__LOST_FOCUS:
       GESTUREONLY_TRANSITION_TO(State_GestureRecognition);
@@ -387,7 +387,7 @@ bool OutputPeripheralGestureOnly::State_2Fingers_Hovering (StateMachineInput inp
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralGestureOnly::State_2Fingers_Scrolling (StateMachineInput input) {
+bool GestureOnlyMode::State_2Fingers_Scrolling (StateMachineInput input) {
   switch (input) {
     case OMGO__LOST_FOCUS:
       GESTUREONLY_TRANSITION_TO(State_GestureRecognition);
@@ -457,7 +457,7 @@ bool OutputPeripheralGestureOnly::State_2Fingers_Scrolling (StateMachineInput in
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralGestureOnly::State_3PlusFingers_SwipeVertical (StateMachineInput input) {
+bool GestureOnlyMode::State_3PlusFingers_SwipeVertical (StateMachineInput input) {
   switch (input) {
     case OMGO__LOST_FOCUS:
       GESTUREONLY_TRANSITION_TO(State_GestureRecognition);
@@ -489,7 +489,7 @@ bool OutputPeripheralGestureOnly::State_3PlusFingers_SwipeVertical (StateMachine
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralGestureOnly::State_3PlusFingers_SwipeHorizontal (StateMachineInput input) {
+bool GestureOnlyMode::State_3PlusFingers_SwipeHorizontal (StateMachineInput input) {
   switch (input) {
     case OMGO__LOST_FOCUS:
       GESTUREONLY_TRANSITION_TO(State_GestureRecognition);
@@ -520,7 +520,7 @@ bool OutputPeripheralGestureOnly::State_3PlusFingers_SwipeHorizontal (StateMachi
   return false; // MUST return false if an event was not handled.
 }
 
-bool OutputPeripheralGestureOnly::State_Palm_Swipe (StateMachineInput input) {
+bool GestureOnlyMode::State_Palm_Swipe (StateMachineInput input) {
   switch (input) {
     case OMGO__LOST_FOCUS:
       GESTUREONLY_TRANSITION_TO(State_GestureRecognition);

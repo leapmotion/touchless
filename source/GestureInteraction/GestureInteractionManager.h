@@ -32,8 +32,6 @@ class OverlayDriver;
 
 enum GestureInteractionMode { OUTPUT_MODE_DISABLED = 0, OUTPUT_MODE_INTRO, OUTPUT_MODE_BASIC, OUTPUT_MODE_ADVANCED };
 
-class OutputPeripheralImplementation;
-
 class GestureInteractionManager {
 public:
 
