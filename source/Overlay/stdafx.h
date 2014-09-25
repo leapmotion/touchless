@@ -27,8 +27,6 @@ using std::max;
 #include <string>
 #include <vector>
 
-HMODULE GetHmodUser32(void);
-
 #endif // _WIN32
 
 
