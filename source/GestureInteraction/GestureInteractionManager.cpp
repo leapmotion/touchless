@@ -800,7 +800,7 @@ int GestureInteractionManager::numTouchScreens() const {
 }
 
 int GestureInteractionManager::touchVersion() const {
-  return -1;
+  return m_osInteractionDriver.touchVersion();
 }
 
 bool GestureInteractionManager::useProceduralOverlay() const {

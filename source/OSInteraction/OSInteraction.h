@@ -32,6 +32,7 @@ public:
   virtual bool checkTouching(const Vector& position, float noTouchBorder) const = 0;
   virtual void emitTouchEvent(const TouchEvent& evt) = 0;
   virtual bool touchAvailable() const = 0;
+  virtual int touchVersion() const = 0;
   virtual int numTouchScreens() const = 0;
   virtual void emitKeyboardEvent(int key, bool down) = 0;
   virtual void emitKeyboardEvents(int* keys, int numKeys, bool down) = 0;

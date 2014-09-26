@@ -103,6 +103,11 @@ bool OSInteractionDriverMac::touchAvailable() const
   return false;
 }
 
+int OSInteractionDriverMac::touchVersion() const
+{
+  return 1;
+}
+
 int OSInteractionDriverMac::numTouchScreens() const
 {
   return 0;

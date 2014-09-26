@@ -60,6 +60,7 @@ protected:
 
 public:
   // Accessor methods:
+  virtual int Version() = 0;
   const std::set<Touch>& getTouches() const { return m_touches; }
   virtual size_t numTouchScreens(void) const;
 

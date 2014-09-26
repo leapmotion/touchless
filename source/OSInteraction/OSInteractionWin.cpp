@@ -197,6 +197,10 @@ bool OSInteractionDriverWin::touchAvailable() const
   return m_touchManager != nullptr;
 }
 
+int OSInteractionDriverWin::touchVersion() const {
+  return (m_touchManager != nullptr) ? m_touchManager->Version() : 0;
+}
+
 int OSInteractionDriverWin::numTouchScreens() const
 {
   return (m_touchManager != nullptr) ? m_touchManager->numTouchScreens() : 0;

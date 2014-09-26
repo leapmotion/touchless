@@ -36,6 +36,7 @@ public:
   bool checkTouching(const Vector& position, float noTouchBorder) const;
   void emitTouchEvent(const TouchEvent& evt);
   bool touchAvailable() const;
+  int touchVersion() const;
   int numTouchScreens() const;
   void emitKeyboardEvent(int key, bool down);
   void emitKeyboardEvents(int* keys, int numKeys, bool down);

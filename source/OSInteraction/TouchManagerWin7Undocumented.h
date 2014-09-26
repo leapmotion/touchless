@@ -30,6 +30,7 @@ private:
 
 public:
   // Overrides from TouchManager:
+  int Version() override { return 7; }
   void AddTouch(const Touch& touch) override;
   void UpdateTouch(const Touch& oldTouch, const Touch& newTouch) override;
   void RemoveTouch(const Touch& touch) override;

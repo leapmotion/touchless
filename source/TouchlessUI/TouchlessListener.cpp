@@ -2,7 +2,6 @@
 #include "TouchlessListener.h"
 #include "Configuration/Config.h"
 #include "FileSystemUtil.h"
-
 #include <fstream>
 
 TouchlessListener::TouchlessListener()
@@ -115,7 +114,7 @@ void TouchlessListener::setUseMultipleMonitors(bool use) {
 }
 
 int TouchlessListener::supportedTouchVersion() const {
-  return m_outputPeripheral.touchVersion();
+  return m_osInteractionDriver->touchVersion();
 }
 
 void TouchlessListener::setReady() {
