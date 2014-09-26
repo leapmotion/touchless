@@ -27,11 +27,13 @@ RequestExecutionLevel highest
 #Leap macros
 !include "macros.nsh"
 
+!cd ..
+
 # This will be in the installer/uninstaller's title bar
 Name "Touchless For Windows"
 OutFile "TouchlessForWindows_LM.exe"
 BrandingText "Leap Motion Touchless"
-Icon touchless-icon.ico
+Icon source/TouchlessUI/touchless-icon.ico
 !define VersionNumber 9111
 !define RegKeyLocation "SOFTWARE\Leap Motion\Touchless"
 !define AppIdentifier "Touchless"
@@ -154,7 +156,7 @@ FunctionEnd
 
 #------------------------------
 #Pages
-!define MUI_ICON touchless-icon.ico
+!define MUI_ICON source/TouchlessUI/touchless-icon.ico
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
@@ -172,6 +174,7 @@ FunctionEnd
 
 Section "Install"
 
+!cd contrib
   #MSVC is required by the driver installer app - install these first thing.
   ${If} ${RunningX64}
       SetRegView 64
@@ -188,7 +191,8 @@ Section "Install"
       !insertmacro InstallRedistributable 2010 x86
     ${EndIf}
   ${EndIf}
-    
+!cd ..
+
   ${If} $ShouldCleanUpTouchless == "true"
     #MessageBox MB_OK "cleaning up touchless"
     RMDir /r "Touchless For Windows"
@@ -200,9 +204,9 @@ Section "Install"
     #MessageBox MB_OK "installing multitouch driver"
     SetOutPath "$INSTDIR\Touchless For Windows"
     ${If} ${RunningX64}
-      File /r "x64\MultiTouch"
+      File /r "drivers\x64\MultiTouch"
     ${Else}
-      File /r "x86\MultiTouch"
+      File /r "drivers\x86\MultiTouch"
     ${EndIf}
   ${EndIf}
 
