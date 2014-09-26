@@ -1,0 +1,69 @@
+
+body{
+  font-family: Arial;
+  color:#333;
+}
+.container{
+ height:100%; 
+}
+
+.fullSlideImage{
+  height:90%;
+}
+
+.buttons {
+  padding-top:10px;
+}
+
+.buttonsLastPage {
+  position:absolute;
+  left:50%;
+  top:93%;
+  margin-left:-250px;
+}
+
+.buttons img{
+  width:250px;
+}
+
+.buttonsLastPage img{
+  width:250px;
+}
+
+#messageBox{
+  height:10%;
+}
+
+#finalPage{
+  height:70%;
+}
+
+#finalPageHeader{
+  height:19%;
+}
+
+#adv{
+  height:69%;
+}
+
+#bsc{
+  height:15%;
+}
+
+th, td {
+  border: 1px solid #777;
+  padding:10px;
+}
+
+#numberOfTutorial table{
+  color:#333;
+  padding:20px;
+}
+
+#numberOfFingers{
+  padding:10px;
+}
+
+#numberOfTutorial p{
+  padding-top:20px;
+}

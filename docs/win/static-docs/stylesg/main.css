@@ -1,0 +1,67 @@
+body{
+	font-family: "myriad-pro", "Myriad Pro", Arial, sans-serif;
+	font-size: 18px;
+	line-height: 1.5em;
+}
+h1, h2, h3, h4{
+	font-weight: bold;
+}
+h1{
+	border-bottom: 1px solid lightgray;
+	font-size: 2.22em;
+	line-height: 1em;
+	margin-bottom: 1em;
+	margin-top: 1em;
+	padding-bottom: 0.8em;
+}
+h3{
+	font-size: 1.5em;
+	margin-bottom: 0.5em;
+	margin-top: 1.5em;
+}
+nav{
+	font-size: 24px;
+}
+nav ul{}
+nav ul li{
+	border: 1px solid transparent;
+	color: #757575;
+	padding: 0.6em 0.6em 0.4em;
+	line-height: 1em;
+	width: 80%;
+}
+nav ul li.active{
+	border-radius: 4px;
+	background: #f0f0f0;
+	background: -webkit-linear-gradient(top, #fcfcfc 0%,#f0f0f0 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #fcfcfc 0%,#f0f0f0 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #fcfcfc 0%,#f0f0f0 100%); /* IE10+ */
+	background: linear-gradient(to bottom, #fcfcfc 0%,#f0f0f0 100%); /* W3C */
+	border: 1px solid #d3d3d3;
+	color: #262626;
+}
+ol{
+	list-style-position: inside;
+	list-style-type: decimal;
+}
+ol li{
+	margin-bottom: 1em;
+}
+#container{
+	margin: 0 auto;
+	width: 960px;
+}
+#side-nav{
+	float: left;
+	width: 240px;
+}
+#main{
+	float: left;
+	width: 720px;
+}
+.reference{
+	display: none;
+}
+.reference.active{
+	display: block;
+}
