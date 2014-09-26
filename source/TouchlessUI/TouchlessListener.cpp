@@ -115,8 +115,7 @@ void TouchlessListener::setUseMultipleMonitors(bool use) {
 }
 
 int TouchlessListener::supportedTouchVersion() const {
-//  return m_osInteractionDriver->touchVersion();
-  return 0;
+  return m_outputPeripheral.touchVersion();
 }
 
 void TouchlessListener::setReady() {

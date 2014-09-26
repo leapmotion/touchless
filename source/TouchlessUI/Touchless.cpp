@@ -55,6 +55,20 @@ int TouchlessApp::Run() {
 
     m_listener = new TouchlessListener();
 
+#ifdef _WIN32
+    //Check to see if touch is supported at all
+    if (m_listener->supportedTouchVersion() == 0) {
+      QMessageBox messageBox;
+      messageBox.setWindowIcon(TouchlessUI::GenerateTouchlessIcon());
+      messageBox.setWindowFlags(Qt::WindowStaysOnTopHint);
+      messageBox.setWindowTitle("Touchless");
+      messageBox.setIcon(QMessageBox::Critical);
+      messageBox.setText("The Leap Motion Touch Emulation Driver was corrupted or missing.  You may need to reinstall the Leap Motion Software.");
+      messageBox.exec();
+      return 1;
+    }
+#endif
+
     m_controller = new Leap::Controller(*m_listener);
     m_UI = new TouchlessUI();
     connect(m_UI, SIGNAL(disabledModeSignal()), this, SLOT(disabledModeSlot()));
@@ -108,6 +122,11 @@ inline void loadResources() {
 
 int main(int argc, char ** argv)
 {
+#if _WIN32
+  _putenv_s("OPENSSL_CONF", "");
+#else
+  setenv("OPENSSL_CONF", "", 1);
+#endif
   loadResources();
   TouchlessApp app(argc, argv);
   if (!app.IsAlreadyRunning()) {
