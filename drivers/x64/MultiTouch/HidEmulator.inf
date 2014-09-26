@@ -1,0 +1,85 @@
+; Copyright (c) 2012-2013 Leap Motion, Inc. All rights Reserved
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4D36E97D-E325-11CE-BFC1-08002BE10318}
+Provider=%MSFT%
+DriverVer=07/15/2013,1.0.1.4
+CatalogFile=HidEmulator.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+[SourceDisksNames]
+1 = %DiskId1%,,,""
+
+[SourceDisksFiles]
+HidEmulator.sys  = 1,,
+HidEmulatorKmdf.sys  = 1,,
+
+;*****************************************
+; HidEmulator Install Section
+;*****************************************
+
+[Manufacturer]
+%StdMfg%=Standard,NTamd64
+
+[Standard.NTamd64]
+; HidEmulator fake device node pnp id
+%HidEmulator_Device.DeviceDesc%=HidEmulator_Device,HID\OcsEmulator
+
+[HidEmulator_Device.NT]
+CopyFiles=Drivers_Dir
+
+[HidEmulator_Device.NT.HW]
+AddReg=LowerFilter_AddReg
+
+[Drivers_Dir]
+HidEmulator.sys
+HidEmulatorKmdf.sys
+
+;--------------
+; Kmdf is installed as a lower filter to the HidEmulator driver
+[LowerFilter_AddReg]
+HKR,,LowerFilters,0x00010000,HidEmulatorKmdf
+
+;-------------- Service installation
+[HidEmulator_Device.NT.Services]
+AddService = HidEmulator,803,HidEmulator_Service_Inst				; SPSVCINST_TAGTOFRONT | SPSVCINST_ASSOCSERVICE | SPSVCSINST_STARTSERVICE
+AddService = HidEmulatorKmdf,0,HidEmulatorKmdf_Service_Inst
+
+; -------------- HID Emulator driver service install sections
+[HidEmulator_Service_Inst]
+DisplayName    = %HidEmulator.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\HidEmulator.sys
+AddReg         = HidEmulator_Service_Inst.Reg
+
+[HidEmulator_Service_Inst.Reg]
+HKR,,Tag,0x00010001,0x00000001
+HKR,,EventMessageFile,0x00000000,%12%\HidEmulator.sys
+HKR,,TypesSupported,0x00010001,7
+
+; -------------- HID Emulator Kmdf driver service install sections
+[HidEmulatorKmdf_Service_Inst]
+DisplayName    = %HidEmulatorKmdf.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\HidEmulatorKmdf.sys
+AddReg         = HidEmulatorKmdf_Service_Inst.Reg
+
+[HidEmulatorKmdf_Service_Inst.Reg]
+HKR,,Tag,0x00010001,0x00000001
+HKR,,EventMessageFile,0x00000000,%12%\HidEmulatorKmdf.sys
+HKR,,TypesSupported,0x00010001,7
+
+[Strings]
+MSFT = "Leap Motion, Inc."
+StdMfg = "Leap Motion, Inc."
+DiskId1 = "Leap Motion Installation Disk #1"
+HidEmulator_Device.DeviceDesc = "Leap Motion gesture emulation device driver"
+HidEmulator.SVCDESC = "HidEmulator Leap Motion Miniport"
+HidEmulatorKmdf.SVCDESC = "HidEmulatorKmdf Lower Filter"
