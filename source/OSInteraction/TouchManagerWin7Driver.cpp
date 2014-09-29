@@ -2,6 +2,7 @@
 #include "TouchManagerWin7Driver.h"
 #include "Utility/LPGeometry.h"
 #include "Utility/LPVirtualScreen.h"
+#include "OcuInterface.h"
 
 static bool DetectDriver(void) {
   COcuHidInstance* hidInstance = COcuInterface().GetFirstCompliantInterface();
@@ -24,12 +25,9 @@ TouchManagerWin7Driver::~TouchManagerWin7Driver(void) {
 }
 
 void TouchManagerWin7Driver::AddTouch(const Touch& touch) {
-  // Normalize:
-  LPPoint pt((LPFloat)touch.x(), (LPFloat)touch.y());
-  m_virtualScreen->Normalize(pt);
-
+  // TODO:  Normalize:
   // Send the report over:
-  m_hidInstance->SendReport((BYTE)touch.id(), true, pt.x, pt.y, 0.5f, 0.5f);
+  m_hidInstance->SendReport((BYTE)touch.id(), true, touch.x(), touch.y(), 0.5f, 0.5f);
 }
 
 void TouchManagerWin7Driver::UpdateTouch(const Touch& oldTouch, const Touch& newTouch) {

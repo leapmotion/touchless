@@ -60,8 +60,12 @@ add_library(OSInteraction ${Project_Libary_Mode} ${OS_INTERACTION_SRCS})
 set_target_properties(OSInteraction PROPERTIES COMPILE_FLAGS "${ADDITIONAL_COMPILER_FLAGS}")
 set_target_properties(OSInteraction PROPERTIES STATIC_LIBRARY_FLAGS "${STATIC_LIB_FLAGS}")
 
+SET(OCU_LIBS ${OCU_DRV_ROOT_DIR}/lib/win32/OcuInterface.lib
+             ${OCU_DRV_ROOT_DIR}/lib/win32/hid.lib)
+
 if(BUILD_WINDOWS)
   target_link_libraries(OSInteraction GdiPlus.lib SetupAPI.Lib ShLwApi.Lib Psapi.Lib)
+  target_link_libraries(OSInteraction ${OCU_LIBS})
 elseif(BUILD_MAC)
   target_link_libraries(OSInteraction ${APPKIT_FRAMEWORK} ${FOUNDATION_FRAMEWORK} ${QUARTZ_CORE_FRAMEWORK} ${OPENGL_FRAMEWORK} ${CARBON_FRAMEWORK})
 elseif(BUILD_LINUX)

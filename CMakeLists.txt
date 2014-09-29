@@ -418,6 +418,7 @@ endif()
 
 endif(USE_QT)
 
+set(OCU_DRV_ROOT_DIR ${EXTERNAL_LIBRARY_DIR}/ocu-drv-int-1)
 set(EIGEN_ROOT_DIR ${EXTERNAL_LIBRARY_DIR}/eigen-3.1.2)
 
 if(BUILD_MAC)
@@ -450,6 +451,7 @@ include_directories(
   ${DRV_INT_DIR}/include
   ${WEBSOCKETPP_DIR}/include
   ${EIGEN_ROOT_DIR}
+  ${OCU_DRV_ROOT_DIR}/include
   )
 
 configure_file(.editorconfig ${CMAKE_CURRENT_BINARY_DIR}/.editorconfig COPYONLY)
