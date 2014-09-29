@@ -1,7 +1,7 @@
 #if defined(_WIN32) && !defined(_TOUCH_MANAGER_WIN7_DRIVER)
 #define _TOUCH_MANAGER_WIN7_DRIVER
 #include "TouchManager.h"
-//#include "OcuHidInstance.h"
+#include "OcuHidInstance.h"
 
 class TouchManagerWin7Driver:
   public TouchManager
@@ -17,8 +17,10 @@ public:
 
   static bool formTouchInput(const Touch& touch, TOUCHINPUT* ti);
 
+  virtual int Version() { return 7; }
+
 private:
- // COcuHidInstance* m_hidInstance;
+  COcuHidInstance* m_hidInstance;
 
   // Overrides from TouchManager:
   void AddTouch(const Touch& touch) override;

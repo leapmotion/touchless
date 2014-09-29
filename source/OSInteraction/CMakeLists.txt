@@ -24,6 +24,8 @@ if(BUILD_WINDOWS)
     InterfaceCodes.h
     OSInteractionWin.h
     OSInteractionWin.cpp
+    TouchManagerWin7Driver.cpp
+    TouchManagerWin7Driver.h
     TouchManagerWin7Undocumented.cpp
     TouchManagerWin7Undocumented.h
     TouchManagerWin8.cpp
