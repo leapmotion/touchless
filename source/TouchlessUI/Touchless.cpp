@@ -140,6 +140,16 @@ int main(int argc, char ** argv)
 #include <Windows.h>
 int __stdcall WinMain(HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int iCmdShow)
 {
-  return main( __argc, __argv );
+  static const bool debugConsole = false;
+  if (debugConsole) {
+    AllocConsole();
+    freopen("CONOUT$", "wb", stdout);
+  }
+  const int retVal = main( __argc, __argv );
+  if (debugConsole) {
+    fclose(stdout);
+    FreeConsole();
+  }
+  return retVal;
 }
 #endif // _WIN32
