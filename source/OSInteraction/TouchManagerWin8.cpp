@@ -19,19 +19,20 @@ static void TranslateAndSend(const Touch& touch, ULONG pointerFlags) {
   const LONG y = static_cast<LONG>(touch.y() + 0.5);
 
   POINTER_TOUCH_INFO contact;
+  memset(&contact, 0, sizeof(POINTER_TOUCH_INFO));
   contact.touchFlags = TOUCH_FLAG_NONE;
-  contact.touchMask = TOUCH_MASK_CONTACTAREA;
+  contact.touchMask = TOUCH_MASK_CONTACTAREA | TOUCH_MASK_ORIENTATION | TOUCH_MASK_PRESSURE;
+  contact.orientation = 90;
+  contact.pressure = 32000;
   contact.rcContact.top = y - 2;
   contact.rcContact.bottom = y + 2;
   contact.rcContact.left = x - 2;
   contact.rcContact.right = x + 2;
-  contact.rcContactRaw = contact.rcContact;
 
   POINTER_INFO& ptrInfo = contact.pointerInfo;
   ptrInfo.pointerType = PT_TOUCH;
-  ptrInfo.frameId = touch.frameId();
   ptrInfo.pointerFlags = pointerFlags;
-  ptrInfo.pointerId = touch.id();
+  ptrInfo.pointerId = touch.id() % MAX_TOUCH_COUNT; //NOTE: the touch ids cannot exceed the touch count
   ptrInfo.ptPixelLocation.x = x;
   ptrInfo.ptPixelLocation.y = y;
   NtUserInjectTouchInput(1, &contact);
