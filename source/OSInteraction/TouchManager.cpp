@@ -29,11 +29,12 @@ TouchManager* TouchManager::New(LPVirtualScreen* virtualScreen) {
   if(TouchManagerWin8::s_supported)
     return new TouchManagerWin8(virtualScreen);
 
+  if(TouchManagerWin7Driver::s_supported)
+    return new TouchManagerWin7Driver(virtualScreen);
+
   if(TouchManagerWin7Undocumented::s_supported)
     return new TouchManagerWin7Undocumented(virtualScreen);
 
-  if(TouchManagerWin7Driver::s_supported)
-    return new TouchManagerWin7Driver(virtualScreen);
 #endif
   return nullptr;
 }
