@@ -8,14 +8,6 @@
 #endif
 #include <fstream>
 
-#define TOUCH_DEBUGGING_TO_FILE 0
-
-#if TOUCH_DEBUGGING_TO_FILE
-  #define LOG_TO_FILE(x) fileOutput << x
-#else
-  #define LOG_TO_FILE(x)
-#endif
-
 TouchManager::TouchManager(LPVirtualScreen* virtualScreen) :
   m_virtualScreen(virtualScreen) {
 }
