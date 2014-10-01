@@ -18,5 +18,10 @@ public:
   void AddTouch(const Touch& touch) override;
   void UpdateTouch(const Touch& oldTouch, const Touch& newTouch) override;
   void RemoveTouch(const Touch& oldTouch) override;
+  void FinishFrame() override;
+
+  void TranslateAndSend(const Touch& touch, ULONG pointerFlags);
+
+  std::vector<POINTER_TOUCH_INFO> m_TouchQueue;
 };
 

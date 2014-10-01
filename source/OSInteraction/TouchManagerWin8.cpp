@@ -10,10 +10,17 @@ static auto NtUserInjectTouchInput = (t_NtUserInjectTouchInput)GetProcAddress(Ge
 
 const bool TouchManagerWin8::s_supported = NtUserInitializeTouchInjection && NtUserInjectTouchInput;
 
+void TouchManagerWin8::FinishFrame() {
+  if (!m_TouchQueue.empty()) {
+    NtUserInjectTouchInput((int)m_TouchQueue.size(), m_TouchQueue.data());
+    m_TouchQueue.clear();
+  }
+}
+
 /// <summary>
 /// Stub structure creator, used by TouchManager overrides
 /// </summary>
-static void TranslateAndSend(const Touch& touch, ULONG pointerFlags) {
+void TouchManagerWin8::TranslateAndSend(const Touch& touch, ULONG pointerFlags) {
   // Translate:
   const LONG x = static_cast<LONG>(touch.x() - 0.5);
   const LONG y = static_cast<LONG>(touch.y() + 0.5);
@@ -35,7 +42,8 @@ static void TranslateAndSend(const Touch& touch, ULONG pointerFlags) {
   ptrInfo.pointerId = touch.id() % MAX_TOUCH_COUNT; //NOTE: the touch ids cannot exceed the touch count
   ptrInfo.ptPixelLocation.x = x;
   ptrInfo.ptPixelLocation.y = y;
-  NtUserInjectTouchInput(1, &contact);
+
+  m_TouchQueue.push_back(contact);
 }
 
 TouchManagerWin8::TouchManagerWin8(LPVirtualScreen* virtualScreen) :
@@ -60,13 +68,15 @@ void TouchManagerWin8::UpdateTouch(const Touch& oldTouch, const Touch& newTouch)
     TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT | POINTER_FLAG_DOWN);
   } else if (!newTouch.touching() && oldTouch.touching()) {
     TranslateAndSend(oldTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_UP);
-    TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_UPDATE);
+    //FIXME: We also have to send this event, but it requires a lot of plumbing to get it working correctly
+    //TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_UPDATE);
   } else if (!newTouch.touching() && !oldTouch.touching()) {
     TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_UPDATE);
   }
 }
 
 void TouchManagerWin8::RemoveTouch(const Touch& oldTouch) {
+  if (oldTouch.touching()) {
     TranslateAndSend(oldTouch, POINTER_FLAG_UP);
   } else {
     TranslateAndSend(oldTouch, POINTER_FLAG_UPDATE);
