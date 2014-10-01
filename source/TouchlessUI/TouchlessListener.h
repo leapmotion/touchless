@@ -58,7 +58,6 @@ private:
   Touchless::OverlayDriver             *m_overlayDriver;
   Touchless::GestureInteractionMode     m_desiredMode;
   Touchless::GestureInteractionManager *m_interactionManager;
-
 };
 
 #endif

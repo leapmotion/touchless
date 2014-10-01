@@ -10,7 +10,7 @@
 namespace Touchless
 {
 
-OverlayDriver::OverlayDriver(LPVirtualScreen &virtualScreen)
+OverlayDriver::OverlayDriver(LPVirtualScreen* virtualScreen)
   : m_virtualScreen(virtualScreen),
   m_UseProceduralOverlay(true),
   m_numOverlayPoints(0),
@@ -20,7 +20,7 @@ OverlayDriver::OverlayDriver(LPVirtualScreen &virtualScreen)
 
 OverlayDriver::~OverlayDriver() {}
 
-OverlayDriver* OverlayDriver::New(LPVirtualScreen &virtualScreen)
+OverlayDriver* OverlayDriver::New(LPVirtualScreen* virtualScreen)
 {
   return new OverlayDriver(virtualScreen);
 }
@@ -99,9 +99,9 @@ bool OverlayDriver::normalizedToScreen(const Vector& position, Vector& output, V
   bool isOkay = normalizedToAspect(position, output, clampVec, scale, clamp);
 
   LPPoint pos = LPPointMake(static_cast<LPFloat>(output.x), static_cast<LPFloat>(output.y));
-  pos = m_virtualScreen.Denormalize(pos);
+  pos = m_virtualScreen->Denormalize(pos);
   if (clamp) {
-    pos = m_virtualScreen.ClipPosition(pos);
+    pos = m_virtualScreen->ClipPosition(pos);
   }
   output.x = static_cast<float>(pos.x);
   output.y = static_cast<float>(pos.y);
@@ -119,7 +119,7 @@ bool OverlayDriver::normalizedToAspect(const Vector& position, Vector& output, V
   bool isOkay = true;
   output = position;
 
-  output.y = (output.y - 0.5f) * m_virtualScreen.AspectRatio() + 0.5f;
+  output.y = (output.y - 0.5f) * m_virtualScreen->AspectRatio() + 0.5f;
 
   // adjust each coordinate by the scale factor
   output.x = (scale * (output.x-0.5f)) + 0.5f;

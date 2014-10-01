@@ -8,7 +8,7 @@
 namespace Touchless
 {
 
-OSInteractionDriver* OSInteractionDriver::New(LPVirtualScreen &virtualScreen)
+OSInteractionDriver* OSInteractionDriver::New(LPVirtualScreen* virtualScreen)
 {
   return new OSInteractionDriverWin(virtualScreen);
 }
@@ -48,7 +48,7 @@ void windowsKeyCombo(WORD key1, WORD key2, WORD key3) {
   SendInput(6,input,sizeof(INPUT));
 }
 
-OSInteractionDriverWin::OSInteractionDriverWin(LPVirtualScreen &virtualScreen)
+OSInteractionDriverWin::OSInteractionDriverWin(LPVirtualScreen* virtualScreen)
   : OSInteractionDriver(virtualScreen),
     m_touchManager(nullptr),
     m_useCharmHelper(true)
@@ -116,8 +116,8 @@ void OSInteractionDriverWin::setCursorPosition(float fx, float fy, bool absolute
     position.x += 0.5f;
     position.y += 0.5f;
   }
-  position = m_virtualScreen.SetPosition(position);
-  position = m_virtualScreen.Normalize(position, false);
+  position = m_virtualScreen->SetPosition(position);
+  position = m_virtualScreen->Normalize(position, false);
 
   // When specifying absolute coordinates, they must be mapped such that max val = 65535.
 
@@ -178,7 +178,7 @@ void OSInteractionDriverWin::emitTouchEvent(const TouchEvent& evt)
       const Touch& cur = *q;
 
       // Clip to our screen:
-      auto position = m_virtualScreen.ClipPosition(LPPoint((LPFloat)cur.x(), (LPFloat)cur.y()));
+      auto position = m_virtualScreen->ClipPosition(LPPoint((LPFloat)cur.x(), (LPFloat)cur.y()));
 
       // Insert into the new map:
       unordered.insert(Touch(
@@ -258,7 +258,7 @@ void OSInteractionDriverWin::syncPosition()
     position.y = static_cast<LPFloat>(cursor.y);
   }
 
-  position = m_virtualScreen.SetPosition(position);
+  position = m_virtualScreen->SetPosition(position);
   m_gesture.setPosition(position.x, position.y);
 }
 

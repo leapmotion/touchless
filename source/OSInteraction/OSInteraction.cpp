@@ -8,7 +8,7 @@
 namespace Touchless
 {
 
-OSInteractionDriver::OSInteractionDriver(LPVirtualScreen &virtualScreen)
+OSInteractionDriver::OSInteractionDriver(LPVirtualScreen* virtualScreen)
   : m_virtualScreen(virtualScreen),
   m_movingCursor(false)
 {}
@@ -19,7 +19,7 @@ bool OSInteractionDriver::initializeTouch() {return true;}
 
 void OSInteractionDriver::useDefaultScreen(bool use)
 {
-  m_virtualScreen.UseDefaultScreen(use);
+  m_virtualScreen->UseDefaultScreen(use);
 }
 
 

@@ -18,7 +18,7 @@ using Leap::Vector;
 class OSInteractionDriver
 {
 public:
-  OSInteractionDriver(LPVirtualScreen &virtualScreen);
+  OSInteractionDriver(LPVirtualScreen* virtualScreen);
   virtual ~OSInteractionDriver();
 
   virtual bool initializeTouch() = 0;
@@ -38,7 +38,7 @@ public:
   virtual void emitKeyboardEvents(int* keys, int numKeys, bool down) = 0;
   virtual void syncPosition() = 0;
 
-  static OSInteractionDriver* New(LPVirtualScreen &virtualScreen);
+  static OSInteractionDriver* New(LPVirtualScreen* virtualScreen);
 
   void useDefaultScreen(bool use);
 
@@ -57,7 +57,7 @@ public:
 protected:
   enum { NUM_BUTTONS = 8 };
 
-  LPVirtualScreen &m_virtualScreen;
+  LPVirtualScreen* m_virtualScreen;
   LPGesture        m_gesture;
   bool             m_movingCursor;
   bool             m_buttonDown;

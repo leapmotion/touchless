@@ -23,8 +23,8 @@ TouchlessListener::TouchlessListener()
   m_updateSettings = false;
   m_useMultipleMonitors = false;
   m_ready = false;
-  m_osInteractionDriver = Touchless::OSInteractionDriver::New(m_virtualScreen);
-  m_overlayDriver       = Touchless::OverlayDriver::New(m_virtualScreen);
+  m_osInteractionDriver = Touchless::OSInteractionDriver::New(&m_virtualScreen);
+  m_overlayDriver       = Touchless::OverlayDriver::New(&m_virtualScreen);
   m_interactionManager  = Touchless::GestureInteractionManager::New(m_desiredMode, *m_osInteractionDriver, *m_overlayDriver);
 
   m_osInteractionDriver->initializeTouch();

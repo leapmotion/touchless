@@ -25,10 +25,10 @@ using Leap::Vector;
 class OverlayDriver
 {
 public:
-  OverlayDriver(LPVirtualScreen &virtualScreen);
+  OverlayDriver(LPVirtualScreen* virtualScreen);
   ~OverlayDriver();
 
-  static OverlayDriver* New(LPVirtualScreen &virtualScreen);
+  static OverlayDriver* New(LPVirtualScreen* virtualScreen);
 
   void destroy();
 
@@ -56,7 +56,7 @@ public:
 
   void flushOverlay();
 
-  LPVirtualScreen                        &m_virtualScreen;
+  LPVirtualScreen*                        m_virtualScreen;
   std::vector<std::shared_ptr<LPImage> >  m_overlayImages;
   std::vector<std::shared_ptr<LPIcon> >   m_overlayPoints;
   int                                     m_numOverlayPoints;

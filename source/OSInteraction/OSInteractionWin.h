@@ -22,7 +22,7 @@ using Leap::Vector;
 class OSInteractionDriverWin : public OSInteractionDriver
 {
 public:
-  OSInteractionDriverWin(LPVirtualScreen &virtualScreen);
+  OSInteractionDriverWin(LPVirtualScreen* virtualScreen);
   ~OSInteractionDriverWin();
 
   bool initializeTouch();
