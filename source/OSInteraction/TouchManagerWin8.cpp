@@ -45,52 +45,29 @@ TouchManagerWin8::TouchManagerWin8(LPVirtualScreen* virtualScreen) :
 }
 
 void TouchManagerWin8::AddTouch(const Touch& touch) {
-  TranslateAndSend(
-    touch,
-    POINTER_FLAG_INRANGE |
-    (
-      touch.touching() ?
-      POINTER_FLAG_INCONTACT :
-      0
-    ) |
-    POINTER_FLAG_UPDATE
-  );
+  if (touch.touching()) {
+    TranslateAndSend(touch, POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT | POINTER_FLAG_DOWN);
+  } else if (!touch.touching()) {
+    TranslateAndSend(touch, POINTER_FLAG_INRANGE | POINTER_FLAG_UPDATE);
+  }
 }
 
 void TouchManagerWin8::UpdateTouch(const Touch& oldTouch, const Touch& newTouch) {
-  TranslateAndSend(
-    newTouch,
-
-    // As long as we're updating, we're in range
-    POINTER_FLAG_INRANGE |
-
-    // Touching in the new state?
-    (
-      newTouch.touching() ?
-      (
-        POINTER_FLAG_INCONTACT |
-
-        // Transition detection:
-        (
-          oldTouch.touching() ?
-          POINTER_FLAG_UPDATE :
-          POINTER_FLAG_DOWN
-        )
-      ) :
-
-      // Transition detection:
-      (
-        oldTouch.touching() ?
-        POINTER_FLAG_UP :
-        POINTER_FLAG_UPDATE
-      )
-    )
-  );
+  if (newTouch.touching() && oldTouch.touching()) {
+    TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT | POINTER_FLAG_UPDATE);
+  } else if (newTouch.touching() && !oldTouch.touching()) {
+    TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT | POINTER_FLAG_DOWN);
+  } else if (!newTouch.touching() && oldTouch.touching()) {
+    TranslateAndSend(oldTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_UP);
+    TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_UPDATE);
+  } else if (!newTouch.touching() && !oldTouch.touching()) {
+    TranslateAndSend(newTouch, POINTER_FLAG_INRANGE | POINTER_FLAG_UPDATE);
+  }
 }
 
 void TouchManagerWin8::RemoveTouch(const Touch& oldTouch) {
-  TranslateAndSend(
-    oldTouch,
-    POINTER_FLAG_UPDATE
-  );
+    TranslateAndSend(oldTouch, POINTER_FLAG_UP);
+  } else {
+    TranslateAndSend(oldTouch, POINTER_FLAG_UPDATE);
+  }
 }
