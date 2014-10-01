@@ -61,7 +61,7 @@ OSInteractionDriverWin::~OSInteractionDriverWin()
 
 bool OSInteractionDriverWin::initializeTouch()
 {
-  m_touchManager = TouchManager::New();
+  m_touchManager = TouchManager::New(m_virtualScreen);
   return m_touchManager != nullptr;
 }
 

@@ -10,7 +10,7 @@ public:
   /// </summary>
   static bool s_supported;
 
-  TouchManagerWin7Undocumented(void);
+  TouchManagerWin7Undocumented(LPVirtualScreen* virtualScreen);
 
 private:
   /// <summary>

@@ -16,23 +16,24 @@
   #define LOG_TO_FILE(x)
 #endif
 
-TouchManager::TouchManager(void) {
+TouchManager::TouchManager(LPVirtualScreen* virtualScreen) :
+  m_virtualScreen(virtualScreen) {
 }
 
 TouchManager::~TouchManager(void) {
   clearTouches();
 }
 
-TouchManager* TouchManager::New(void) {
+TouchManager* TouchManager::New(LPVirtualScreen* virtualScreen) {
 #if _WIN32
   if(TouchManagerWin8::s_supported)
-    return new TouchManagerWin8;
+    return new TouchManagerWin8(virtualScreen);
 
   if(TouchManagerWin7Undocumented::s_supported)
-    return new TouchManagerWin7Undocumented;
+    return new TouchManagerWin7Undocumented(virtualScreen);
 
   if(TouchManagerWin7Driver::s_supported)
-    return new TouchManagerWin7Driver;
+    return new TouchManagerWin7Driver(virtualScreen);
 #endif
   return nullptr;
 }
@@ -47,7 +48,7 @@ size_t TouchManager::numTouchScreens(void) const {
 #if __APPLE__
   return 0;
 #else
-  return m_virtualScreen.NumScreens();
+  return m_virtualScreen->NumScreens();
 #endif
 }
 

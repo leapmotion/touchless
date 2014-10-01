@@ -50,7 +50,8 @@ static void TranslateAndSend(HWND hwnd, const Touch& touch, DWORD dwFlags) {
   }
 }
 
-TouchManagerWin7Undocumented::TouchManagerWin7Undocumented(void):
+TouchManagerWin7Undocumented::TouchManagerWin7Undocumented(LPVirtualScreen* virtualScreen):
+  TouchManager(virtualScreen),
   m_capture(nullptr),
   m_captureIsTouch(false)
 {

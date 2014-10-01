@@ -12,7 +12,7 @@ public:
   /// </summary>
   static const bool s_supported;
 
-  TouchManagerWin7Driver(void);
+  TouchManagerWin7Driver(LPVirtualScreen* virtualScreen);
   ~TouchManagerWin7Driver(void);
 
   static bool formTouchInput(const Touch& touch, TOUCHINPUT* ti);

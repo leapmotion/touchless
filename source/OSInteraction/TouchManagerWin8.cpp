@@ -36,7 +36,9 @@ static void TranslateAndSend(const Touch& touch, ULONG pointerFlags) {
   NtUserInjectTouchInput(1, &contact);
 }
 
-TouchManagerWin8::TouchManagerWin8(void) {
+TouchManagerWin8::TouchManagerWin8(LPVirtualScreen* virtualScreen) :
+  TouchManager(virtualScreen)
+{
   // Support exists for InitializeTouchInjection
   NtUserInitializeTouchInjection(MAX_TOUCH_COUNT, TOUCH_FEEDBACK_DEFAULT);
 }

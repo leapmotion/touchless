@@ -10,7 +10,7 @@ public:
   /// </summary>
   static const bool s_supported;
 
-  TouchManagerWin8(void);
+  TouchManagerWin8(LPVirtualScreen* virtualScreen);
 
 public:
   // Overrides from TouchManager:

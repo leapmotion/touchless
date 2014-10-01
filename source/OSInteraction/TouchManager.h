@@ -11,13 +11,13 @@ using Touchless::Touch;
 
 class TouchManager {
 public:
-  TouchManager(void);
+  TouchManager(LPVirtualScreen* virtualScreen);
   virtual ~TouchManager(void);
 
   /// <summary>
   /// Creates a new platform-specific touch manager implementation
   /// </summary>
-  static TouchManager* New(void);
+  static TouchManager* New(LPVirtualScreen* virtualScreen);
 
 protected:
   std::set<Touch> m_touches;
@@ -28,7 +28,7 @@ protected:
 #endif
 
   // Wired in because we need virtual coordinates for the driver:
-  LPVirtualScreen m_virtualScreen;
+  LPVirtualScreen* m_virtualScreen;
 
   /// <summary>
   /// Service routine, used to print debug information about touch updates

@@ -15,7 +15,8 @@ static bool DetectDriver(void) {
 
 const bool TouchManagerWin7Driver::s_supported = DetectDriver();
 
-TouchManagerWin7Driver::TouchManagerWin7Driver(void):
+TouchManagerWin7Driver::TouchManagerWin7Driver(LPVirtualScreen* virtualScreen):
+  TouchManager(virtualScreen),
   m_hidInstance(COcuInterface().GetFirstCompliantInterface())
 {
 }
@@ -41,7 +42,7 @@ void TouchManagerWin7Driver::RemoveTouch(const Touch& touchDenorm) {
 
 Touch TouchManagerWin7Driver::NormalizeTouch(const Touch& touch) const {
   const LPPoint input((float)touch.x(), (float)touch.y());
-  const LPPoint output = m_virtualScreen.Normalize(input);
+  const LPPoint output = m_virtualScreen->Normalize(input);
   Touch retVal(touch);
   retVal.setPos(output.x, output.y);
   return retVal;
