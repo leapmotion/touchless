@@ -34,7 +34,7 @@ Name "Touchless For Windows"
 OutFile "TouchlessForWindows_LM.exe"
 BrandingText "Leap Motion Touchless"
 Icon source/TouchlessUI/touchless-icon.ico
-!define VersionNumber 9111
+!define VersionNumber 9113
 !define RegKeyLocation "SOFTWARE\Leap Motion\Touchless"
 !define AppIdentifier "Touchless"
 
