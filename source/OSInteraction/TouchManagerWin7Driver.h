@@ -22,6 +22,8 @@ public:
 private:
   COcuHidInstance* m_hidInstance;
 
+  Touch NormalizeTouch(const Touch& touch) const;
+
   // Overrides from TouchManager:
   void AddTouch(const Touch& touch) override;
   void UpdateTouch(const Touch& oldTouch, const Touch& newTouch) override;
