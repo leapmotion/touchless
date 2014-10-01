@@ -781,9 +781,6 @@ void GestureInteractionManager::drawRasterIcon(int iconIndex, float x, float y, 
 
 void GestureInteractionManager::emitTouchEvent() {
   m_osInteractionDriver.emitTouchEvent(m_touchEvent);
-}
-
-void GestureInteractionManager::clearTouchPoints() {
   m_touchEvent.clear();
 }
 
