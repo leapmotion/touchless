@@ -702,7 +702,7 @@ void GestureInteractionManager::addTouchPointForHand (const Hand &hand, bool tou
   int32_t touchId = hand.id();
   // untouch at the borders
   if (clampVec.magnitudeSquared() == 0.0f) {
-    addTouchPoint(touchId, screenPosition.x, screenPosition.y, touching);
+    addTouchPoint(touchId, (uint32_t)hand.frame().id(), screenPosition.x, screenPosition.y, touching);
   }
 }
 
@@ -720,7 +720,7 @@ void GestureInteractionManager::addTouchPointForPointable (int touchId, const Po
   normalizedToScreen(interactionBox().normalizePoint(position), screenPosition, clampVec);
   // untouch at the borders
   if (clampVec.magnitudeSquared() == 0.0f) {
-    addTouchPoint(touchId, screenPosition.x, screenPosition.y, touching);
+    addTouchPoint(touchId, (uint32_t)pointable.frame().id(), screenPosition.x, screenPosition.y, touching);
   }
 }
 
@@ -784,8 +784,8 @@ void GestureInteractionManager::emitTouchEvent() {
   m_touchEvent.clear();
 }
 
-void GestureInteractionManager::addTouchPoint(int touchId, float x, float y, bool touching) {
-  m_touchEvent.insert(Touch(touchId, x, y, touching));
+void GestureInteractionManager::addTouchPoint(int touchId, int frameId, float x, float y, bool touching) {
+  m_touchEvent.insert(Touch(touchId, frameId, x, y, touching));
 }
 
 bool GestureInteractionManager::touchAvailable() const {

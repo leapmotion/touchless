@@ -121,7 +121,7 @@ protected:
   static float scrollDampingFactor (const Vector &scrollVelocity);
   static double touchDistanceToRadius (float touchDistance);
   void drawRasterIcon(int iconIndex, float x, float y, bool visible, const Vector3& velocity, float touchDistance, double radius, float clampDistance, float alphaMult, int numFingers = 1);
-  void addTouchPoint(int touchId, float x, float y, bool touching);
+  void addTouchPoint(int touchId, int frameId, float x, float y, bool touching);
   bool touchAvailable() const;
   int numTouchScreens() const;
   int touchVersion() const;

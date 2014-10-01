@@ -1,6 +1,4 @@
-#if !defined(_Touch_h_)
-#define _Touch_h_
-
+#pragma once
 #include <set>
 #include <stdint.h>
 
@@ -9,21 +7,22 @@ class TouchManager;
 namespace Touchless {
 class Touch {
 public:
-  Touch(unsigned int id, double x = 0, double y = 0, bool touching = true, uint32_t orientation = 90):
+  Touch(uint32_t id, uint32_t frameId, double x, double y, bool touching):
     m_id(id),
+    m_frameId(frameId),
     m_x(x),
     m_y(y),
-    m_touching(touching),
-    m_orientation(orientation)
-  {
+    m_touching(touching) {
   }
 
-  unsigned int id() const { return m_id; }
+  uint32_t id() const { return m_id; }
+  uint32_t frameId() const { return m_frameId; }
   double x() const { return m_x; }
   double y() const { return m_y; }
-  uint32_t orientation() const { return m_orientation; }
   bool touching() const { return m_touching; }
+
   void setPos(double x, double y) { m_x = x; m_y = y; }
+  void setId(uint32_t id) { m_id = id; }
 
   /// <summary>
   /// Comparator override, for use in ordered sets
@@ -36,10 +35,10 @@ public:
   operator size_t(void) const {return m_id;}
 
 private:
-  unsigned int m_id;
+  uint32_t m_id;
+  uint32_t m_frameId;
   double m_x;
   double m_y;
-  uint32_t m_orientation;
   bool m_touching;
 };
 
@@ -55,12 +54,13 @@ public:
   }
 
   void removeTouchPoint(int touchId) {
-    Touch touch(touchId);
+    Touch touch(*begin());
+    touch.setId(touchId);
     erase(touch);
   }
 
-  void addTouchPoint(int touchId, float x, float y, bool touching) {
-    insert(Touch(touchId, x, y, touching));
+  void addTouchPoint(int touchId, int frameId, float x, float y, bool touching) {
+    insert(Touch(touchId, frameId, x, y, touching));
   }
 };
 
@@ -81,5 +81,3 @@ namespace std {
   }
 }
 #endif
-
-#endif // _Touch_h_

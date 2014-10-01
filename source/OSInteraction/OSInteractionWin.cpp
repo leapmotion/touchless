@@ -175,19 +175,16 @@ void OSInteractionDriverWin::emitTouchEvent(const TouchEvent& evt)
     std::set<Touch> unordered;
 
     for(auto q = evt.begin(); q != evt.end(); q++) {
-      const Touch& cur = *q;
+      Touch cur = *q;
 
       // Clip to our screen:
       auto position = m_virtualScreen->ClipPosition(LPPoint((LPFloat)cur.x(), (LPFloat)cur.y()));
+      cur.setPos(position.x, position.y);
 
       // Insert into the new map:
-      unordered.insert(Touch(
-                             cur.id(),
-                             position.x,
-                             position.y,
-                             cur.touching()
-                             ));
+      unordered.insert(cur);
     }
+
     m_touchManager->setTouches(std::move(unordered));
   }
 }

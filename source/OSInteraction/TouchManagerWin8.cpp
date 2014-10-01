@@ -20,15 +20,16 @@ static void TranslateAndSend(const Touch& touch, ULONG pointerFlags) {
 
   POINTER_TOUCH_INFO contact;
   contact.touchFlags = TOUCH_FLAG_NONE;
-  contact.touchMask = TOUCH_MASK_ORIENTATION | TOUCH_MASK_CONTACTAREA;
-  contact.orientation = touch.orientation();
+  contact.touchMask = TOUCH_MASK_CONTACTAREA;
   contact.rcContact.top = y - 2;
   contact.rcContact.bottom = y + 2;
   contact.rcContact.left = x - 2;
   contact.rcContact.right = x + 2;
+  contact.rcContactRaw = contact.rcContact;
 
   POINTER_INFO& ptrInfo = contact.pointerInfo;
   ptrInfo.pointerType = PT_TOUCH;
+  ptrInfo.frameId = touch.frameId();
   ptrInfo.pointerFlags = pointerFlags;
   ptrInfo.pointerId = touch.id();
   ptrInfo.ptPixelLocation.x = x;
