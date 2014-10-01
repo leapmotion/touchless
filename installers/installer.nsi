@@ -51,7 +51,6 @@ Var /GLOBAL INST_ERR
 Var ShouldUnpackDriver
 Var ShouldInstallDriver
 Var ShouldInstallTouchless
-Var ShouldCleanUpTouchless
 
 requestExecutionLevel user # required for UAC plugin
 
@@ -63,7 +62,6 @@ Function .onInit
   StrCpy $ShouldUnpackDriver    "false"
   StrCpy $ShouldInstallDriver   "false"
   StrCpy $ShouldInstallTouchless "true"
-  StrCpy $ShouldCleanUpTouchless "false"
 
   #The installer needs to detect if multitouch driver is already installed.
 
@@ -101,14 +99,13 @@ Function .onInit
       
     ${IfNot} ${FileExists} "$INSTDIR\Touchless For Windows\Touchless.exe" #make sure they didn't just delete the folder.
         StrCpy $ShouldInstallTouchless "true"
-        StrCpy $ShouldCleanUpTouchless "true"
         ${If} ${IsWin7}
           StrCpy $ShouldUnpackDriver "true"    
         ${Endif}
     ${EndIf}
   ${EndIf}
   
-  #MessageBox MB_OK "ShouldUnpackDriver=$ShouldUnpackDriver ShouldInstallDriver=$ShouldInstallDriver ShouldInstallTouchless=$ShouldInstallTouchless ShouldCleanUpTouchless=$ShouldCleanUpTouchless"
+  #MessageBox MB_OK "ShouldUnpackDriver=$ShouldUnpackDriver ShouldInstallDriver=$ShouldInstallDriver ShouldInstallTouchless=$ShouldInstallTouchless"
   
   uac_tryagain:
     !insertmacro UAC_RunElevated
@@ -193,9 +190,9 @@ Section "Install"
   ${EndIf}
 !cd ..
 
-  ${If} $ShouldCleanUpTouchless == "true"
-    #MessageBox MB_OK "cleaning up touchless"
-    RMDir /r "Touchless For Windows"
+  ${If} $ShouldInstallTouchless == "true"
+    !insertmacro EnsureFileIsUnused "Touchless.exe"
+    RMDir /r "$INSTDIR\Touchless For Windows"
   ${EndIf}
   
   #MessageBox MB_OK "installing touchless"
