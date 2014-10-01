@@ -81,8 +81,8 @@ void TouchManagerWin8::UpdateTouch(const Touch& oldTouch, const Touch& newTouch)
       // Transition detection:
       (
         oldTouch.touching() ?
-        POINTER_FLAG_UPDATE :
-        POINTER_FLAG_UP
+        POINTER_FLAG_UP :
+        POINTER_FLAG_UPDATE
       )
     )
   );
