@@ -43,7 +43,7 @@ elseif(BUILD_MAC)
     OSInteractionMac.cpp
     ${OS_INTERACTION_SRCS}
   )
-  include_directories(${CMAKE_OSX_SYSROOT}/${APPKIT_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${FOUNDATION_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${QUARTZ_CORE_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${CARBON_FRAMEWORK}/Frameworks/HIToolbox.framework/Headers)
+  include_directories(${APPKIT_FRAMEWORK}/Headers ${FOUNDATION_FRAMEWORK}/Headers ${QUARTZ_CORE_FRAMEWORK}/Headers ${CARBON_FRAMEWORK}/Frameworks/HIToolbox.framework/Headers)
 elseif(BUILD_LINUX)
   SET(OS_INTERACTION_SRCS
     LPLinux.h

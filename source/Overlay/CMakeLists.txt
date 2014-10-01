@@ -27,7 +27,7 @@ if(BUILD_MAC)
   # set_property(SOURCE LPIcon.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
   # set_property(SOURCE LPImage.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
   set_property(SOURCE LPImageMac.cpp PROPERTY COMPILE_FLAGS "-x objective-c++")
-  include_directories(${CMAKE_OSX_SYSROOT}/${APPKIT_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${FOUNDATION_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${QUARTZ_CORE_FRAMEWORK}/Headers ${CMAKE_OSX_SYSROOT}/${CARBON_FRAMEWORK}/Frameworks/HIToolbox.framework/Headers)
+  include_directories(${APPKIT_FRAMEWORK}/Headers ${FOUNDATION_FRAMEWORK}/Headers ${QUARTZ_CORE_FRAMEWORK}/Headers ${CARBON_FRAMEWORK}/Frameworks/HIToolbox.framework/Headers)
 elseif(BUILD_WINDOWS)
   SET(OVERLAY_SRCS
     LPIconWin.h

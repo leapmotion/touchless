@@ -6,13 +6,13 @@
 
 namespace Touchless
 {
-  OSInteractionDriver* OSInteractionDriver::New(LPVirtualScreen &virtualScreen)
+  OSInteractionDriver* OSInteractionDriver::New(LPVirtualScreen *virtualScreen)
   {
     return new OSInteractionDriverMac(virtualScreen);
   }
 
 
-OSInteractionDriverMac::OSInteractionDriverMac(LPVirtualScreen &virtualScreen)
+OSInteractionDriverMac::OSInteractionDriverMac(LPVirtualScreen *virtualScreen)
   : OSInteractionDriver(virtualScreen)
 { }
 
@@ -26,7 +26,7 @@ bool OSInteractionDriverMac::initializeTouch()
 void OSInteractionDriverMac::clickDown(int button, int number)
 {
   int clickNum = (number < 1) ? 1 : ((number > 3) ? 3 : number);
-  const CGPoint& position = m_virtualScreen.Position();
+  const CGPoint& position = m_virtualScreen->Position();
   CGEventRef eventRef = CGEventCreateMouseEvent(0, kCGEventLeftMouseDown, position, kCGMouseButtonLeft);
   CGEventSetIntegerValueField(eventRef, kCGMouseEventClickState, clickNum);
   CGEventPost(kCGHIDEventTap, eventRef);
@@ -39,7 +39,7 @@ void OSInteractionDriverMac::clickUp(int button, int number)
 {
   OSInteractionDriver::clickUp(button, number);
   int clickNum = (number < 1) ? 1 : ((number > 3) ? 3 : number);
-  const CGPoint& position = m_virtualScreen.Position();
+  const CGPoint& position = m_virtualScreen->Position();
   CGEventRef eventRef = CGEventCreateMouseEvent(0, kCGEventLeftMouseUp, position, kCGMouseButtonLeft);
   CGEventSetIntegerValueField(eventRef, kCGMouseEventClickState, clickNum);
   CGEventPost(kCGHIDEventTap, eventRef);
@@ -73,7 +73,7 @@ void OSInteractionDriverMac::setCursorPosition(float fx, float fy, bool absolute
     position.y += cursor.y;
     CFRelease(eventRef);
   }
-  position = m_virtualScreen.SetPosition(position);
+  position = m_virtualScreen->SetPosition(position);
   eventRef = CGEventCreateMouseEvent(0, m_buttonDown ? kCGEventLeftMouseDragged : kCGEventMouseMoved,
                                      position, kCGMouseButtonLeft);
   CGEventPost(kCGHIDEventTap, eventRef);
@@ -140,7 +140,7 @@ void OSInteractionDriverMac::syncPosition()
   position = CGEventGetLocation(eventRef);
   CFRelease(eventRef);
 
-  position = m_virtualScreen.SetPosition(position);
+  position = m_virtualScreen->SetPosition(position);
   m_gesture.setPosition(position.x, position.y);
 }
 
