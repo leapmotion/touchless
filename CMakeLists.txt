@@ -6,7 +6,7 @@ endif(COMMAND CMAKE_POLICY)
 # This version number must conform to semver.org (2.0.0-rc.1) standard for any release starting with 1.0.0
 set(TOUCHLESS_VERSION_MAJOR 1)
 set(TOUCHLESS_VERSION_MINOR 0)
-set(TOUCHLESS_VERSION_PATCH 9)
+set(TOUCHLESS_VERSION_PATCH 10)
 
 # Adds a precompiled header
 MACRO(ADD_MSVC_PRECOMPILED_HEADER PrecompiledHeader PrecompiledSource SourcesVar)
