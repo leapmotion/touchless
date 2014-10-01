@@ -20,7 +20,6 @@
 #include "LPLinux.h"
 #endif
 #include <math.h>
-inline float round(float r) { return (r > 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f); }
 #endif
 
 //
@@ -368,7 +367,7 @@ bool LPGesture::applyScroll(float dx, float dy, int64_t timeDiff)
       }
     }
 
-    // Adjust partal pixels
+    // Adjust partial pixels
     m_scrollPartialPixel.x += px;
     m_scrollPartialPixel.y += py;
     px = round(m_scrollPartialPixel.x);

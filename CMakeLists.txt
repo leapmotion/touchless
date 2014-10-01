@@ -231,13 +231,13 @@ enable_testing()
 #Setup Libraries
 
 #Look for one of our external libraries in the PATH or EXTERNAL_LIBRARY_PATHS
-find_path(EXTERNAL_LIBRARY_DIR "boost_1_51_0" PATHS $ENV{PATH} $ENV{EXTERNAL_LIBRARY_DIR} NO_DEFAULT_PATH)
+find_path(EXTERNAL_LIBRARY_DIR "boost_1_55_0" PATHS $ENV{PATH} $ENV{EXTERNAL_LIBRARY_DIR} NO_DEFAULT_PATH)
 if( EXTERNAL_LIBRARY_DIR STREQUAL "EXTERNAL_LIBRARY_DIR-NOTFOUND" )
   message(STATUS "External Library Directory not found, please specify a folder to look for external libraries")
   return()
 endif()
 
-set(Boost_DIR ${EXTERNAL_LIBRARY_DIR}/boost_1_51_0${ALTERNATE_LIBRARY} CACHE PATH "boost root path" FORCE)
+set(Boost_DIR ${EXTERNAL_LIBRARY_DIR}/boost_1_55_0${ALTERNATE_LIBRARY} CACHE PATH "boost root path" FORCE)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_INCLUDE_DIR ${Boost_DIR}/include CACHE PATH "boost include path" FORCE)
@@ -459,7 +459,6 @@ configure_file(.editorconfig ${CMAKE_CURRENT_BINARY_DIR}/.editorconfig COPYONLY)
 if(BUILD_WINDOWS)
   option(UNSIGNED_BINARIES_EXPECTED "Binaries being built are not expected to be digitally signed" OFF)
 endif()
-
 
 add_subdirectory(source)
 
