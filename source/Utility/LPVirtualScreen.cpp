@@ -286,28 +286,8 @@ LRESULT LPVirtualScreen::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 void LPVirtualScreen::UseDefaultScreen(bool useDefaultScreen)
 {
   if (m_useDefaultScreen != useDefaultScreen) {
-    if (useDefaultScreen) {
-      if (m_activeScreens.size() > 1) {
-        m_activeScreens.clear();
-        if (!m_detectedScreens.empty()) {
-          for (size_t i = 0; i < m_detectedScreens.size(); i++) {
-            if (m_detectedScreens[i].IsPrimary()) {
-              m_activeScreens.push_back(m_detectedScreens[i]);
-              break;
-            }
-          }
-          if (m_activeScreens.empty()) {
-            // This shouldn't happen, as there should always be a primary screen
-            m_activeScreens.push_back(m_detectedScreens[0]);
-          }
-        }
-      }
-    } else if (m_detectedScreens.size() > m_activeScreens.size()) {
-      m_activeScreens = m_detectedScreens;
-    }
     m_useDefaultScreen = useDefaultScreen;
-    m_activeBounds = ComputeBounds(m_activeScreens);
-    m_detectedBounds = ComputeBounds(m_detectedScreens);
+    Update();
   }
 }
 
