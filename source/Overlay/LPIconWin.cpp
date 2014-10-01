@@ -45,7 +45,7 @@ LRESULT LPIconWin::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_DISPLAYCHANGE:
       // Something changed with monitor resolutions.  The extent of the display needs to be
       // correspondingly changed.
-// Tickle Virtual Screen -- FIXME
+      // Tickle Virtual Screen -- FIXME
       break;
     case WM_NCHITTEST:
       // Hit testing.  In order to allow for proper pass-through to underlying windows, this

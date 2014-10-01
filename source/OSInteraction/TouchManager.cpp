@@ -68,13 +68,13 @@ void TouchManager::setTouches(std::set<Touch>&& touches) {
 #endif
 
   // Handle new and existing touches
-  for(auto iter = m_touches.begin(); iter != m_touches.end(); ++iter) {
+  for (auto iter = m_touches.begin(); iter != m_touches.end(); ++iter) {
     // Determine whether this touch is new:
     auto priorTouch = removedTouches.find(*iter);
-    if(priorTouch == removedTouches.end())
+    if (priorTouch == removedTouches.end()) {
       // Couldn't find this touch in our collection.  It must be new.
       AddTouch(*iter);
-    else {
+    } else {
       // Touch already exists, just update it.
       UpdateTouch(*priorTouch, *iter);
 
@@ -84,12 +84,14 @@ void TouchManager::setTouches(std::set<Touch>&& touches) {
   }
 
   // Process each removed touch:
-  for (auto q = removedTouches.begin(); q != removedTouches.end(); ++q)
+  for (auto q = removedTouches.begin(); q != removedTouches.end(); ++q) {
     RemoveTouch(*q);
+  }
 
   // If the collection is now empty, we notify derived types of this new fact:
-  if(m_touches.empty())
+  if (m_touches.empty()) {
     OnRemoveAllTouches();
+  }
 
 #if TOUCH_DEBUGGING_TO_FILE
   fileOutput << std::endl;
