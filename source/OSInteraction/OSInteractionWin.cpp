@@ -185,7 +185,7 @@ void OSInteractionDriverWin::emitTouchEvent(const TouchEvent& evt)
       unordered.insert(cur);
     }
 
-    m_touchManager->setTouches(std::move(unordered));
+    m_touchManager->setTouches(unordered);
   }
 }
 

@@ -54,6 +54,11 @@ protected:
   virtual void RemoveTouch(const Touch& oldTouch) = 0;
 
   /// <summary>
+  /// Event fired when all touches have finished for the frame
+  /// </summary>
+  virtual void FinishFrame(void) {}
+
+  /// <summary>
   /// Event fired when all touches have just been removed
   /// </summary>
   virtual void OnRemoveAllTouches(void) {}
@@ -77,7 +82,7 @@ public:
   ///
   /// Adjustments to this set are emitted to concrete classes in the form of internal virtual members.
   /// </remarks>
-  void setTouches(std::set<Touch>&& touches);
+  void setTouches(const std::set<Touch>& touches);
 };
 
 #endif // _TouchManager_h_

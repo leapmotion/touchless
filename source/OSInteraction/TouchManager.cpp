@@ -52,50 +52,39 @@ size_t TouchManager::numTouchScreens(void) const {
 #endif
 }
 
-void TouchManager::setTouches(std::set<Touch>&& touches) {
-#if TOUCH_DEBUGGING_TO_FILE
-  std::ofstream fileOutput("touch-log.txt", std::ios::app);
-#endif
-
-  // Initially, we consider all current touches to be removed:
-  std::set<Touch> removedTouches;
-  std::swap(m_touches, removedTouches);
-
-  // Then we consider the passed touches to be the new touches:
-#if __APPLE__
-  m_touches = touches;
-#else
-  m_touches = std::move(touches);
-#endif
-
-  // Handle new and existing touches
-  for (auto iter = m_touches.begin(); iter != m_touches.end(); ++iter) {
-    // Determine whether this touch is new:
-    auto priorTouch = removedTouches.find(*iter);
-    if (priorTouch == removedTouches.end()) {
-      // Couldn't find this touch in our collection.  It must be new.
-      AddTouch(*iter);
+void TouchManager::setTouches(const std::set<Touch>& newTouches) {
+  // Process each removed touch:
+  for (auto priorTouch = m_touches.begin(); priorTouch != m_touches.end();) {
+    const auto newTouch = newTouches.find(*priorTouch);
+    if (newTouch == newTouches.end()) {
+      RemoveTouch(*priorTouch);
+      priorTouch = m_touches.erase(priorTouch);
     } else {
-      // Touch already exists, just update it.
-      UpdateTouch(*priorTouch, *iter);
-
-      // In any case we found this touch--we don't want to consider it "removed"
-      removedTouches.erase(priorTouch);
+      ++priorTouch;
     }
   }
 
-  // Process each removed touch:
-  for (auto q = removedTouches.begin(); q != removedTouches.end(); ++q) {
-    RemoveTouch(*q);
+  // Handle new and existing touches
+  for (auto newTouch = newTouches.begin(); newTouch != newTouches.end(); ++newTouch) {
+    // Determine whether this touch is new:
+    auto priorTouch = m_touches.find(*newTouch);
+    if (priorTouch == m_touches.end()) {
+      // Couldn't find this touch in our collection.  It must be new.
+      AddTouch(*newTouch);
+      m_touches.insert(*newTouch);
+    } else {
+      // Touch already exists, just update it.
+      UpdateTouch(*priorTouch, *newTouch);
+      m_touches.erase(priorTouch);
+      m_touches.insert(*newTouch);
+    }
   }
+
+  //Notify that the frame is finished with touch events
+  FinishFrame();
 
   // If the collection is now empty, we notify derived types of this new fact:
   if (m_touches.empty()) {
     OnRemoveAllTouches();
   }
-
-#if TOUCH_DEBUGGING_TO_FILE
-  fileOutput << std::endl;
-  fileOutput.close();
-#endif
 }
