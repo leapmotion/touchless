@@ -193,12 +193,7 @@ Section "Install"
   ${If} $ShouldInstallTouchless == "true"
     !insertmacro EnsureFileIsUnused "Touchless.exe"
     Sleep 200
-    ClearErrors
     RMDir /r "$INSTDIR\Touchless For Windows"
-    ${If} ${Errors}
-      MessageBox MB_OK|MB_ICONSTOP "Could not remove previous version.  Please close Touchless and try again."
-      Goto earlyAbort
-    ${Endif}
   ${EndIf}
   
   #MessageBox MB_OK "installing touchless"
