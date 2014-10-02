@@ -50,6 +50,7 @@ InstallDirRegKey HKLM "${RegKeyLocation}" ""
 Var /GLOBAL INST_ERR
 Var ShouldInstallDriver
 Var ShouldInstallTouchless
+Var OldVersionNumber
 
 requestExecutionLevel user # required for UAC plugin
 
@@ -311,5 +312,6 @@ Section "Uninstall"
 
   RMDir /r "$INSTDIR"
   DeleteRegKey HKLM "${RegKeyLocation}"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}"
 
 SectionEnd
