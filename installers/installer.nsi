@@ -200,7 +200,7 @@ Section "Install"
    
   ${If} $ShouldUnpackDriver == "true"
     #MessageBox MB_OK "installing multitouch driver"
-    SetOutPath "$INSTDIR\Touchless For Windows"
+    SetOutPath "$INSTDIR\Touchless For Windows\MultiTouch"
     ${If} ${RunningX64}
       File /r "drivers\x64\MultiTouch"
     ${Else}
