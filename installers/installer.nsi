@@ -61,8 +61,6 @@ Function .onInit
   StrCpy $ShouldInstallDriver   "false"
   StrCpy $ShouldInstallTouchless "true"
 
-  #The installer needs to detect if multitouch driver is already installed.
-
   ${If} ${IsWin7}
     StrCpy $ShouldInstallDriver "true"
     ClearErrors
@@ -74,10 +72,10 @@ Function .onInit
   #if installer version is newer - install new touchless.
   #if installer version same or older - launch touchless.  
   ClearErrors
-  ReadRegDWORD $0 HKLM "${RegKeyLocation}" "Version"
+  ReadRegDWORD $OldVersionNumber HKLM "${RegKeyLocation}" "Version"
   
   ${IfNot} ${Errors}  
-    ${If} ${VersionNumber} > $0 #if the new version is greater than the installed one, wipe the old & install the new
+    ${If} ${VersionNumber} > $OldVersionNumber #if the new version is greater than the installed one, wipe the old & install the new
         StrCpy $ShouldInstallTouchless "true"
     ${Else}
         StrCpy $ShouldInstallTouchless "false"
@@ -179,32 +177,32 @@ Section "Install"
     RMDir /r "$INSTDIR\Touchless For Windows"
   ${EndIf}
   
-  ${If} $ShouldInstallDriver == "true"
-    #Copy the driver files
-    SetOutPath "$INSTDIR\Touchless For Windows\"
-    ${If} ${RunningX64}
-      File /r "drivers\x64\MultiTouch"
-    ${Else}
-      File /r "drivers\x86\MultiTouch"
-    ${EndIf}
-    
-    #Run the installerapp
-    ${DebugDetail} "Installing Windows 7 MultiTouch driver..."
-    ClearErrors
-    nsExec::execToLog '"$INSTDIR\Touchless For Windows\MultiTouch\InstallerApp.exe"'
-    Pop $R0  #return value
-    ${DebugDetail} "Multitouch driver install returned code:  $R0"
-    ${If} $R0 L= 0x60010000
-      ${DebugDetail} "Multitouch driver updated, reboot required for full functionality."
-      SetRebootFlag true
-    ${ElseIf} ${Errors}
-    ${OrIf} $R0 L> 0x80000000  #negative (or >0x80000000 in unsigned notation) are errors.
-    ${AndIfNot} ${Silent}
-      MessageBox MB_OKCANCEL|MB_ICONSTOP "The Multitouch driver failed to install properly. Press OK to continue, or Cancel to abort the installation. error code:  $R0" IDCANCEL earlyAbort
-    ${EndIf}
-  ${EndIf}
-  
   ${If} $ShouldInstallTouchless == "true"
+    ${If} $ShouldInstallDriver == "true"
+      #Copy the driver files
+      SetOutPath "$INSTDIR\Touchless For Windows\"
+      ${If} ${RunningX64}
+        File /r "drivers\x64\MultiTouch"
+      ${Else}
+        File /r "drivers\x86\MultiTouch"
+      ${EndIf}
+      
+      #Run the installerapp
+      ${DebugDetail} "Installing Windows 7 MultiTouch driver..."
+      ClearErrors
+      nsExec::execToLog '"$INSTDIR\Touchless For Windows\MultiTouch\InstallerApp.exe"'
+      Pop $R0  #return value
+      ${DebugDetail} "Multitouch driver install returned code:  $R0"
+      ${If} $R0 L= 0x60010000
+        ${DebugDetail} "Multitouch driver updated, reboot required for full functionality."
+        SetRebootFlag true
+      ${ElseIf} ${Errors}
+      ${OrIf} $R0 L> 0x80000000  #negative (or >0x80000000 in unsigned notation) are errors.
+      ${AndIfNot} ${Silent}
+        MessageBox MB_OKCANCEL|MB_ICONSTOP "The Multitouch driver failed to install properly. Press OK to continue, or Cancel to abort the installation. error code:  $R0" IDCANCEL earlyAbort
+      ${EndIf}
+    ${EndIf}
+  
     SetOutPath "$INSTDIR"
 
     File /r "Touchless For Windows"
