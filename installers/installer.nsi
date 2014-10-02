@@ -48,7 +48,6 @@ InstallDir "$PROGRAMFILES\Leap Motion"
 InstallDirRegKey HKLM "${RegKeyLocation}" ""
 
 Var /GLOBAL INST_ERR
-Var ShouldUnpackDriver
 Var ShouldInstallDriver
 Var ShouldInstallTouchless
 
@@ -59,27 +58,14 @@ requestExecutionLevel user # required for UAC plugin
 Function .onInit  
   SetSilent silent
 
-  StrCpy $ShouldUnpackDriver    "false"
   StrCpy $ShouldInstallDriver   "false"
   StrCpy $ShouldInstallTouchless "true"
 
   #The installer needs to detect if multitouch driver is already installed.
 
   ${If} ${IsWin7}
-    StrCpy $ShouldUnpackDriver "true"
     StrCpy $ShouldInstallDriver "true"
     ClearErrors
-    ReadRegDWORD $0 HKLM "${MultiTouchDriverKey}" "${MultiTouchDriverDWORD}"
-    
-    ${IfNot} ${Errors}
-      ${If} $0 > 0 #if there is a fake multitouch device enumerated the driver is installed
-        StrCpy $ShouldInstallDriver "false"    
-      ${EndIf}
-    ${EndIf}
-    
-    ${If} ${FileExists} "$INSTDIR\Touchless For Windows\MultiTouch\InstallerApp.exe" #make sure they didn't just delete the folder.
-      StrCpy $ShouldUnpackDriver "false"
-    ${Endif}
   ${EndIf}
 
   #The installer needs to detect if touchless.exe is already installed.
@@ -99,13 +85,10 @@ Function .onInit
       
     ${IfNot} ${FileExists} "$INSTDIR\Touchless For Windows\Touchless.exe" #make sure they didn't just delete the folder.
         StrCpy $ShouldInstallTouchless "true"
-        ${If} ${IsWin7}
-          StrCpy $ShouldUnpackDriver "true"    
-        ${Endif}
     ${EndIf}
   ${EndIf}
   
-  #MessageBox MB_OK "ShouldUnpackDriver=$ShouldUnpackDriver ShouldInstallDriver=$ShouldInstallDriver ShouldInstallTouchless=$ShouldInstallTouchless"
+  #MessageBox MB_OK "ShouldInstallDriver=$ShouldInstallDriver ShouldInstallTouchless=$ShouldInstallTouchless"
   
   uac_tryagain:
     !insertmacro UAC_RunElevated
@@ -196,19 +179,16 @@ Section "Install"
     RMDir /r "$INSTDIR\Touchless For Windows"
   ${EndIf}
   
-  #MessageBox MB_OK "installing touchless"
-   
-  ${If} $ShouldUnpackDriver == "true"
-    #MessageBox MB_OK "installing multitouch driver"
-    SetOutPath "$INSTDIR\Touchless For Windows\MultiTouch"
+  ${If} $ShouldInstallDriver == "true"
+    #Copy the driver files
+    SetOutPath "$INSTDIR\Touchless For Windows\"
     ${If} ${RunningX64}
       File /r "drivers\x64\MultiTouch"
     ${Else}
       File /r "drivers\x86\MultiTouch"
     ${EndIf}
-  ${EndIf}
-
-  ${If} $ShouldInstallDriver == "true"
+    
+    #Run the installerapp
     ${DebugDetail} "Installing Windows 7 MultiTouch driver..."
     ClearErrors
     nsExec::execToLog '"$INSTDIR\Touchless For Windows\MultiTouch\InstallerApp.exe"'
