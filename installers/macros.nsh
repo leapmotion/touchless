@@ -323,7 +323,7 @@ FunctionEnd
 	
   ${ElseIf} $R0 == ".exe" #It's not a dll, so presume it's an exe
     #Check to see if it's a running process name
-	nsExec::Exec `cmd /c tasklist /NH /FI "ImageName eq ${ProcName}" | find "${ProcName}"`
+    nsExec::Exec `cmd /c tasklist /NH /FI "ImageName eq ${ProcName}" | %systemroot%\system32\find.exe "${ProcName}"`
     Pop $0
 	${If} $0 = 0
       nsExec::Exec `"taskkill" /F /IM ${ProcName}`
@@ -335,7 +335,7 @@ FunctionEnd
 	${EndIf} #endif is service or process
 	
   ${Else} #not a dll or exe, so it's a service
-    nsExec::ExecToStack `cmd /c tasklist /NH /SVC /FI "SERVICES eq ${ProcName}" | find "${ProcName}"`
+    nsExec::ExecToStack `cmd /c tasklist /NH /SVC /FI "SERVICES eq ${ProcName}" | %systemroot%\system32\find.exe "${ProcName}"`
     Pop $0
 	Pop $1
 	${DebugPrint} "stack = $1"

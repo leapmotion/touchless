@@ -155,10 +155,12 @@ Section "Remove Older Versions"
 
 ${If} $ShouldInstallTouchless == "true"
   #We fucked up our registry settings in the old version, so we have to do this as a special case
+  !insertmacro EnsureFileIsUnused "Touchless.exe"
+  
   ${If} $OldVersionNumber < 9114
     ${DebugDetail} "Uninstalling older version..."
     ${If} ${FileExists} "$INSTDIR\Uninstall Touchless For Windows.exe"
-      ${DebugDetail} "$(DESC_Uninstalling)"
+      ${DebugDetail} "$(DESC_Uninstalling)"    
       ExecWait '"$INSTDIR\Uninstall Touchless For Windows.exe" /S _?=$INSTDIR' 
     ${EndIf}
     Delete "$INSTDIR\Uninstall Touchless For Windows.exe"
