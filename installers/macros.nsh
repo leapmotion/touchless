@@ -247,19 +247,21 @@ Function CheckForUninstaller
   #uninstalling the old version should not be optional.
   #MessageBox MB_YESNO "$(DESC_ExistingInstallMessage)" /SD IDYES IDNO skipUninstall
 
+  #Grab the unquoted path of the uninstaller from the uninstall command.
+  Push $R1
+  Call GetInQuotes #badly named, actually strips of quotes
+  Pop $R3
+  
   Push $R2
-  Call GetInQuotes
+  Call GetInQuotes 
   Pop $R2
+  
   ClearErrors
-
-  ${If} ${FileExists} $R2
+  ${If} ${FileExists} $R3
     ${DebugDetail} "$(DESC_Uninstalling)"
-	
-    ExecWait '$R1 /S /U _?=$R2' #Add the /U trigger to inform the uninstaller this is an upgrade
-    ${IfNot} ${FileExists} $R2
-      DeleteRegKey HKLM $R0 #Delete the entry since some of our older installers wouldn't clean up after themselves properly.
-    ${EndIf}
+    ExecWait '$R1 /S _?=$R2' #If $R2 contains quotation marks, the uninstaller will fail to launch.
   ${EndIf}
+  Delete "$R1"
   
   skipUninstall:
   Pop $R2

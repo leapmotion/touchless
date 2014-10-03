@@ -151,6 +151,22 @@ FunctionEnd
 #--------------------------------
 #Sections
 
+Section "Remove Older Versions"
+
+#We fucked up our registry settings in the old version, so we have to do this as a special case
+${If} $OldVersionNumber < 9114
+  ${DebugDetail} "Uninstalling older version..."
+  ${If} ${FileExists} "$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe"
+    ${DebugDetail} "$(DESC_Uninstalling)"
+    ExecWait '"$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe" /S _?=$INSTDIR' 
+  ${EndIf}
+  Delete "$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe"
+${Else}
+  !insertmacro CheckForUninstaller "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}"
+${EndIf}
+
+SectionEnd
+
 Section "Install"
 
 !cd contrib
@@ -171,12 +187,6 @@ Section "Install"
     ${EndIf}
   ${EndIf}
 !cd ..
-
-  ${If} $ShouldInstallTouchless == "true"
-    !insertmacro EnsureFileIsUnused "Touchless.exe"
-    Sleep 200
-    RMDir /r "$INSTDIR\Touchless For Windows"
-  ${EndIf}
   
   ${If} $ShouldInstallTouchless == "true"
     ${If} $ShouldInstallDriver == "true"
