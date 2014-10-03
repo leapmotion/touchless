@@ -34,7 +34,7 @@ Name "Touchless For Windows"
 OutFile "TouchlessForWindows_LM.exe"
 BrandingText "Leap Motion Touchless"
 Icon source/TouchlessUI/touchless-icon.ico
-!define VersionNumber 9113
+!define VersionNumber 9114
 !define RegKeyLocation "SOFTWARE\Leap Motion\Touchless"
 !define AppIdentifier "Touchless"
 
@@ -42,7 +42,7 @@ Icon source/TouchlessUI/touchless-icon.ico
 !define MultiTouchDriverDWORD "Count"
 
 #Sets the default install folder
-InstallDir "$PROGRAMFILES\Leap Motion"
+InstallDir "$PROGRAMFILES\Leap Motion\Touchless For Windows"
 
 #Get the install folder from the registry if available.
 InstallDirRegKey HKLM "${RegKeyLocation}" ""
@@ -82,7 +82,7 @@ Function .onInit
         StrCpy $ShouldInstallTouchless "false"
     ${EndIf}
       
-    ${IfNot} ${FileExists} "$INSTDIR\Touchless For Windows\Touchless.exe" #make sure they didn't just delete the folder.
+    ${IfNot} ${FileExists} "$INSTDIR\Touchless.exe" #make sure they didn't just delete the folder.
         StrCpy $ShouldInstallTouchless "true"
     ${EndIf}
   ${EndIf}
@@ -156,11 +156,11 @@ Section "Remove Older Versions"
 #We fucked up our registry settings in the old version, so we have to do this as a special case
 ${If} $OldVersionNumber < 9114
   ${DebugDetail} "Uninstalling older version..."
-  ${If} ${FileExists} "$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe"
+  ${If} ${FileExists} "$INSTDIR\Uninstall Touchless For Windows.exe"
     ${DebugDetail} "$(DESC_Uninstalling)"
-    ExecWait '"$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe" /S _?=$INSTDIR' 
+    ExecWait '"$INSTDIR\Uninstall Touchless For Windows.exe" /S _?=$INSTDIR' 
   ${EndIf}
-  Delete "$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe"
+  Delete "$INSTDIR\Uninstall Touchless For Windows.exe"
 ${Else}
   !insertmacro CheckForUninstaller "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}"
 ${EndIf}
@@ -191,7 +191,7 @@ Section "Install"
   ${If} $ShouldInstallTouchless == "true"
     ${If} $ShouldInstallDriver == "true"
       #Copy the driver files
-      SetOutPath "$INSTDIR\Touchless For Windows\"
+      SetOutPath "$INSTDIR"
       ${If} ${RunningX64}
         File /r "drivers\x64\MultiTouch"
       ${Else}
@@ -201,7 +201,7 @@ Section "Install"
       #Run the installerapp
       ${DebugDetail} "Installing Windows 7 MultiTouch driver..."
       ClearErrors
-      nsExec::execToLog '"$INSTDIR\Touchless For Windows\MultiTouch\InstallerApp.exe"'
+      nsExec::execToLog '"$INSTDIR\MultiTouch\InstallerApp.exe"'
       Pop $R0  #return value
       ${DebugDetail} "Multitouch driver install returned code:  $R0"
       ${If} $R0 L= 0x60010000
@@ -216,16 +216,16 @@ Section "Install"
   
     SetOutPath "$INSTDIR"
 
-    File /r "Touchless For Windows"
-    WriteUninstaller "$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe"
+    File /r "Touchless For Windows\*"
+    WriteUninstaller "$INSTDIR\Uninstall Touchless For Windows.exe"
     WriteRegDWORD HKLM "${RegKeyLocation}" "Version" ${VersionNumber}
     
      # Registry information for add/remove programs
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "DisplayName" "Touchless For Windows"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "UninstallString" "$\"$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe$\""
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "QuietUninstallString" "$\"$INSTDIR\Touchless For Windows\Uninstall Touchless For Windows.exe$\" /S"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "UninstallString" "$\"$INSTDIR\Uninstall Touchless For Windows.exe$\""
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "QuietUninstallString" "$\"$INSTDIR\Uninstall Touchless For Windows.exe$\" /S"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "InstallLocation" "$\"$INSTDIR$\""
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "DisplayIcon" "$\"$INSTDIR\Touchless For Windows\Touchless.exe$\""
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "DisplayIcon" "$\"$INSTDIR\Touchless.exe$\""
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "Publisher" "Leap Motion"
     #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "HelpLink" "${HELPURL}"
     #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}" "URLUpdateInfo" "${UPDATEURL}"
@@ -244,7 +244,7 @@ Section "Install"
   
   runTouchless:
   #MessageBox MB_OK "running touchless"
-  ExecShell "open" "$INSTDIR\Touchless For Windows\Touchless.exe"
+  ExecShell "open" "$INSTDIR\Touchless.exe"
   Goto Done
 
   earlyAbort:
