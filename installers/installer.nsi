@@ -153,18 +153,19 @@ FunctionEnd
 
 Section "Remove Older Versions"
 
-#We fucked up our registry settings in the old version, so we have to do this as a special case
-${If} $OldVersionNumber < 9114
-  ${DebugDetail} "Uninstalling older version..."
-  ${If} ${FileExists} "$INSTDIR\Uninstall Touchless For Windows.exe"
-    ${DebugDetail} "$(DESC_Uninstalling)"
-    ExecWait '"$INSTDIR\Uninstall Touchless For Windows.exe" /S _?=$INSTDIR' 
-  ${EndIf}
-  Delete "$INSTDIR\Uninstall Touchless For Windows.exe"
-${Else}
-  !insertmacro CheckForUninstaller "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}"
+${If} $ShouldInstallTouchless == "true"
+  #We fucked up our registry settings in the old version, so we have to do this as a special case
+  ${If} $OldVersionNumber < 9114
+    ${DebugDetail} "Uninstalling older version..."
+    ${If} ${FileExists} "$INSTDIR\Uninstall Touchless For Windows.exe"
+      ${DebugDetail} "$(DESC_Uninstalling)"
+      ExecWait '"$INSTDIR\Uninstall Touchless For Windows.exe" /S _?=$INSTDIR' 
+    ${EndIf}
+    Delete "$INSTDIR\Uninstall Touchless For Windows.exe"
+  ${Else}
+    !insertmacro CheckForUninstaller "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPIDENTIFIER}"
 ${EndIf}
-
+${Endif}
 SectionEnd
 
 Section "Install"
